@@ -2,8 +2,9 @@
 CS180 project 5
 
 # Get started
+**[Download SQLite JDBC Driver](https://github.com/Ashulu/Project_5/tree/main#dowload-sqlite-jdbc-driver)**
 
-## Dowload Sqlite JDBC Driver
+## Dowload SQLite JDBC Driver
 1. Download the driver by referring to the following [repository](https://github.com/xerial/sqlite-jdbc). `https://github.com/xerial/sqlite-jdbc`
 2. In the README of the repository linked above, go to [Usage](https://github.com/xerial/sqlite-jdbc#usage) section. (`https://github.com/xerial/sqlite-jdbc#usage`)
 3. You have to download the two .jar files `sqlite-jdbc-3.44.0.0.jar` and `slf4j-api-1.7.36.jar` and then add them to classpath.
