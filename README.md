@@ -10,14 +10,12 @@ CS180 project 5
 3. You have to download the two .jar files `sqlite-jdbc-3.44.0.0.jar` and `slf4j-api-1.7.36.jar` and then add them to classpath.
 **The method of adding to classpath will defer based on the IDE**
 
-**Intellij**  
-Refer to the following [Article](https://www.geeksforgeeks.org/how-to-add-external-jar-file-to-an-intellij-idea-project/).  
-`https://www.geeksforgeeks.org/how-to-add-external-jar-file-to-an-intellij-idea-project/`
-
-**Eclipse**  
-Refer to the following [Article](https://www.janbasktraining.com/community/sql-server/how-to-import-a-jar-file-in-eclipse).  
-`https://www.janbasktraining.com/community/sql-server/how-to-import-a-jar-file-in-eclipse`
-
-**No IDE**  
-Refer to the following [Article](https://stackoverflow.com/questions/5112607/how-to-include-libraries-in-java-without-using-an-ide).  
-`https://stackoverflow.com/questions/5112607/how-to-include-libraries-in-java-without-using-an-ide`
+- **Intellij**
+  - Refer to the following [Article](https://www.geeksforgeeks.org/how-to-add-external-jar-file-to-an-intellij-idea-project/).  
+    `https://www.geeksforgeeks.org/how-to-add-external-jar-file-to-an-intellij-idea-project/`
+- **Eclipse**
+  - Refer to the following [Article](https://www.janbasktraining.com/community/sql-server/how-to-import-a-jar-file-in-eclipse).  
+    `https://www.janbasktraining.com/community/sql-server/how-to-import-a-jar-file-in-eclipse`
+- **No IDE**
+  - Refer to the following [Article](https://stackoverflow.com/questions/5112607/how-to-include-libraries-in-java-without-using-an-ide).  
+    `https://stackoverflow.com/questions/5112607/how-to-include-libraries-in-java-without-using-an-ide`
