@@ -2,7 +2,7 @@
 CS180 project 5
 
 # Sections
-**[Download SQLite JDBC Driver](https://github.com/Ashulu/Project_5/tree/main#dowload-sqlite-jdbc-driver)**
+**[Download SQLite JDBC Driver](https://github.com/Ashulu/Project_5/tree/main#dowload-sqlite-jdbc-driver)**  
 **[Database Structure](https://github.com/Ashulu/Project_5/blob/main/README.md#database-structure)**
 
 ## Dowload SQLite JDBC Driver
