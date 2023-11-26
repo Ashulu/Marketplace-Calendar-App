@@ -21,3 +21,14 @@ CS180 project 5
 - **No IDE**
   - Refer to the following [Article](https://stackoverflow.com/questions/5112607/how-to-include-libraries-in-java-without-using-an-ide).  
     `https://stackoverflow.com/questions/5112607/how-to-include-libraries-in-java-without-using-an-ide`
+
+## Database Structure
+
+We used SQL to create our own .db file. Below are the tables and their respective columns in the database.
+- accounts `type, email, password`
+- stores `sellerEmail, storeName`
+- calendars `storeName, calendarName, calendarDescription`
+- windows `storeName, calendarName, appointmentTitle, startTime, endTime, maxAttendees, currentBookings`
+- appointments `customerEmail, sellerEmail, storeName, calendarName, startTime, endTime, booking, isApproved, isRequest, timeStamp`
+  
+*Note that startTime and endTime are stored as strings of length 4, representing military time. timeStamp is stored as a string by using strftime()*
