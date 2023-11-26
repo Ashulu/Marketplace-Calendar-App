@@ -1,8 +1,9 @@
 # Project_5
 CS180 project 5
 
-# Get started
+# Sections
 **[Download SQLite JDBC Driver](https://github.com/Ashulu/Project_5/tree/main#dowload-sqlite-jdbc-driver)**
+**[Database Structure](https://github.com/Ashulu/Project_5/blob/main/README.md#database-structure)**
 
 ## Dowload SQLite JDBC Driver
 1. Download the driver by referring to the following [repository](https://github.com/xerial/sqlite-jdbc). `https://github.com/xerial/sqlite-jdbc`
