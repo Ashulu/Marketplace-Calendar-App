@@ -63,6 +63,4 @@ public class Client extends JComponent implements Runnable {
             }
         });
     }
-
-
 }
