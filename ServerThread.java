@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 
 public class ServerThread extends Thread {
@@ -12,12 +9,33 @@ public class ServerThread extends Thread {
     }
 
     public void run() {
+        BufferedReader reader = null;
+        PrintWriter writer = null;
         try {
-            InputStream inputStream = socket.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            writer = new PrintWriter(socket.getOutputStream());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return;
+        }
+
+        String clientInput = null;
+
+        while (true) {
+            try {
+                clientInput = reader.readLine();
+                switch (clientInput) {
+                    case "c":
+                        break;
+                    case "s":
+                        break;
+                    default:
+                        break;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
         }
     }
 }
