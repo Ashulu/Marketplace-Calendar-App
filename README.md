@@ -6,12 +6,14 @@ CS180 project 5
 **[Database Structure](https://github.com/Ashulu/Project_5/blob/main/README.md#database-structure)**
 
 ## Dowload SQLite JDBC Driver
-1. Download the driver by referring to the following [repository](https://github.com/xerial/sqlite-jdbc). `https://github.com/xerial/sqlite-jdbc`
-2. In the README of the repository linked above, go to [Usage](https://github.com/xerial/sqlite-jdbc#usage) section. (`https://github.com/xerial/sqlite-jdbc#usage`)
-3. You have to download the two .jar files
+1. Download the driver by referring to the following [repository](https://github.com/xerial/sqlite-jdbc).  
+   `https://github.com/xerial/sqlite-jdbc`
+3. In the README of the repository linked above, go to [Usage](https://github.com/xerial/sqlite-jdbc#usage) section.  
+   `https://github.com/xerial/sqlite-jdbc#usage`
+5. You have to download the two .jar files
    1. `sqlite-jdbc-3.44.0.0.jar` (recommended to direct download from _releases_ page)
    2. `slf4j-api-1.7.36.jar`
-5. Add them both to classpath. **Below are some popular IDEs and how to add .jar files to classpath**
+6. Add them both to classpath. **Below are some popular IDEs and how to add .jar files to classpath**
 
 - **Intellij**
   - Refer to the following [Article](https://www.geeksforgeeks.org/how-to-add-external-jar-file-to-an-intellij-idea-project/).  
