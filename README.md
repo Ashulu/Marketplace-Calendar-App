@@ -28,10 +28,15 @@ CS180 project 5
 ## Database Structure
 
 We used SQL to create our own .db file. Below are the tables and their respective columns in the database.
-- accounts `type, email, password`
-- stores `sellerEmail, storeName`
-- calendars `storeName, calendarName, calendarDescription`
-- windows `storeName, calendarName, appointmentTitle, startTime, endTime, maxAttendees, currentBookings`
-- appointments `customerEmail, sellerEmail, storeName, calendarName, startTime, endTime, booking, isApproved, isRequest, timeStamp`
+- accounts  
+  `type, email, password`
+- stores  
+  `sellerEmail, storeName`
+- calendars  
+  `storeName, calendarName, calendarDescription`
+- windows  
+  `storeName, calendarName, appointmentTitle, startTime, endTime, maxAttendees, currentBookings`
+- appointments  
+  `customerEmail, sellerEmail, storeName, calendarName, startTime, endTime, booking, isApproved, isRequest, timeStamp`
   
-*Note that startTime and endTime are stored as strings of length 4, representing military time. timeStamp is stored as a string by using strftime()*
+*Note that startTime and endTime are stored as strings of length 4, to represent military time. timeStamp is stored as a string by using strftime() method in SQL*
