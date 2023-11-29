@@ -3,7 +3,15 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 public class Client extends JComponent implements Runnable {
+    private JFrame frame;
+    private JTextField username;
+    private JTextField password;
+
+    private JButton enter;
+    private JButton createAccount;
+    private int choice = -1;
     public Client() {
+        this.frame = new JFrame("Calendar");
     }
 
     public static void main(String[] args) {
@@ -11,9 +19,7 @@ public class Client extends JComponent implements Runnable {
     }
 
     public void run() {
-        JFrame frame = new JFrame("Calendar");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
 
         Container content = frame.getContentPane();
         content.setLayout(new BorderLayout());
@@ -40,48 +46,28 @@ public class Client extends JComponent implements Runnable {
         frame.setDefaultCloseOperation(exit());
         frame.setVisible(true);
 
-        //TODO: GUI for login and create account
-        JPanel buttons = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.CENTER;
-        gbc.fill = GridBagConstraints.VERTICAL;
-        JButton login = new JButton("Login");
-        JButton createAccount = new JButton("Create Account");
-        buttons.add(login, gbc);
-        buttons.add(createAccount, gbc);
+        JPanel user = new JPanel();
+        user.setLayout(new BoxLayout(user, BoxLayout.Y_AXIS));
+        JPanel account = new JPanel();
+        username = new JTextField("username", 10);
+        password = new JTextField("password", 10);
+        enter = new JButton("Enter");
+        enter.addActionListener(actionListener);
+        account.add(new JLabel("Account Login"));
+        account.add(username);
+        account.add(password);
+        account.add(enter);
 
-        frame.add(buttons);
+        JPanel create = new JPanel();
+        createAccount = new JButton("Create Account");
+        createAccount.addActionListener(actionListener);
+        create.add(new JLabel("Don't have an account?"), BorderLayout.PAGE_START);
+        create.add(createAccount, BorderLayout.PAGE_END);
 
-        login.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                boolean cont = false;
-                do {
-                    //TODO: user enters login info -- if info is correct, break, else continue
-                } while (cont);
-                frame.remove(buttons);
-                //TODO: GUI for dropdown options based on customer or seller
-                String[] choices = { "CHOICE 1", "CHOICE 2", "CHOICE 3", "CHOICE 4",
-                        "CHOICE 5", "CHOICE 6" };
+        user.add(account);
+        user.add(create);
+        mainPanel.add(user);
 
-                JComboBox<String> cb = new JComboBox<String>(choices);
-                frame.add(cb);
-            }
-        });
-        createAccount.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                boolean cont = false;
-                do {
-                    //TODO: user enters account info -- if valid, break, else continue
-                } while (cont);
-                frame.remove(buttons);
-                //TODO: GUI for dropdown options based on customer or seller
-                String[] choices = { "CHOICE 1", "CHOICE 2", "CHOICE 3", "CHOICE 4",
-                        "CHOICE 5", "CHOICE 6" };
-
-                JComboBox<String> cb = new JComboBox<String>(choices);
-                frame.add(cb);
-            }
-        });
 
         JPanel selSide = createCardPanel("Calendar: Seller");
         JButton confirm = new JButton("Confirm");
@@ -188,6 +174,36 @@ public class Client extends JComponent implements Runnable {
         frame.add(mainPanel);
 
     }
+
+    ActionListener actionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (e.getSource() == enter) {
+                String Username = username.getText();
+                String Password = password.getText();
+
+                if (Username.equals("username") || Username.isEmpty() || Password.equals("password") || Password.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Please enter an email and password or create an account.");
+                } else {
+                    // TODO: check the username and password to make sure it is valid (SQL Query) and
+                    //  then change to specific calendar (seller vs. customer)
+                    String type = "";
+                    // SQL Query: 'SELECT type FROM accounts WHERE (email == Username AND password == Password)'
+                    if (type == "c") {
+                        //TODO: make ian's code methods and call them here?
+                    } else if (type == "s") {
+                        //TODO: same here as previous TODO
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Username or Password are incorrect");
+                    }
+                }
+            } else if (e.getSource() == createAccount) {
+                // TODO: change panel and display text fields for user to enter type, email, and password
+                // SQL Query: 'INSERT INTO accounts (type, email, password, password) VALUES (userInput, userInput, userInput)'
+            }
+        }
+    };
+
     private static JPanel createCardPanel(String text) {
         JPanel panel = new JPanel();
         panel.add(new JLabel(text));
