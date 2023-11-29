@@ -37,19 +37,27 @@ public class ServerThread extends Thread {
                 clientInput = reader.readLine();
                 String[] inputList = clientInput.split(" ");
                 String command = inputList[0];
-                statement = connection.createStatement();
+                int execute = 0;
+//                execute == 1 if executeUpdate, execute == 2 if executeQuery, execute == 0 to quit
+                boolean isAppointment = clientInput.toLowerCase().contains("appointments");
                 switch (command) {
                     case "SELECT":
+                        execute = 2;
                         break;
                     case "UPDATE":
-                        break;
                     case "INSERT":
-                        break;
                     case "DELETE":
+                        execute = 1;
                         break;
                     case "QUIT":
+                    default:
                         break;
                 }
+
+
+                statement = connection.createStatement();
+
+
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("Could not pass data to / receive data from client");
