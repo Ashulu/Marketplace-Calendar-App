@@ -6,9 +6,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
- * Project 5
+ * Server.java
  *
- * Project Calendar
+ * This class provides the main method for our server, creating new thread for each socket accepted.
  *
  * @author Gunyoung Park, Ashish Chenna, Ian Lan, Sanjana Gadaginmath
  *
@@ -31,8 +31,9 @@ public class Server {
             try {
                 socket = serverSocket.accept();
             } catch (IOException e) {
-
+                e.printStackTrace();
             }
+            new ServerThread(socket).start();
         }
     }
 }
