@@ -23,28 +23,39 @@ public class ServerThread extends Thread {
         }
 
         Connection connection = null;
-        Statement statement = null;
         try {
             connection = DriverManager.getConnection(DB_URL);
-            statement =connection.createStatement();
         } catch (SQLException e) {
             System.out.println("Error Connecting to Database");
             e.printStackTrace();
         }
 
         String clientInput = null;
+        Statement statement = null;
         while (true) {
             try {
                 clientInput = reader.readLine();
-                switch (clientInput) {
-                    case "c":
+                String[] inputList = clientInput.split(" ");
+                String command = inputList[0];
+                statement = connection.createStatement();
+                switch (command) {
+                    case "SELECT":
                         break;
-                    case "s":
+                    case "UPDATE":
                         break;
-                    default:
+                    case "INSERT":
+                        break;
+                    case "DELETE":
+                        break;
+                    case "QUIT":
                         break;
                 }
             } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("Could not pass data to / receive data from client");
+                return;
+            } catch (SQLException e) {
+                System.out.println("Statement issue. Statement was: " + statement);
                 e.printStackTrace();
                 return;
             }
