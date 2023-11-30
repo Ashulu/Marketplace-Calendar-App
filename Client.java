@@ -67,6 +67,28 @@ public class Client extends JComponent implements Runnable {
         //----------------------------------------------------------//
         JPanel s0 = createCardPanel(selOp[0]);
 
+        String[] options0 = new String[0];
+        JComboBox<String> storeOptions0 = new JComboBox<>(options0);
+        JButton create0 = new JButton("Select");
+        create0.addActionListener(e -> {
+            String command = String.format("SELECT * FROM calendars WHERE storeName = '%s';",
+                    storeOptions0.getSelectedItem());
+            pw.write(command);
+        });
+
+        JTextArea appointments0 = null;
+        try {
+            //appointment information goes here
+            appointments0 = new JTextArea(br.readLine());
+            appointments0.setEditable(false);
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        appointments0.setLineWrap(true);
+        JScrollPane scroll0 = new JScrollPane(appointments0);
+
+
         //----------------------------------------------------------//
         JPanel s1 = createCardPanel(selOp[1]);
 
@@ -270,6 +292,7 @@ public class Client extends JComponent implements Runnable {
                         case 0 -> {
                             //view approved appointments
                             cardLayout.show(mainPanel, "s0");
+                            pw.write("SELECT storeName FROM calendars;");
                         }
                         case 1 -> {
                             //appointment requests
