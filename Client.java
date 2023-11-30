@@ -68,6 +68,54 @@ public class Client extends JComponent implements Runnable {
         user.add(create);
         mainPanel.add(user);
 
+        String[] custOps = {"View Calendar", "Request Appointment", "Cancel Appointment", "View Approved",
+                "Show Statistics", "Logout", "Quit"};
+        String[] custPans = {"s0", "s1", "s2", "s3", "s3", "s4", "s5", "s6"};
+        JPanel custSide = createCardPanel("Calendar: Customer");
+        JButton enter = new JButton("Confirm");
+
+        custSide.add(enter);
+
+        JComboBox<String> customerOptions = new JComboBox<>(custOps);
+        JLabel custResult = new JLabel("");
+        enter.addActionListener(e -> {
+            String selectedOption = (String) customerOptions.getSelectedItem();
+            int choice = Arrays.asList().indexOf(selectedOption);
+
+            switch (choice) {
+                case 0:
+
+                    break;
+                case 1:
+
+                    break;
+                case 2:
+
+                    break;
+                case 3:
+
+                    break;
+                case 4:
+
+                    break;
+                case 5:
+
+                    break;
+                case 6:
+
+                    break;
+                case 7:
+
+                    break;
+            }
+
+            custResult.setText("Selected Option:" + selectedOption);
+            cardLayout.show(mainPanel, custPans[choice]);
+        });
+
+        custSide.add(customerOptions);
+        custSide.add(customerOptions);
+        mainPanel.add(custSide);
 
         JPanel selSide = createCardPanel("Calendar: Seller");
         JButton confirm = new JButton("Confirm");
