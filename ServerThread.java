@@ -37,10 +37,11 @@ public class ServerThread extends Thread {
             try {
                 statement = connection.createStatement();
                 clientInput = reader.readLine();
+
                 String[] inputList = clientInput.split(" ");
                 String command = inputList[0];
                 int execute = 0;
-//                execute == 1 if executeUpdate, execute == 2 if executeQuery, execute == 0 to quit
+//                execute = 1 if select, execute = 2 if update or insert, execute = 3 if delete, execute = 0 to quit
                 boolean isAppointment = clientInput.toLowerCase().contains("appointments");
                 switch (command) {
                     case "SELECT":
@@ -48,8 +49,10 @@ public class ServerThread extends Thread {
                         break;
                     case "UPDATE":
                     case "INSERT":
-                    case "DELETE":
                         execute = 1;
+                        break;
+                    case "DELETE":
+                        execute = 3;
                         break;
                     case "QUIT":
                     default:
@@ -57,38 +60,66 @@ public class ServerThread extends Thread {
                 }
 
                 switch (execute) {
+//                execute = 1 if select, execute = 2 if update or insert, execute = 3 if delete, execute = 0 to quit
                     case 1:
+                        ResultSet result = null;
                         if (isAppointment) {
                             PreparedStatement preparedStatement = connection.prepareStatement(clientInput);
                             preparedStatement.setString(1, "datetime(timestamp, 'unixepoch') as timestamp");
-                            ResultSet result = preparedStatement.executeQuery();
+                            result = preparedStatement.executeQuery();
                         } else {
-                            ResultSet result = statement.executeQuery(clientInput);
+                            result = statement.executeQuery(clientInput);
                         }
 
+
+                        StringBuilder builder = new StringBuilder();
+                        int columnCount = result.getMetaData().getColumnCount();
+                        while (result.next()) {
+                            for (int i = 0; i < columnCount;) {
+                                builder.append(result.getString(i + 1));
+                                if (++i < columnCount) {
+                                    builder.append(",");
+                                }
+                            }
+                            builder.append("|");
+                        }
+                        builder.deleteCharAt(builder.length() - 1);
+                        String resultString = builder.toString();
+                        writer.write(resultString);
+                        writer.flush();
                         break;
+
                     case 2:
+                        int updateResult;
                         if (isAppointment) {
                             PreparedStatement preparedStatement = connection.prepareStatement(clientInput);
                             preparedStatement.setString(1, "timestamp");
                             preparedStatement.setString(2, "strftime('%s', now)");
-                            preparedStatement.executeUpdate();
+                            updateResult = preparedStatement.executeUpdate();
                         } else {
-                            statement.executeUpdate(clientInput);
+                            updateResult = statement.executeUpdate(clientInput);
                         }
+                        writer.write(updateResult);
+//                            if updateResult = 1, update was successful
                         break;
-                    default:
-                        break;
-                }
-                statement = connection.createStatement();
 
+                    case 3:
+                        int deletions = statement.executeUpdate(clientInput);
+                        writer.write(deletions);
+//                        write how items were removed from db
+                        break;
+
+                    default:
+                        socket.close();
+                        return;
+                }
 
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("Could not pass data to / receive data from client");
                 return;
             } catch (SQLException e) {
-                System.out.println("Statement issue. Statement was: " + statement);
+                System.out.println("Error when executing statment. Statement was: " + clientInput);
                 e.printStackTrace();
                 return;
             }
