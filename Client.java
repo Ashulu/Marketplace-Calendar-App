@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -38,6 +39,7 @@ public class Client extends JComponent implements Runnable {
                     "Search Client", JOptionPane.ERROR_MESSAGE);
             return;
         }
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         Container content = frame.getContentPane();
@@ -87,33 +89,69 @@ public class Client extends JComponent implements Runnable {
 
         //----------------------------------------------------------//
         JPanel s3 = createCardPanel(selOp[3]);
+        //just a temp options array - will get replaced
         String[] options3 = new String[3];
-        JComboBox<String> storeOptions = new JComboBox<>(options3);
-
+        JComboBox<String> storeOptions3 = new JComboBox<>(options3);
         JButton create3 = new JButton("Create");
+        JTextField calendarDescription = new JTextField(40);
         create3.addActionListener(e -> {
             String command = String.format("INSERT INTO calendars (storeName, calendarName," +
                             " calendarDescription) VALUES ('%s', '%s', '%s');", storeName.getText(),
-                            username.getText(), calendarDescription);
+                            username.getText(), calendarDescription.getText());
             //
             //how do we handle duplicates??
             //i don't know how
             //
             pw.write(command);
         });
+        s3.add(storeOptions3);
+        s3.add(create3);
+        s3.add(calendarDescription);
 
         //----------------------------------------------------------//
         JPanel s4 = createCardPanel(selOp[4]);
 
         //----------------------------------------------------------//
         JPanel s5 = createCardPanel(selOp[5]);
-
+        String[] options5 = new String[5];
+        JComboBox<String> storeOptions5 = new JComboBox<>(options5);
+        JButton create5 = new JButton("Select");
+        create5.addActionListener(e -> {
+            String command = String.format("SELECT * FROM calendars WHERE storeName = '%s';",
+                    storeOptions5.getSelectedItem());
+            pw.write(command);
+        });
+        JComboBox<String> calendarOptions5 = new JComboBox<>(options5);
+        JButton delete5 = new JButton("Delete");
+        ActionListener actionListener5 = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String calendar = (String) calendarOptions5.getSelectedItem();
+                String command = String.format("DELETE FROM calendars WHERE calendarName = '%s';\n" +
+                                "DELETE FROM windows WHERE calendarName = '%s';\n" +
+                                "DELETE FROM appointments WHERE calendarName = '%s';\n",
+                                calendar, calendar, calendar);
+                pw.write(command);
+            }
+        };
+        delete5.addActionListener(actionListener5);
         //----------------------------------------------------------//
         JPanel s6 = createCardPanel(selOp[6]);
+        //insert statistics code here
 
         //----------------------------------------------------------//
         JPanel s7 = createCardPanel(selOp[7]);
 
+        JTextField calendar7 = new JTextField("File Path:");
+        JButton import7 = new JButton("Import");
+        ActionListener actionListener7 = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //i'm not sure what to send so here you go
+                pw.write(calendar7.getText());
+            }
+        };
+        import7.addActionListener(actionListener7);
         //----------------------------------------------------------//
         JPanel s8 = createCardPanel(selOp[8]);
 
@@ -199,7 +237,11 @@ public class Client extends JComponent implements Runnable {
                             //create calendar
                             cardLayout.show(mainPanel, "s3");
                             pw.write("SELECT storeName FROM calendars;");
-                            set3(options3,s3(br, pw));
+                            try {
+                                storeOptions3.setModel(new DefaultComboBoxModel<>(br.readLine().split(",")));
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }
 
                         }
                         case 4 -> {
@@ -209,10 +251,17 @@ public class Client extends JComponent implements Runnable {
                         case 5 -> {
                             //delete calendar
                             cardLayout.show(mainPanel, "s5");
+                            pw.write("SELECT storeName FROM calendars;");
+                            try {
+                                storeOptions5.setModel(new DefaultComboBoxModel<>(br.readLine().split(",")));
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }
 
                         }
                         case 6 -> {
                             //show statistics
+                            //i forgot what statistics are supposed to be shown
                             cardLayout.show(mainPanel, "s6");
 
                         }
@@ -292,9 +341,6 @@ public class Client extends JComponent implements Runnable {
             ex.printStackTrace();
         }
         return null;
-    }
-    private void set3(String[] old, String[] newAr) {
-        old = newAr;
     }
 
     private static JPanel createCardPanel(String text) {
