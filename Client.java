@@ -1,6 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.*;
 public class Client extends JComponent implements Runnable {
     private JFrame frame;
@@ -10,6 +14,8 @@ public class Client extends JComponent implements Runnable {
     private JButton enter;
     private JButton createAccount;
     private int choice = -1;
+    private JButton confirm = new JButton("Confirm");
+
     public Client() {
         this.frame = new JFrame("Calendar");
     }
@@ -19,6 +25,19 @@ public class Client extends JComponent implements Runnable {
     }
 
     public void run() {
+        Socket socket;
+        BufferedReader br;
+        PrintWriter pw;
+        try {
+            //this is Ian's host and portname - may need to modify?
+            socket = new Socket("localhost", 4242);
+            br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            pw = new PrintWriter(socket.getOutputStream());
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Connection unsuccessful.",
+                    "Search Client", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         Container content = frame.getContentPane();
@@ -28,103 +47,18 @@ public class Client extends JComponent implements Runnable {
         frame.setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel(new CardLayout());
-        CardLayout cardLayout = (CardLayout)  mainPanel.getLayout();
+        CardLayout cardLayout = (CardLayout) mainPanel.getLayout();
 
-        String[] selOp = new String[] {
-                "View Approved", "Appointment Requests",
+        String[] selOp = new String[]{
+                "View Approved Appointments", "Appointment Requests",
                 "Create Store", "Create Calendar",
                 "Edit Calendar", "Delete Calendar",
                 "Show Statistics", "Import Calendar",
                 "Logout", "Quit"
         };
-        String[] selPans = new String[] {
+        String[] selPans = new String[]{
                 "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9"
         };
-
-
-        //maybe exit works?
-        frame.setDefaultCloseOperation(exit());
-        frame.setVisible(true);
-
-        JPanel user = new JPanel();
-        user.setLayout(new BoxLayout(user, BoxLayout.Y_AXIS));
-        JPanel account = new JPanel();
-        username = new JTextField("username", 10);
-        password = new JTextField("password", 10);
-        enter = new JButton("Enter");
-        enter.addActionListener(actionListener);
-        account.add(new JLabel("Account Login"));
-        account.add(username);
-        account.add(password);
-        account.add(enter);
-
-        JPanel create = new JPanel();
-        createAccount = new JButton("Create Account");
-        createAccount.addActionListener(actionListener);
-        create.add(new JLabel("Don't have an account?"), BorderLayout.PAGE_START);
-        create.add(createAccount, BorderLayout.PAGE_END);
-
-        user.add(account);
-        user.add(create);
-        mainPanel.add(user);
-
-
-        JPanel selSide = createCardPanel("Calendar: Seller");
-        JButton confirm = new JButton("Confirm");
-        //----------------------------------------------------------//
-        selSide.add(confirm);
-        //add this button to every single card - it's going to be
-        //what sends the request
-
-        //----------------------------------------------------------//
-        JComboBox<String> sellerOptions = new JComboBox<>(selOp);
-        JLabel resultLabel = new JLabel("");
-        confirm.addActionListener(e -> {
-            String selectedOption = (String) sellerOptions.getSelectedItem();
-            int choice = Arrays.asList(selOp).indexOf(selectedOption);
-
-            //SEND REQUEST HERE
-            switch (choice) {
-                case 0 -> {
-
-                }
-                case 1 -> {
-
-                }
-                case 2 -> {
-
-                }
-                case 3 -> {
-
-                }
-                case 4 -> {
-
-                }
-                case 5 -> {
-
-                }
-                case 6 -> {
-
-                }
-                case 7 -> {
-
-                }
-                case 8 -> {
-
-                }
-                case 9 -> {
-
-                }
-            }
-            //WAIT FOR REPLY THEN
-            //cardLayout.show(THE PANEL SELECTED HERE)
-            resultLabel.setText("Selected Option: " + selectedOption);
-            cardLayout.show(mainPanel, selPans[choice]);
-        });
-
-        selSide.add(sellerOptions);
-        selSide.add(resultLabel);
-        mainPanel.add(selSide);
 
         //whatever option specific buttons and the like go into their
         //own slot here:
@@ -137,8 +71,36 @@ public class Client extends JComponent implements Runnable {
         //----------------------------------------------------------//
         JPanel s2 = createCardPanel(selOp[2]);
 
+        JTextField storeName = new JTextField("Example Name", 10);
+        JButton create2 = new JButton("Create");
+        create2.addActionListener(e -> {
+            String command = String.format("INSERT INTO stores (sellerEmail, storeName) VALUES " +
+                    "('%s', '%s');", storeName.getText(), username.getText());
+            //
+            //how do we handle duplicates??
+            //i don't know how
+            //
+            pw.write(command);
+        });
+        s2.add(storeName);
+        s2.add(create2);
+
         //----------------------------------------------------------//
         JPanel s3 = createCardPanel(selOp[3]);
+        String[] options3 = new String[3];
+        JComboBox<String> storeOptions = new JComboBox<>(options3);
+
+        JButton create3 = new JButton("Create");
+        create3.addActionListener(e -> {
+            String command = String.format("INSERT INTO calendars (storeName, calendarName," +
+                            " calendarDescription) VALUES ('%s', '%s', '%s');", storeName.getText(),
+                            username.getText(), calendarDescription);
+            //
+            //how do we handle duplicates??
+            //i don't know how
+            //
+            pw.write(command);
+        });
 
         //----------------------------------------------------------//
         JPanel s4 = createCardPanel(selOp[4]);
@@ -173,6 +135,124 @@ public class Client extends JComponent implements Runnable {
 
         frame.add(mainPanel);
 
+
+        //maybe exit works?
+        frame.setDefaultCloseOperation(exit());
+        frame.setVisible(true);
+
+        JPanel user = new JPanel();
+        user.setLayout(new BoxLayout(user, BoxLayout.Y_AXIS));
+        JPanel account = new JPanel();
+        username = new JTextField("username", 10);
+        password = new JTextField("password", 10);
+        enter = new JButton("Enter");
+        enter.addActionListener(actionListener);
+        account.add(new JLabel("Account Login"));
+        account.add(username);
+        account.add(password);
+        account.add(enter);
+
+        JPanel create = new JPanel();
+        createAccount = new JButton("Create Account");
+        createAccount.addActionListener(actionListener);
+        create.add(new JLabel("Don't have an account?"), BorderLayout.PAGE_START);
+        create.add(createAccount, BorderLayout.PAGE_END);
+
+        user.add(account);
+        user.add(create);
+        mainPanel.add(user);
+
+
+        JPanel selSide = createCardPanel("Calendar: Seller");
+        //----------------------------------------------------------//
+        selSide.add(confirm);
+        //add this button to every single card - it's going to be
+        //what sends the request
+
+        //----------------------------------------------------------//
+        JComboBox<String> sellerOptions = new JComboBox<>(selOp);
+        JLabel resultLabel = new JLabel("");
+        ActionListener selListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String selectedOption = (String) sellerOptions.getSelectedItem();
+                choice = Arrays.asList(selOp).indexOf(selectedOption);
+
+                //SEND REQUEST HERE
+                while (true) {
+                    switch (choice) {
+                        case 0 -> {
+                            //view approved appointments
+                            cardLayout.show(mainPanel, "s0");
+                        }
+                        case 1 -> {
+                            //appointment requests
+                            cardLayout.show(mainPanel, "s1");
+
+                        }
+                        case 2 -> {
+                            //create store
+                            cardLayout.show(mainPanel, "s2");
+
+                        }
+                        case 3 -> {
+                            //create calendar
+                            cardLayout.show(mainPanel, "s3");
+                            pw.write("SELECT storeName FROM calendars;");
+                            set3(options3,s3(br, pw));
+
+                        }
+                        case 4 -> {
+                            //edit calendar
+                            cardLayout.show(mainPanel, "s4");
+                        }
+                        case 5 -> {
+                            //delete calendar
+                            cardLayout.show(mainPanel, "s5");
+
+                        }
+                        case 6 -> {
+                            //show statistics
+                            cardLayout.show(mainPanel, "s6");
+
+                        }
+                        case 7 -> {
+                            //import calendar
+                            cardLayout.show(mainPanel, "s7");
+
+                        }
+                        case 8 -> {
+                            //logout
+                            //or actually let's bring this back to login (but ill do that later)
+                            cardLayout.show(mainPanel, "s8");
+
+                        }
+                        case 9 -> {
+                            //quit
+                            pw.write("QUIT");
+                            //idk it won't let me close unless i have the try/catch
+                            try {
+                                br.close();
+                                pw.close();
+                                return;
+                            } catch (Exception ex) {
+                                return;
+                            }
+                        }
+                    }
+
+                    //WAIT FOR REPLY THEN
+                    //cardLayout.show(THE PANEL SELECTED HERE)
+                    resultLabel.setText("Selected Option: " + selectedOption);
+                    cardLayout.show(mainPanel, selPans[choice]);
+                }
+            }
+        };
+
+        confirm.addActionListener(selListener);
+        selSide.add(sellerOptions);
+        selSide.add(resultLabel);
+        mainPanel.add(selSide);
     }
 
     ActionListener actionListener = new ActionListener() {
@@ -203,6 +283,19 @@ public class Client extends JComponent implements Runnable {
             }
         }
     };
+
+    private String[] s3(BufferedReader br, PrintWriter pw) {
+        try {
+            return br.readLine().split(",");
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+    private void set3(String[] old, String[] newAr) {
+        old = newAr;
+    }
 
     private static JPanel createCardPanel(String text) {
         JPanel panel = new JPanel();
