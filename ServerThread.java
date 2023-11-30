@@ -23,6 +23,7 @@ public class ServerThread extends Thread {
         }
 
         Connection connection = null;
+        Statement statement = null;
         try {
             connection = DriverManager.getConnection(DB_URL);
         } catch (SQLException e) {
@@ -31,9 +32,10 @@ public class ServerThread extends Thread {
         }
 
         String clientInput = null;
-        Statement statement = null;
+
         while (true) {
             try {
+                statement = connection.createStatement();
                 clientInput = reader.readLine();
                 String[] inputList = clientInput.split(" ");
                 String command = inputList[0];
@@ -54,7 +56,30 @@ public class ServerThread extends Thread {
                         break;
                 }
 
+                switch (execute) {
+                    case 1:
+                        if (isAppointment) {
+                            PreparedStatement preparedStatement = connection.prepareStatement(clientInput);
+                            preparedStatement.setString(1, "datetime(timestamp, 'unixepoch') as timestamp");
+                            ResultSet result = preparedStatement.executeQuery();
+                        } else {
+                            ResultSet result = statement.executeQuery(clientInput);
+                        }
 
+                        break;
+                    case 2:
+                        if (isAppointment) {
+                            PreparedStatement preparedStatement = connection.prepareStatement(clientInput);
+                            preparedStatement.setString(1, "timestamp");
+                            preparedStatement.setString(2, "strftime('%s', now)");
+                            preparedStatement.executeUpdate();
+                        } else {
+                            statement.executeUpdate(clientInput);
+                        }
+                        break;
+                    default:
+                        break;
+                }
                 statement = connection.createStatement();
 
 
