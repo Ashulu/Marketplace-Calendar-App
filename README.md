@@ -202,29 +202,67 @@ UPDATE appointments SET isApproved = 1, isRequest = 0,
 -------------------------------------------------------------------------------------------------------------
 **createStore**
 
+variables needed:
+storeName
 
-
+return:
+0 or 1
 
 -------------------------------------------------------------------------------------------------------------
 **createCalendar**
 
+variables needed:
+1. storeName, calendarName, calendarDescription
+2. startTime, endTime, maxAttendees * number of windows
 
+return:
+0 or 1
 
 -------------------------------------------------------------------------------------------------------------
 **editCalendar**
 
+- edit name
+- edit description
+- edit windows (add or remove)
+
+variables needed:
+if name:
+old name, new name
+if description:
+calendarName, description
+if adding windows:
+storeName, calendarName, startTime, endTime, maxAttendees
+if deleting windows:
+storeName, calendarName, startTime, endTime
+
+
 -------------------------------------------------------------------------------------------------------------
 **deleteCalendar**
 
+variables needed:
+storeName, calendarName
 
 -------------------------------------------------------------------------------------------------------------
 **statisticsSeller**
 
+output:
+sellerEmail, storeName
+[customerName, numofApproved]
+most popular window
+sorted in number of customers
+
+
 -------------------------------------------------------------------------------------------------------------
 **importCalendar**
 
+variablesNeeded:
+storeName, fileName
+
 -------------------------------------------------------------------------------------------------------------
 **exportApprovedRequests**
+
+variablesNeeded:
+fileName
 
 
 
