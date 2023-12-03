@@ -51,149 +51,6 @@ public class Client extends JComponent implements Runnable {
         JPanel mainPanel = new JPanel(new CardLayout());
         CardLayout cardLayout = (CardLayout) mainPanel.getLayout();
 
-        String[] selOp = new String[]{
-                "View Approved Appointments", "Appointment Requests",
-                "Create Store", "Create Calendar",
-                "Edit Calendar", "Delete Calendar",
-                "Show Statistics", "Import Calendar",
-                "Logout", "Quit"
-        };
-        String[] selPans = new String[]{
-                "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9"
-        };
-
-        //whatever option specific buttons and the like go into their
-        //own slot here:
-        //----------------------------------------------------------//
-        JPanel s0 = createCardPanel(selOp[0]);
-
-        String[] options0 = new String[0];
-        JComboBox<String> storeOptions0 = new JComboBox<>(options0);
-        JButton create0 = new JButton("Select");
-        create0.addActionListener(e -> {
-            String command = String.format("SELECT * FROM calendars WHERE storeName = '%s';",
-                    storeOptions0.getSelectedItem());
-            pw.write(command);
-        });
-
-        JTextArea appointments0 = null;
-        try {
-            //appointment information goes here
-            appointments0 = new JTextArea(br.readLine());
-            appointments0.setEditable(false);
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        appointments0.setLineWrap(true);
-        JScrollPane scroll0 = new JScrollPane(appointments0);
-
-
-        //----------------------------------------------------------//
-        JPanel s1 = createCardPanel(selOp[1]);
-
-        //----------------------------------------------------------//
-        JPanel s2 = createCardPanel(selOp[2]);
-
-        JTextField storeName = new JTextField("Example Name", 10);
-        JButton create2 = new JButton("Create");
-        create2.addActionListener(e -> {
-            String command = String.format("INSERT INTO stores (sellerEmail, storeName) VALUES " +
-                    "('%s', '%s');", storeName.getText(), username.getText());
-            //
-            //how do we handle duplicates??
-            //i don't know how
-            //
-            pw.write(command);
-        });
-        s2.add(storeName);
-        s2.add(create2);
-
-        //----------------------------------------------------------//
-        JPanel s3 = createCardPanel(selOp[3]);
-        //just a temp options array - will get replaced
-        String[] options3 = new String[3];
-        JComboBox<String> storeOptions3 = new JComboBox<>(options3);
-        JButton create3 = new JButton("Create");
-        JTextField calendarDescription = new JTextField(40);
-        create3.addActionListener(e -> {
-            String command = String.format("INSERT INTO calendars (storeName, calendarName," +
-                            " calendarDescription) VALUES ('%s', '%s', '%s');", storeName.getText(),
-                            username.getText(), calendarDescription.getText());
-            //
-            //how do we handle duplicates??
-            //i don't know how
-            //
-            pw.write(command);
-        });
-        s3.add(storeOptions3);
-        s3.add(create3);
-        s3.add(calendarDescription);
-
-        //----------------------------------------------------------//
-        JPanel s4 = createCardPanel(selOp[4]);
-
-        //----------------------------------------------------------//
-        JPanel s5 = createCardPanel(selOp[5]);
-        String[] options5 = new String[5];
-        JComboBox<String> storeOptions5 = new JComboBox<>(options5);
-        JButton create5 = new JButton("Select");
-        create5.addActionListener(e -> {
-            String command = String.format("SELECT * FROM calendars WHERE storeName = '%s';",
-                    storeOptions5.getSelectedItem());
-            pw.write(command);
-        });
-        JComboBox<String> calendarOptions5 = new JComboBox<>(options5);
-        JButton delete5 = new JButton("Delete");
-        ActionListener actionListener5 = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String calendar = (String) calendarOptions5.getSelectedItem();
-                String command = String.format("DELETE FROM calendars WHERE calendarName = '%s';\n" +
-                                "DELETE FROM windows WHERE calendarName = '%s';\n" +
-                                "DELETE FROM appointments WHERE calendarName = '%s';\n",
-                                calendar, calendar, calendar);
-                pw.write(command);
-            }
-        };
-        delete5.addActionListener(actionListener5);
-        //----------------------------------------------------------//
-        JPanel s6 = createCardPanel(selOp[6]);
-        //insert statistics code here
-
-        //----------------------------------------------------------//
-        JPanel s7 = createCardPanel(selOp[7]);
-
-        JTextField calendar7 = new JTextField("File Path:");
-        JButton import7 = new JButton("Import");
-        ActionListener actionListener7 = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                //i'm not sure what to send so here you go
-                pw.write(calendar7.getText());
-            }
-        };
-        import7.addActionListener(actionListener7);
-        //----------------------------------------------------------//
-        JPanel s8 = createCardPanel(selOp[8]);
-
-        //----------------------------------------------------------//
-        JPanel s9 = createCardPanel(selOp[9]);
-
-        //----------------------------------------------------------//
-
-        mainPanel.add(s0, "s0");
-        mainPanel.add(s1, "s1");
-        mainPanel.add(s2, "s2");
-        mainPanel.add(s3, "s3");
-        mainPanel.add(s4, "s4");
-        mainPanel.add(s5, "s5");
-        mainPanel.add(s6, "s6");
-        mainPanel.add(s7, "s7");
-        mainPanel.add(s8, "s8");
-        mainPanel.add(s9, "s9");
-
-        frame.add(mainPanel);
 
 
         //maybe exit works?
@@ -297,6 +154,9 @@ public class Client extends JComponent implements Runnable {
                         case 1 -> {
                             //appointment requests
                             cardLayout.show(mainPanel, "s1");
+                            String command = String.format("SELECT * FROM appointments WHERE sellerEmail = '%s",
+                                    username.getText());
+                            pw.write(command);
 
                         }
                         case 2 -> {
@@ -391,8 +251,10 @@ public class Client extends JComponent implements Runnable {
                     // SQL Query: 'SELECT type FROM accounts WHERE (email == Username AND password == Password)'
                     if (type == "c") {
                         //TODO: make ian's code methods and call them here?
+
                     } else if (type == "s") {
                         //TODO: same here as previous TODO
+
                     } else {
                         JOptionPane.showMessageDialog(null, "Username or Password are incorrect");
                     }
@@ -404,24 +266,333 @@ public class Client extends JComponent implements Runnable {
         }
     };
 
-    private String[] s3(BufferedReader br, PrintWriter pw) {
-        try {
-            return br.readLine().split(",");
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null;
+    //0 "View Approved Appointments"
+    private void s0(BufferedReader br, PrintWriter pw) throws IOException {
+        pw.write("s0");
+        pw.flush();
+        Panel panel = new Panel();
+        JTextArea appointments = new JTextArea("",3, 20);
+        String approved = br.readLine();
+        panel.add(appointments);
+        appointments.setText(approved);
+    }
+    //1 "Appointment Requests"
+    private void s1(BufferedReader br, PrintWriter pw) throws IOException {
+        pw.write("s1");
+        pw.flush();
+        Panel panel = new Panel();
+        //i forgot if we're sending strings or objects and if so, when/where for which method :(
+        String[] requests = br.readLine().split(",");
+        JComboBox<String> appointments = new JComboBox<String>(requests);
+        JButton confirm = new JButton("Confirm");
+        //error handling for appointment confirm/delete bouncing not implemented
+        //because I want to delete things from the array and refresh the
+        //dropdown as we go along but i could end up deleting something that
+        //didn't actually get processed
+        confirm.addActionListener(e -> {
+            String command = String.format("confirm,%s",(String)appointments.getSelectedItem());
+            pw.write(command);
+            pw.flush();
+        });
+        JButton delete = new JButton("Delete");
+        delete.addActionListener(e -> {
+            String command = String.format("delete,%s",(String)appointments.getSelectedItem());
+            pw.write(command);
+            pw.flush();
+        });
+        panel.add(appointments);
+        panel.add(confirm);
+        panel.add(delete);
     }
 
-    private static JPanel createCardPanel(String text) {
+    //2 "Create Store"
+    private void s2(BufferedReader br, PrintWriter pw) throws IOException {
         JPanel panel = new JPanel();
-        panel.add(new JLabel(text));
-        return panel;
+        JTextField storeName = new JTextField("Example Name", 10);
+        JTextField result = new JTextField();
+        result.setVisible(false);
+        JButton create = new JButton("Create");
+        create.addActionListener(e -> {
+            String command = String.format("s2,%s",storeName.getText());
+            pw.write(command);
+            pw.flush();
+        });
+        panel.add(storeName);
+        panel.add(create);
+        panel.add(result);
+        int response = br.read();
+        if (response == 0) {
+            result.setText("Unable to create store.");
+        } else {
+            result.setText("Creation successful!");
+        }
+        result.setVisible(true);
+    }
+
+    //3 "Create Calendar"
+    private void s3(BufferedReader br, PrintWriter pw) throws IOException {
+        JPanel panel = new JPanel();
+        //creation of calendar portion
+        JTextField storeName = new JTextField("Example Store", 10);
+        JTextField calendarName = new JTextField("Example Calendar", 10);
+        JTextField calendarDescription = new JTextField("Example Description", 20);
+        JTextField result = new JTextField();
+        result.setVisible(false);
+        JButton create = new JButton("Create");
+        ActionListener actionListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String command = String.format("s2,%s,%s,%s",storeName.getText(),calendarName.getText(),
+                        calendarDescription.getText());
+                pw.write(command);
+                pw.flush();
+            }
+        };
+        create.addActionListener(actionListener);
+        panel.add(storeName);
+        panel.add(create);
+        panel.add(result);
+        //creation of windows section
+        JTextArea appointments = new JTextArea("start,end,maxCapacity\nstart,end,maxCapacity\n...",
+                3, 20);
+        appointments.setVisible(false);
+        panel.add(appointments);
+
+        int response = br.read();
+        if (response == 0) {
+            result.setText("Unable to create calendar.");
+        } else {
+            result.setText("Creation successful!");
+            appointments.setVisible(true);
+        }
+        create.removeActionListener(actionListener);
+        actionListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String command = appointments.getText();
+                command = command.strip();
+                command = command.replace("\n",",");
+                String[] check = command.split(",");
+                boolean vFormat = true;
+                for (int i = 0; i < check.length; i++) {
+                    switch (i % 3) {
+                        case 1:
+                            if (Integer.parseInt(check[i]) < Integer.parseInt(check[i - 1])) {
+                                vFormat = false;
+                            }
+                        case 0:
+                            if (check[i].length() != 4) {
+                                vFormat = false;
+                            }
+                    }
+                }
+                if (command.replace(",","").matches("\\d+")
+                        && check.length % 3 == 0 && vFormat) {
+                    pw.write(command);
+                    pw.flush();
+                } else {
+                    result.setText("Invalid format.");
+                }
+            }
+        };
+        create.addActionListener(actionListener);
+        result.setVisible(true);
+    }
+
+    //4 "Edit Calendar"
+    //i need to check for reply of successful or not?
+    private void s4(BufferedReader br, PrintWriter pw) throws IOException {
+        pw.write("s4");
+        JPanel panel = new JPanel();
+        String[] options = { "Edit Name", "Edit Description", "Add Windows", "Delete Windows" };
+        JComboBox<String> edit = new JComboBox<String>(options);
+        JTextField result = new JTextField();
+        result.setVisible(false);
+        panel.add(result);
+        panel.add(edit);
+        switch (edit.getSelectedIndex()) {
+            case 0 -> {
+                panel = new JPanel();
+                JButton submit = new JButton("Edit");
+                panel.add(edit);
+                panel.add(result);
+                panel.add(submit);
+                JTextField oldName = new JTextField("Old Name");
+                JTextField newName = new JTextField("New Name");
+                panel.add(oldName);
+                panel.add(newName);
+                submit.addActionListener(e -> {
+                    if (oldName.getText().isEmpty() || newName.getText().isEmpty()) {
+                        result.setText("Invalid input.");
+                        result.setVisible(true);
+                    } else {
+                        String command = String.format("editName,%s,%s",oldName.getText(),newName.getText());
+                        pw.write(command);
+                        pw.flush();
+                    }
+                });
+            }
+            case 1 -> {
+                panel = new JPanel();
+                JButton submit = new JButton("Edit");
+                panel.add(edit);
+                panel.add(result);
+                panel.add(submit);
+                JTextField calendarName = new JTextField("Calendar Name");
+                JTextField calendarDescription = new JTextField("New Description");
+                panel.add(calendarName);
+                panel.add(calendarDescription);
+                submit.addActionListener(e -> {
+                    if (calendarName.getText().isEmpty() || calendarDescription.getText().isEmpty()) {
+                        result.setText("Invalid input.");
+                        result.setVisible(true);
+                    } else {
+                        String command = String.format("editDescription,%s,%s",calendarName.getText(),
+                                calendarDescription.getText());
+                        pw.write(command);
+                        pw.flush();
+                    }
+                });
+            }
+            case 2 -> {
+                panel = new JPanel();
+                JButton submit = new JButton("Add");
+                panel.add(edit);
+                panel.add(result);
+                panel.add(submit);
+                JTextField storeName = new JTextField("Calendar Name");
+                JTextField calendarName = new JTextField("New Description");
+                JTextField window = new JTextField("start,end,maxCapacity");
+                panel.add(storeName);
+                panel.add(calendarName);
+                panel.add(window);
+                submit.addActionListener(e -> {
+                    String[] check = window.getText().split(",");
+                    boolean vFormat = true;
+                    for (int i = 0; i < check.length; i++) {
+                        switch (i % 3) {
+                            case 1:
+                                if (Integer.parseInt(check[i]) < Integer.parseInt(check[i - 1])) {
+                                    vFormat = false;
+                                }
+                            case 0:
+                                if (check[i].length() != 4) {
+                                    vFormat = false;
+                                }
+                        }
+                    }
+                    if (storeName.getText().isEmpty() || calendarName.getText().isEmpty() ||
+                            window.getText().replace(",","").matches("\\d+")
+                                    && check.length == 3 && vFormat) {
+                        result.setText("Invalid input.");
+                        result.setVisible(true);
+                    } else {
+                        String command = String.format("addWindow,%s,%s,%s",storeName.getText(),
+                                calendarName.getText(),window.getText());
+                        pw.write(command);
+                        pw.flush();
+                    }
+                });
+            }
+            case 3 -> {
+                panel = new JPanel();
+                JButton submit = new JButton("Delete");
+                panel.add(edit);
+                panel.add(result);
+                panel.add(submit);
+                JTextField storeName = new JTextField("Store Name");
+                JTextField calendarName = new JTextField("Calendar Name");
+                JTextField window = new JTextField("start,end");
+                panel.add(storeName);
+                panel.add(calendarName);
+                panel.add(window);
+                submit.addActionListener(e -> {
+                    String[] check = window.getText().split(",");
+                    boolean vFormat = true;
+                    if (Integer.parseInt(check[1]) < Integer.parseInt(check[0])) {
+                        vFormat = false;
+                    }
+                    if (check[0].length() != 4 || check[1].length() != 4) {
+                        vFormat = false;
+                    }
+                    if (storeName.getText().isEmpty() || calendarName.getText().isEmpty() ||
+                            window.getText().replace(",","").matches("\\d+")
+                                    && vFormat) {
+                        result.setText("Invalid input.");
+                        result.setVisible(true);
+                    } else {
+                        String command = String.format("addWindow,%s,%s,%s",storeName.getText(),
+                                calendarName.getText(),window.getText());
+                        pw.write(command);
+                        pw.flush();
+                    }
+                });
+            }
+        }
+    }
+
+    //5 "Delete Calendar"
+    private void s5(BufferedReader br, PrintWriter pw) throws IOException {
+        JPanel panel = new JPanel();
+        JTextField storeName = new JTextField("Example Store", 10);
+        JTextField calendarName = new JTextField("Example Calendar", 10);
+        JTextField result = new JTextField();
+        result.setVisible(false);
+        JButton delete = new JButton("Delete");
+        delete.addActionListener(e -> {
+            String command = String.format("s5,%s,%s",storeName.getText(),calendarName.getText());
+            pw.write(command);
+            pw.flush();
+        });
+        panel.add(storeName);
+        panel.add(calendarName);
+        panel.add(delete);
+        panel.add(result);
+        int response = br.read();
+        if (response == 0) {
+            result.setText("Unable to delete calendar.");
+        } else {
+            result.setText("Deletion successful!");
+        }
+        result.setVisible(true);
+    }
+
+    //6 "Show Statistics"
+    //i'll fix this tmrw after clarification
+    private void s6() {
+
+    }
+
+    //7 "Import Calendar"
+    private void s7(BufferedReader br, PrintWriter pw) throws IOException {
+        JPanel panel = new JPanel();
+        JTextField storeName = new JTextField("Example Store", 10);
+        JTextField fileName = new JTextField("File Name", 10);
+        JTextField result = new JTextField();
+        result.setVisible(false);
+        JButton imp = new JButton("Import");
+        imp.addActionListener(e -> {
+            String command = String.format("s7,%s,%s",storeName.getText(),fileName.getText());
+            pw.write(command);
+            pw.flush();
+        });
+        panel.add(storeName);
+        panel.add(fileName);
+        panel.add(imp);
+        panel.add(result);
+        int response = br.read();
+        if (response == 0) {
+            result.setText("Unable to import calendar.");
+        } else {
+            result.setText("Import successful!");
+        }
+        result.setVisible(true);
     }
 
     public static int exit() {
         //send exit message here
         return JFrame.DISPOSE_ON_CLOSE;
     }
+
+
 }
