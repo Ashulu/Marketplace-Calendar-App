@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.*;
+
 public class Client extends JComponent implements Runnable {
 
 //    userInput
@@ -229,6 +229,7 @@ public class Client extends JComponent implements Runnable {
                                 //go to the customer panel
                             case 2:
                                 //go to the seller panel
+                                seller(reader,writer);
                             case 0:
                                 JOptionPane.showMessageDialog(frame.getContentPane(), "Password is wrong!");
                                 break;
@@ -256,11 +257,68 @@ public class Client extends JComponent implements Runnable {
             e.printStackTrace();
         }
     }
+    //Seller landing page
+    private void seller(BufferedReader br, PrintWriter pw) throws IOException {
+        String[] selOp = new String[] {
+                "View Approved Appointments", "Appointment Requests",
+                "Create Store", "Create Calendar",
+                "Edit Calendar", "Delete Calendar",
+                "Show Statistics", "Import Calendar",
+                "Logout", "Quit"
+        };
+        Panel panel = new Panel();
+        JComboBox<String> sellerOptions = new JComboBox<>(selOp);
+        switch (sellerOptions.getSelectedIndex()) {
+            case 0 -> {
+                s0(reader,writer);
+            }
+            case 1 -> {
+                s1(reader,writer);
+            }
+            case 2 -> {
+                s2(reader,writer);
+            }
+            case 3 -> {
+                s3(reader,writer);
+            }
+            case 4 -> {
+                s4(reader,writer);
+            }
+            case 5 -> {
+                s5(reader,writer);
+            }
+            case 6 -> {
+                s6(reader,writer);
+            }
+            case 7 -> {
+                s7(reader,writer);
+            }
+            //return to login
+            case 8 -> {
+                loginPage();
+            }
+            //quit
+            case 9 -> {
+                writer.write("QUIT");
+                writer.flush();
+            }
+        }
+    }
     //0 "View Approved Appointments"
     private void s0(BufferedReader br, PrintWriter pw) throws IOException {
         pw.write("s0");
         pw.flush();
-        Panel panel = new Panel();
+        JPanel panel = new JPanel();
+        back(br, pw, panel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                s0(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        panel.add(refresh);
         JTextArea appointments = new JTextArea("",3, 20);
         String approved = br.readLine();
         panel.add(appointments);
@@ -270,7 +328,17 @@ public class Client extends JComponent implements Runnable {
     private void s1(BufferedReader br, PrintWriter pw) throws IOException {
         pw.write("s1");
         pw.flush();
-        Panel panel = new Panel();
+        JPanel panel = new JPanel();
+        back(br, pw, panel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                s1(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        panel.add(refresh);
         //i forgot if we're sending strings or objects and if so, when/where for which method :(
         String[] requests = br.readLine().split(",");
         JComboBox<String> appointments = new JComboBox<String>(requests);
@@ -298,6 +366,16 @@ public class Client extends JComponent implements Runnable {
     //2 "Create Store"
     private void s2(BufferedReader br, PrintWriter pw) throws IOException {
         JPanel panel = new JPanel();
+        back(br, pw, panel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                s0(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        panel.add(refresh);
         JTextField storeName = new JTextField("Example Name", 10);
         JTextField result = new JTextField();
         result.setVisible(false);
@@ -322,6 +400,16 @@ public class Client extends JComponent implements Runnable {
     //3 "Create Calendar"
     private void s3(BufferedReader br, PrintWriter pw) throws IOException {
         JPanel panel = new JPanel();
+        back(br, pw, panel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                s3(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        panel.add(refresh);
         //creation of calendar portion
         JTextField storeName = new JTextField("Example Store", 10);
         JTextField calendarName = new JTextField("Example Calendar", 10);
@@ -394,6 +482,16 @@ public class Client extends JComponent implements Runnable {
     private void s4(BufferedReader br, PrintWriter pw) throws IOException {
         pw.write("s4");
         JPanel panel = new JPanel();
+        back(br, pw, panel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                s4(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        panel.add(refresh);
         String[] options = { "Edit Name", "Edit Description", "Add Windows", "Delete Windows" };
         JComboBox<String> edit = new JComboBox<String>(options);
         JTextField result = new JTextField();
@@ -524,6 +622,16 @@ public class Client extends JComponent implements Runnable {
     //5 "Delete Calendar"
     private void s5(BufferedReader br, PrintWriter pw) throws IOException {
         JPanel panel = new JPanel();
+        back(br, pw, panel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                s5(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        panel.add(refresh);
         JTextField storeName = new JTextField("Example Store", 10);
         JTextField calendarName = new JTextField("Example Calendar", 10);
         JTextField result = new JTextField();
@@ -549,13 +657,33 @@ public class Client extends JComponent implements Runnable {
 
     //6 "Show Statistics"
     //i'll fix this tmrw after clarification
-    private void s6() {
-
+    private void s6(BufferedReader br, PrintWriter pw) throws IOException {
+        JPanel panel = new JPanel();
+        back(br, pw, panel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                s6(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        panel.add(refresh);
     }
 
     //7 "Import Calendar"
     private void s7(BufferedReader br, PrintWriter pw) throws IOException {
         JPanel panel = new JPanel();
+        back(br, pw, panel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                s7(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        panel.add(refresh);
         JTextField storeName = new JTextField("Example Store", 10);
         JTextField fileName = new JTextField("File Name", 10);
         JTextField result = new JTextField();
@@ -578,7 +706,17 @@ public class Client extends JComponent implements Runnable {
         }
         result.setVisible(true);
     }
-
+    private void back(BufferedReader br, PrintWriter pw, JPanel panel) {
+        JButton back = new JButton("Back");
+        back.addActionListener(e -> {
+            try {
+                seller(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        panel.add(back);
+    }
     public static int exit() {
         //send exit message here
         return JFrame.DISPOSE_ON_CLOSE;
