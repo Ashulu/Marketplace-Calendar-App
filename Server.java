@@ -10,7 +10,7 @@ import java.net.Socket;
  *
  * This class provides the main method for our server, creating new thread for each socket accepted.
  *
- * @author Gunyoung Park, Ashish Chenna, Ian Lan, Sanjana Gadaginmath
+ * @author Gunyoung Park, Ashish Chenna, Ian Lam, Sanjana Gadaginmath
  *
  * @version
  */

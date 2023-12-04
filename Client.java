@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.*;
 public class Client extends JComponent implements Runnable {
+
 //    userInput
 //private JFrame frame;
 //    private JTextField username;
@@ -305,6 +306,7 @@ public class Client extends JComponent implements Runnable {
 
         frame.add(loginPanel, BorderLayout.CENTER);
 
+
         createAccount.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -360,6 +362,16 @@ public class Client extends JComponent implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private String[] s3(BufferedReader br, PrintWriter pw) {
+        try {
+            return br.readLine().split(",");
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 
     private static JPanel createCardPanel(String text) {
