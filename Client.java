@@ -105,8 +105,8 @@ public class Client extends JComponent implements Runnable {
     JButton createAccount;
     JPanel jPanel;
     JFrame frame;
-    static BufferedReader reader;
-    static PrintWriter writer;
+    static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+    static PrintWriter writer = new PrintWriter(new OutputStreamWriter(System.out));
 
 
     public void creationPanel() {
@@ -227,7 +227,6 @@ public class Client extends JComponent implements Runnable {
                                 //go to the customer panel
                             case 2:
                                 //go to the seller panel
-                                frame.removeAll();
                                 seller(reader,writer);
                             case 0:
                                 JOptionPane.showMessageDialog(frame.getContentPane(), "Password is wrong!");
@@ -236,6 +235,7 @@ public class Client extends JComponent implements Runnable {
                                 JOptionPane.showMessageDialog(frame.getContentPane(), "Account not made yet!");
                         }
                     } catch (IOException a) {
+                        System.out.println("This is the reason");
                         a.printStackTrace();
                     }
                 }
@@ -276,6 +276,7 @@ public class Client extends JComponent implements Runnable {
         frame.add(jPanel);
         JComboBox<String> sellerOptions = new JComboBox<>(selOp);
         jPanel.add(sellerOptions);
+        frame.pack();
         switch (sellerOptions.getSelectedIndex()) {
             case 0 -> {
                 frame.remove(jPanel);
@@ -324,8 +325,8 @@ public class Client extends JComponent implements Runnable {
     }
     //0 "View Approved Appointments"
     private void s0(BufferedReader br, PrintWriter pw) throws IOException {
-        pw.write("s0");
-        pw.flush();
+        //pw.write("s0");
+        //pw.flush();
         jPanel = new JPanel();
         frame.add(jPanel);
         back(br, pw, jPanel);
@@ -343,6 +344,7 @@ public class Client extends JComponent implements Runnable {
         String approved = br.readLine();
         jPanel.add(appointments);
         appointments.setText(approved);
+        frame.pack();
     }
     //1 "Appointment Requests"
     private void s1(BufferedReader br, PrintWriter pw) throws IOException {
@@ -383,6 +385,7 @@ public class Client extends JComponent implements Runnable {
         jPanel.add(appointments);
         jPanel.add(confirm);
         jPanel.add(delete);
+        frame.pack();
     }
 
     //2 "Create Store"
@@ -419,6 +422,7 @@ public class Client extends JComponent implements Runnable {
             result.setText("Creation successful!");
         }
         result.setVisible(true);
+        frame.pack();
     }
 
     //3 "Create Calendar"
@@ -501,6 +505,7 @@ public class Client extends JComponent implements Runnable {
         };
         create.addActionListener(actionListener);
         result.setVisible(true);
+        frame.pack();
     }
 
     //4 "Edit Calendar"
@@ -611,6 +616,7 @@ public class Client extends JComponent implements Runnable {
                         pw.flush();
                     }
                 });
+                frame.pack();
             }
             case 3 -> {
                 jPanel = new JPanel();
@@ -646,6 +652,7 @@ public class Client extends JComponent implements Runnable {
                         pw.flush();
                     }
                 });
+                frame.pack();
             }
         }
     }
@@ -686,6 +693,7 @@ public class Client extends JComponent implements Runnable {
             result.setText("Deletion successful!");
         }
         result.setVisible(true);
+        frame.pack();
     }
 
     //6 "Show Statistics"
@@ -704,6 +712,7 @@ public class Client extends JComponent implements Runnable {
             }
         });
         jPanel.add(refresh);
+        frame.pack();
     }
 
     //7 "Import Calendar"
@@ -742,6 +751,7 @@ public class Client extends JComponent implements Runnable {
             result.setText("Import successful!");
         }
         result.setVisible(true);
+        frame.pack();
     }
     private void back(BufferedReader br, PrintWriter pw, JPanel panel) {
         JButton back = new JButton("Back");
