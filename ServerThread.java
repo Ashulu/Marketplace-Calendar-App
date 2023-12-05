@@ -21,6 +21,7 @@ public class ServerThread extends Thread {
             e.printStackTrace();
             return;
         }
+        boolean isSeller = false;
 
         Connection connection = null;
         Statement statement = null;
@@ -31,87 +32,49 @@ public class ServerThread extends Thread {
             e.printStackTrace();
         }
 
-        String clientInput = null;
+        String clientAction = null;
 
         while (true) {
             try {
                 statement = connection.createStatement();
-                clientInput = reader.readLine();
+                clientAction = reader.readLine();
+                String[] inputList = clientAction.split(" ");
 
-                String[] inputList = clientInput.split(" ");
-                String command = inputList[0];
-                int execute = 0;
-//                execute = 1 if select, execute = 2 if update or insert, execute = 3 if delete, execute = 0 to quit
-                boolean isAppointment = clientInput.toLowerCase().contains("appointments");
-                switch (command) {
-                    case "SELECT":
-                        execute = 2;
+                switch (clientAction) {
+                    case "login":
                         break;
-                    case "UPDATE":
-                    case "INSERT":
-                        execute = 1;
+                    case "createAccount":
                         break;
-                    case "DELETE":
-                        execute = 3;
+                    case "viewCalendar":
                         break;
-                    case "QUIT":
-                    default:
+                    case "requestAppointment":
                         break;
-                }
-
-                switch (execute) {
-//                execute = 1 if select, execute = 2 if update or insert, execute = 3 if delete, execute = 0 to quit
-                    case 1:
-                        ResultSet result = null;
-                        if (isAppointment) {
-                            PreparedStatement preparedStatement = connection.prepareStatement(clientInput);
-                            preparedStatement.setString(1, "datetime(timestamp, 'unixepoch') as timestamp");
-                            result = preparedStatement.executeQuery();
-                        } else {
-                            result = statement.executeQuery(clientInput);
-                        }
-
-
-                        StringBuilder builder = new StringBuilder();
-                        int columnCount = result.getMetaData().getColumnCount();
-                        while (result.next()) {
-                            for (int i = 0; i < columnCount;) {
-                                builder.append(result.getString(i + 1));
-                                if (++i < columnCount) {
-                                    builder.append(",");
-                                }
-                            }
-                            builder.append("|");
-                        }
-                        builder.deleteCharAt(builder.length() - 1);
-                        String resultString = builder.toString();
-                        writer.write(resultString);
-                        writer.flush();
+                    case "cancelRequest":
                         break;
-
-                    case 2:
-                        int updateResult;
-                        if (isAppointment) {
-                            PreparedStatement preparedStatement = connection.prepareStatement(clientInput);
-                            preparedStatement.setString(1, "timestamp");
-                            preparedStatement.setString(2, "strftime('%s', now)");
-                            updateResult = preparedStatement.executeUpdate();
-                        } else {
-                            updateResult = statement.executeUpdate(clientInput);
-                        }
-                        writer.write(updateResult);
-//                            if updateResult = 1, update was successful
+                    case "viewApproved":
                         break;
-
-                    case 3:
-                        int deletions = statement.executeUpdate(clientInput);
-                        writer.write(deletions);
-//                        write how items were removed from db
+                    case "showStatisticsCustomer":
                         break;
-
-                    default:
-                        socket.close();
-                        return;
+                    case "showStatisticsCustomerOrderByTotal":
+                        break;
+                    case "showApproved":
+                        break;
+                    case "approveRequest":
+                        break;
+                    case "createStore":
+                        break;
+                    case "createCalendar":
+                        break;
+                    case "editCalendar":
+                        break;
+                    case "deleteCalendar":
+                        break;
+                    case "statisticsSeller":
+                        break;
+                    case "importCalendar":
+                        break;
+                    case "exportApprovedRequests":
+                        break;
                 }
 
             } catch (IOException e) {
@@ -119,7 +82,7 @@ public class ServerThread extends Thread {
                 System.out.println("Could not pass data to / receive data from client");
                 return;
             } catch (SQLException e) {
-                System.out.println("Error when executing statment. Statement was: " + clientInput);
+                System.out.println("Error when executing statement. Statement was: " + clientInput);
                 e.printStackTrace();
                 return;
             }
