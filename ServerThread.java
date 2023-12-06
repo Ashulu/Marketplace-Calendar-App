@@ -12,6 +12,7 @@ public class ServerThread extends Thread {
     }
 
     public void run() {
+        System.out.println("connected");
         BufferedReader reader = null;
         PrintWriter writer = null;
         try {
@@ -27,6 +28,7 @@ public class ServerThread extends Thread {
         Statement statement = null;
         try {
             connection = DriverManager.getConnection(DB_URL);
+            System.out.println("Connected to Database");
         } catch (SQLException e) {
             System.out.println("Error Connecting to Database");
             e.printStackTrace();
@@ -41,33 +43,11 @@ public class ServerThread extends Thread {
 
                 switch (clientAction) {
                     case "login":
-                        int returning = 0;
-                        String dbPassword = null;
-                        String dbType = null;
-
-                        String input = reader.readLine();
-                        String[] inputList = input.split(",");
-                        String query = String.format("SELECT password FROM accounts WHERE email == %s", inputList[0]);
-                        ResultSet result = statement.executeQuery(query);
-                        if (result.next()) {
-                            dbPassword = result.getString("password");
-                            if (dbPassword.equals(inputList[1])) {
-                                dbType = result.getString("type");
-                                if (dbType.equals("customer")) { // type customer
-                                    returning = 1;
-                                } else { // type seller
-                                    returning = 2;
-                                }
-                            } else { // password is incorrect
-                                returning = 0;
-                            }
-                        } else { //email does not exist
-                            returning = -1;
-                        }
-
-
-
-
+                        System.out.println("logging in");
+                        String returning = login(reader, statement);
+                        writer.write(returning);
+                        writer.println();
+                        writer.flush();
                         break;
                     case "createAccount":
                         break;
@@ -101,6 +81,10 @@ public class ServerThread extends Thread {
                         break;
                     case "exportApprovedRequests":
                         break;
+                    case "quit":
+                        System.out.println("closing");
+                        socket.close();
+                        return;
                 }
 
             } catch (IOException e) {
@@ -113,5 +97,33 @@ public class ServerThread extends Thread {
                 return;
             }
         }
+    }
+
+    public String login(BufferedReader reader, Statement statement) throws IOException, SQLException {
+        String returning = null;
+
+        String input = reader.readLine();
+        System.out.println("input: " + input);
+        String[] inputList = input.split(",");
+        System.out.println("inputList made");
+        String query = String.format("SELECT password FROM accounts WHERE email == '%s'", inputList[0]);
+        System.out.println("query: " + query);
+        ResultSet result = statement.executeQuery(query);
+        if (result.next()) {
+            String dbPassword = result.getString("password");
+            System.out.println(dbPassword);
+            if (dbPassword.equals(inputList[1])) {
+                String dbType = result.getString("type");
+                if (dbType.equals("customer")) { // type customer
+                    returning = "1";
+                } else { // type seller
+                    returning = "2";
+                }
+            }
+        } else { //email does not exist
+            returning = "-1";
+        }
+        System.out.println("returning: " + returning);
+        return returning;
     }
 }
