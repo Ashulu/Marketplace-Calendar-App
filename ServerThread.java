@@ -22,6 +22,7 @@ public class ServerThread extends Thread {
             e.printStackTrace();
             return;
         }
+        boolean isSeller = false;
 
         String clientEmail = null;
 
@@ -93,6 +94,7 @@ public class ServerThread extends Thread {
                         System.out.println("closing");
                         socket.close();
                         return;
+
                 }
 
             } catch (IOException e) {
