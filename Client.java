@@ -1,12 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
-import java.util.*;
+
 public class Client extends JComponent implements Runnable {
 
 //    userInput
@@ -106,9 +103,10 @@ public class Client extends JComponent implements Runnable {
     JPanel createPanel;
     JButton login;
     JButton createAccount;
+    JPanel jPanel;
     JFrame frame;
-    static BufferedReader reader;
-    static PrintWriter writer;
+    static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+    static PrintWriter writer = new PrintWriter(new OutputStreamWriter(System.out));
 
 
     public void creationPanel() {
@@ -229,6 +227,7 @@ public class Client extends JComponent implements Runnable {
                                 //go to the customer panel
                             case 2:
                                 //go to the seller panel
+                                seller(reader,writer);
                             case 0:
                                 JOptionPane.showMessageDialog(frame.getContentPane(), "Password is wrong!");
                                 break;
@@ -236,6 +235,7 @@ public class Client extends JComponent implements Runnable {
                                 JOptionPane.showMessageDialog(frame.getContentPane(), "Account not made yet!");
                         }
                     } catch (IOException a) {
+                        System.out.println("This is the reason");
                         a.printStackTrace();
                     }
                 }
@@ -244,7 +244,8 @@ public class Client extends JComponent implements Runnable {
     }
 
     public static void main(String[] args) {
-        String host = JOptionPane.showInputDialog(null, "Enter the IP you want to connect to:", "Calender System", JOptionPane.QUESTION_MESSAGE);
+        /*String host = JOptionPane.showInputDialog(null, "Enter the IP you want to connect to:", "Calender System",
+                JOptionPane.QUESTION_MESSAGE);
         try {
             Socket socket = new Socket(host,5555);
             JOptionPane.showMessageDialog(null, "Client connected");
@@ -255,22 +256,113 @@ public class Client extends JComponent implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        */
+        reader = new BufferedReader(new InputStreamReader(System.in));
+        writer = new PrintWriter(new OutputStreamWriter(System.out));
+
+        SwingUtilities.invokeLater(new Client());
+
+    }
+    //Seller landing page
+    private void seller(BufferedReader br, PrintWriter pw) throws IOException {
+        String[] selOp = new String[] {
+                "View Approved Appointments", "Appointment Requests",
+                "Create Store", "Create Calendar",
+                "Edit Calendar", "Delete Calendar",
+                "Show Statistics", "Import Calendar",
+                "Logout", "Quit"
+        };
+        jPanel = new JPanel();
+        frame.add(jPanel);
+        JComboBox<String> sellerOptions = new JComboBox<>(selOp);
+        jPanel.add(sellerOptions);
+        frame.pack();
+        switch (sellerOptions.getSelectedIndex()) {
+            case 0 -> {
+                frame.remove(jPanel);
+                s0(br,pw);
+            }
+            case 1 -> {
+                frame.remove(jPanel);
+                s1(br,pw);
+            }
+            case 2 -> {
+                frame.remove(jPanel);
+                s2(br,pw);
+            }
+            case 3 -> {
+                frame.remove(jPanel);
+                s3(br,pw);
+            }
+            case 4 -> {
+                frame.remove(jPanel);
+                s4(br,pw);
+            }
+            case 5 -> {
+                frame.remove(jPanel);
+                s5(br,pw);
+            }
+            case 6 -> {
+                frame.remove(jPanel);
+                s6(br,pw);
+            }
+            case 7 -> {
+                frame.remove(jPanel);
+                s7(br,pw);
+            }
+            //return to login
+            case 8 -> {
+                frame.remove(jPanel);
+                loginPage();
+            }
+            //quit
+            case 9 -> {
+                frame.remove(jPanel);
+                writer.write("QUIT");
+                writer.flush();
+            }
+        }
     }
     //0 "View Approved Appointments"
     private void s0(BufferedReader br, PrintWriter pw) throws IOException {
-        pw.write("s0");
-        pw.flush();
-        Panel panel = new Panel();
+        //pw.write("s0");
+        //pw.flush();
+        jPanel = new JPanel();
+        frame.add(jPanel);
+        back(br, pw, jPanel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                frame.remove(jPanel);
+                s0(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        jPanel.add(refresh);
         JTextArea appointments = new JTextArea("",3, 20);
         String approved = br.readLine();
-        panel.add(appointments);
+        jPanel.add(appointments);
         appointments.setText(approved);
+        frame.pack();
     }
     //1 "Appointment Requests"
     private void s1(BufferedReader br, PrintWriter pw) throws IOException {
         pw.write("s1");
         pw.flush();
-        Panel panel = new Panel();
+        jPanel = new JPanel();
+        frame.add(jPanel);
+        back(br, pw, jPanel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                frame.remove(jPanel);
+                s1(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        jPanel.add(refresh);
         //i forgot if we're sending strings or objects and if so, when/where for which method :(
         String[] requests = br.readLine().split(",");
         JComboBox<String> appointments = new JComboBox<String>(requests);
@@ -290,14 +382,27 @@ public class Client extends JComponent implements Runnable {
             pw.write(command);
             pw.flush();
         });
-        panel.add(appointments);
-        panel.add(confirm);
-        panel.add(delete);
+        jPanel.add(appointments);
+        jPanel.add(confirm);
+        jPanel.add(delete);
+        frame.pack();
     }
 
     //2 "Create Store"
     private void s2(BufferedReader br, PrintWriter pw) throws IOException {
-        JPanel panel = new JPanel();
+        jPanel = new JPanel();
+        frame.add(jPanel);
+        back(br, pw, jPanel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                frame.remove(jPanel);
+                s0(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        jPanel.add(refresh);
         JTextField storeName = new JTextField("Example Name", 10);
         JTextField result = new JTextField();
         result.setVisible(false);
@@ -307,9 +412,9 @@ public class Client extends JComponent implements Runnable {
             pw.write(command);
             pw.flush();
         });
-        panel.add(storeName);
-        panel.add(create);
-        panel.add(result);
+        jPanel.add(storeName);
+        jPanel.add(create);
+        jPanel.add(result);
         int response = br.read();
         if (response == 0) {
             result.setText("Unable to create store.");
@@ -317,11 +422,24 @@ public class Client extends JComponent implements Runnable {
             result.setText("Creation successful!");
         }
         result.setVisible(true);
+        frame.pack();
     }
 
     //3 "Create Calendar"
     private void s3(BufferedReader br, PrintWriter pw) throws IOException {
-        JPanel panel = new JPanel();
+        jPanel = new JPanel();
+        frame.add(jPanel);
+        back(br, pw, jPanel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                frame.remove(jPanel);
+                s3(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        jPanel.add(refresh);
         //creation of calendar portion
         JTextField storeName = new JTextField("Example Store", 10);
         JTextField calendarName = new JTextField("Example Calendar", 10);
@@ -339,14 +457,14 @@ public class Client extends JComponent implements Runnable {
             }
         };
         create.addActionListener(actionListener);
-        panel.add(storeName);
-        panel.add(create);
-        panel.add(result);
+        jPanel.add(storeName);
+        jPanel.add(create);
+        jPanel.add(result);
         //creation of windows section
         JTextArea appointments = new JTextArea("start,end,maxCapacity\nstart,end,maxCapacity\n...",
                 3, 20);
         appointments.setVisible(false);
-        panel.add(appointments);
+        jPanel.add(appointments);
 
         int response = br.read();
         if (response == 0) {
@@ -387,30 +505,43 @@ public class Client extends JComponent implements Runnable {
         };
         create.addActionListener(actionListener);
         result.setVisible(true);
+        frame.pack();
     }
 
     //4 "Edit Calendar"
     //i need to check for reply of successful or not?
     private void s4(BufferedReader br, PrintWriter pw) throws IOException {
         pw.write("s4");
-        JPanel panel = new JPanel();
+        jPanel = new JPanel();
+        frame.add(jPanel);
+        back(br, pw, jPanel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                frame.remove(jPanel);
+                s4(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        jPanel.add(refresh);
         String[] options = { "Edit Name", "Edit Description", "Add Windows", "Delete Windows" };
         JComboBox<String> edit = new JComboBox<String>(options);
         JTextField result = new JTextField();
         result.setVisible(false);
-        panel.add(result);
-        panel.add(edit);
+        jPanel.add(result);
+        jPanel.add(edit);
         switch (edit.getSelectedIndex()) {
             case 0 -> {
-                panel = new JPanel();
+                jPanel = new JPanel();
                 JButton submit = new JButton("Edit");
-                panel.add(edit);
-                panel.add(result);
-                panel.add(submit);
+                jPanel.add(edit);
+                jPanel.add(result);
+                jPanel.add(submit);
                 JTextField oldName = new JTextField("Old Name");
                 JTextField newName = new JTextField("New Name");
-                panel.add(oldName);
-                panel.add(newName);
+                jPanel.add(oldName);
+                jPanel.add(newName);
                 submit.addActionListener(e -> {
                     if (oldName.getText().isEmpty() || newName.getText().isEmpty()) {
                         result.setText("Invalid input.");
@@ -423,15 +554,16 @@ public class Client extends JComponent implements Runnable {
                 });
             }
             case 1 -> {
-                panel = new JPanel();
+                jPanel = new JPanel();
+                frame.add(jPanel);
                 JButton submit = new JButton("Edit");
-                panel.add(edit);
-                panel.add(result);
-                panel.add(submit);
+                jPanel.add(edit);
+                jPanel.add(result);
+                jPanel.add(submit);
                 JTextField calendarName = new JTextField("Calendar Name");
                 JTextField calendarDescription = new JTextField("New Description");
-                panel.add(calendarName);
-                panel.add(calendarDescription);
+                jPanel.add(calendarName);
+                jPanel.add(calendarDescription);
                 submit.addActionListener(e -> {
                     if (calendarName.getText().isEmpty() || calendarDescription.getText().isEmpty()) {
                         result.setText("Invalid input.");
@@ -445,17 +577,18 @@ public class Client extends JComponent implements Runnable {
                 });
             }
             case 2 -> {
-                panel = new JPanel();
+                jPanel = new JPanel();
+                frame.add(jPanel);
                 JButton submit = new JButton("Add");
-                panel.add(edit);
-                panel.add(result);
-                panel.add(submit);
+                jPanel.add(edit);
+                jPanel.add(result);
+                jPanel.add(submit);
                 JTextField storeName = new JTextField("Calendar Name");
                 JTextField calendarName = new JTextField("New Description");
                 JTextField window = new JTextField("start,end,maxCapacity");
-                panel.add(storeName);
-                panel.add(calendarName);
-                panel.add(window);
+                jPanel.add(storeName);
+                jPanel.add(calendarName);
+                jPanel.add(window);
                 submit.addActionListener(e -> {
                     String[] check = window.getText().split(",");
                     boolean vFormat = true;
@@ -483,19 +616,21 @@ public class Client extends JComponent implements Runnable {
                         pw.flush();
                     }
                 });
+                frame.pack();
             }
             case 3 -> {
-                panel = new JPanel();
+                jPanel = new JPanel();
+                frame.add(jPanel);
                 JButton submit = new JButton("Delete");
-                panel.add(edit);
-                panel.add(result);
-                panel.add(submit);
+                jPanel.add(edit);
+                jPanel.add(result);
+                jPanel.add(submit);
                 JTextField storeName = new JTextField("Store Name");
                 JTextField calendarName = new JTextField("Calendar Name");
                 JTextField window = new JTextField("start,end");
-                panel.add(storeName);
-                panel.add(calendarName);
-                panel.add(window);
+                jPanel.add(storeName);
+                jPanel.add(calendarName);
+                jPanel.add(window);
                 submit.addActionListener(e -> {
                     String[] check = window.getText().split(",");
                     boolean vFormat = true;
@@ -517,13 +652,26 @@ public class Client extends JComponent implements Runnable {
                         pw.flush();
                     }
                 });
+                frame.pack();
             }
         }
     }
 
     //5 "Delete Calendar"
     private void s5(BufferedReader br, PrintWriter pw) throws IOException {
-        JPanel panel = new JPanel();
+        jPanel = new JPanel();
+        frame.add(jPanel);
+        back(br, pw, jPanel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                frame.remove(jPanel);
+                s5(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        jPanel.add(refresh);
         JTextField storeName = new JTextField("Example Store", 10);
         JTextField calendarName = new JTextField("Example Calendar", 10);
         JTextField result = new JTextField();
@@ -534,10 +682,10 @@ public class Client extends JComponent implements Runnable {
             pw.write(command);
             pw.flush();
         });
-        panel.add(storeName);
-        panel.add(calendarName);
-        panel.add(delete);
-        panel.add(result);
+        jPanel.add(storeName);
+        jPanel.add(calendarName);
+        jPanel.add(delete);
+        jPanel.add(result);
         int response = br.read();
         if (response == 0) {
             result.setText("Unable to delete calendar.");
@@ -545,17 +693,43 @@ public class Client extends JComponent implements Runnable {
             result.setText("Deletion successful!");
         }
         result.setVisible(true);
+        frame.pack();
     }
 
     //6 "Show Statistics"
     //i'll fix this tmrw after clarification
-    private void s6() {
-
+    private void s6(BufferedReader br, PrintWriter pw) throws IOException {
+        jPanel = new JPanel();
+        frame.add(jPanel);
+        back(br, pw, jPanel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                frame.remove(jPanel);
+                s6(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        jPanel.add(refresh);
+        frame.pack();
     }
 
     //7 "Import Calendar"
     private void s7(BufferedReader br, PrintWriter pw) throws IOException {
-        JPanel panel = new JPanel();
+        jPanel = new JPanel();
+        frame.add(jPanel);
+        back(br, pw, jPanel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                frame.remove(jPanel);
+                s7(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        jPanel.add(refresh);
         JTextField storeName = new JTextField("Example Store", 10);
         JTextField fileName = new JTextField("File Name", 10);
         JTextField result = new JTextField();
@@ -566,10 +740,10 @@ public class Client extends JComponent implements Runnable {
             pw.write(command);
             pw.flush();
         });
-        panel.add(storeName);
-        panel.add(fileName);
-        panel.add(imp);
-        panel.add(result);
+        jPanel.add(storeName);
+        jPanel.add(fileName);
+        jPanel.add(imp);
+        jPanel.add(result);
         int response = br.read();
         if (response == 0) {
             result.setText("Unable to import calendar.");
@@ -577,8 +751,19 @@ public class Client extends JComponent implements Runnable {
             result.setText("Import successful!");
         }
         result.setVisible(true);
+        frame.pack();
     }
-
+    private void back(BufferedReader br, PrintWriter pw, JPanel panel) {
+        JButton back = new JButton("Back");
+        back.addActionListener(e -> {
+            try {
+                seller(br,pw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        panel.add(back);
+    }
     public static int exit() {
         //send exit message here
         return JFrame.DISPOSE_ON_CLOSE;
