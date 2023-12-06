@@ -22,7 +22,8 @@ public class ServerThread extends Thread {
             e.printStackTrace();
             return;
         }
-        boolean isSeller = false;
+
+        String clientEmail = null;
 
         Connection connection = null;
         Statement statement = null;
@@ -44,7 +45,14 @@ public class ServerThread extends Thread {
                 switch (clientAction) {
                     case "login":
                         System.out.println("logging in");
-                        String returning = login(reader, statement);
+                        String input = reader.readLine();
+                        System.out.println("input: " + input);
+                        String[] inputList = input.split(",");
+                        System.out.println("inputList made");
+                        String returning = login(statement, inputList[0], inputList[1]);
+                        if ((returning.equals("1")) || (returning.equals("2"))) {
+                            clientEmail = inputList[0];
+                        }
                         writer.write(returning);
                         writer.println();
                         writer.flush();
@@ -99,26 +107,24 @@ public class ServerThread extends Thread {
         }
     }
 
-    public String login(BufferedReader reader, Statement statement) throws IOException, SQLException {
-        String returning = null;
+    public String login(Statement statement, String email, String password) throws IOException, SQLException {
+        String returning;
 
-        String input = reader.readLine();
-        System.out.println("input: " + input);
-        String[] inputList = input.split(",");
-        System.out.println("inputList made");
-        String query = String.format("SELECT password FROM accounts WHERE email == '%s'", inputList[0]);
+        String query = String.format("SELECT type, password FROM accounts WHERE email == '%s'", email);
         System.out.println("query: " + query);
         ResultSet result = statement.executeQuery(query);
         if (result.next()) {
             String dbPassword = result.getString("password");
-            System.out.println(dbPassword);
-            if (dbPassword.equals(inputList[1])) {
+            System.out.println("dbPassword: " + dbPassword);
+            if (dbPassword.equals(password)) {
                 String dbType = result.getString("type");
                 if (dbType.equals("customer")) { // type customer
                     returning = "1";
                 } else { // type seller
                     returning = "2";
                 }
+            } else { //password did not match
+                returning = "0";
             }
         } else { //email does not exist
             returning = "-1";
