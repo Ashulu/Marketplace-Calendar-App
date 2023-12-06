@@ -41,7 +41,7 @@ We used SQL to create our own .db file. Below are the tables and their respectiv
   
 *Note that startTime and endTime are stored as strings of length 4, to represent military time. timeStamp is stored as a string by using strftime() method in SQL*
 
-##ActionLists
+## ActionLists
 
 **login**
 

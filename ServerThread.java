@@ -12,6 +12,7 @@ public class ServerThread extends Thread {
     }
 
     public void run() {
+        System.out.println("connected");
         BufferedReader reader = null;
         PrintWriter writer = null;
         try {
@@ -21,97 +22,79 @@ public class ServerThread extends Thread {
             e.printStackTrace();
             return;
         }
+        boolean isSeller = false;
+
+        String clientEmail = null;
 
         Connection connection = null;
         Statement statement = null;
         try {
             connection = DriverManager.getConnection(DB_URL);
+            System.out.println("Connected to Database");
         } catch (SQLException e) {
             System.out.println("Error Connecting to Database");
             e.printStackTrace();
         }
 
-        String clientInput = null;
+        String clientAction = null;
 
         while (true) {
             try {
                 statement = connection.createStatement();
-                clientInput = reader.readLine();
+                clientAction = reader.readLine();
 
-                String[] inputList = clientInput.split(" ");
-                String command = inputList[0];
-                int execute = 0;
-//                execute = 1 if select, execute = 2 if update or insert, execute = 3 if delete, execute = 0 to quit
-                boolean isAppointment = clientInput.toLowerCase().contains("appointments");
-                switch (command) {
-                    case "SELECT":
-                        execute = 2;
-                        break;
-                    case "UPDATE":
-                    case "INSERT":
-                        execute = 1;
-                        break;
-                    case "DELETE":
-                        execute = 3;
-                        break;
-                    case "QUIT":
-                    default:
-                        break;
-                }
-
-                switch (execute) {
-//                execute = 1 if select, execute = 2 if update or insert, execute = 3 if delete, execute = 0 to quit
-                    case 1:
-                        ResultSet result = null;
-                        if (isAppointment) {
-                            PreparedStatement preparedStatement = connection.prepareStatement(clientInput);
-                            preparedStatement.setString(1, "datetime(timestamp, 'unixepoch') as timestamp");
-                            result = preparedStatement.executeQuery();
-                        } else {
-                            result = statement.executeQuery(clientInput);
+                switch (clientAction) {
+                    case "login":
+                        System.out.println("logging in");
+                        String input = reader.readLine();
+                        System.out.println("input: " + input);
+                        String[] inputList = input.split(",");
+                        System.out.println("inputList made");
+                        String returning = login(statement, inputList[0], inputList[1]);
+                        if ((returning.equals("1")) || (returning.equals("2"))) {
+                            clientEmail = inputList[0];
                         }
-
-
-                        StringBuilder builder = new StringBuilder();
-                        int columnCount = result.getMetaData().getColumnCount();
-                        while (result.next()) {
-                            for (int i = 0; i < columnCount;) {
-                                builder.append(result.getString(i + 1));
-                                if (++i < columnCount) {
-                                    builder.append(",");
-                                }
-                            }
-                            builder.append("|");
-                        }
-                        builder.deleteCharAt(builder.length() - 1);
-                        String resultString = builder.toString();
-                        writer.write(resultString);
+                        writer.write(returning);
+                        writer.println();
                         writer.flush();
                         break;
-
-                    case 2:
-                        int updateResult;
-                        if (isAppointment) {
-                            PreparedStatement preparedStatement = connection.prepareStatement(clientInput);
-                            preparedStatement.setString(1, "timestamp");
-                            preparedStatement.setString(2, "strftime('%s', now)");
-                            updateResult = preparedStatement.executeUpdate();
-                        } else {
-                            updateResult = statement.executeUpdate(clientInput);
-                        }
-                        writer.write(updateResult);
-//                            if updateResult = 1, update was successful
+                    case "createAccount":
                         break;
-
-                    case 3:
-                        int deletions = statement.executeUpdate(clientInput);
-                        writer.write(deletions);
-//                        write how items were removed from db
+                    case "viewCalendar":
                         break;
-
-                    default:
+                    case "requestAppointment":
+                        break;
+                    case "cancelRequest":
+                        break;
+                    case "viewApproved":
+                        break;
+                    case "showStatisticsCustomer":
+                        break;
+                    case "showStatisticsCustomerOrderByTotal":
+                        break;
+                    case "showApproved":
+                        break;
+                    case "approveRequest":
+                        break;
+                    case "createStore":
+                        break;
+                    case "createCalendar":
+                        break;
+                    case "editCalendar":
+                        break;
+                    case "deleteCalendar":
+                        break;
+                    case "statisticsSeller":
+                        break;
+                    case "importCalendar":
+                        break;
+                    case "exportApprovedRequests":
+                        break;
+                    case "quit":
+                        System.out.println("closing");
                         socket.close();
                         return;
+
                 }
 
             } catch (IOException e) {
@@ -119,10 +102,36 @@ public class ServerThread extends Thread {
                 System.out.println("Could not pass data to / receive data from client");
                 return;
             } catch (SQLException e) {
-                System.out.println("Error when executing statment. Statement was: " + clientInput);
+                System.out.println("Error when executing statement. Statement was: " + clientAction);
                 e.printStackTrace();
                 return;
             }
         }
+    }
+
+    public String login(Statement statement, String email, String password) throws IOException, SQLException {
+        String returning;
+
+        String query = String.format("SELECT type, password FROM accounts WHERE email == '%s'", email);
+        System.out.println("query: " + query);
+        ResultSet result = statement.executeQuery(query);
+        if (result.next()) {
+            String dbPassword = result.getString("password");
+            System.out.println("dbPassword: " + dbPassword);
+            if (dbPassword.equals(password)) {
+                String dbType = result.getString("type");
+                if (dbType.equals("customer")) { // type customer
+                    returning = "1";
+                } else { // type seller
+                    returning = "2";
+                }
+            } else { //password did not match
+                returning = "0";
+            }
+        } else { //email does not exist
+            returning = "-1";
+        }
+        System.out.println("returning: " + returning);
+        return returning;
     }
 }
