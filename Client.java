@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
+import java.nio.Buffer;
 
 public class Client extends JComponent implements Runnable {
 
@@ -101,12 +102,16 @@ public class Client extends JComponent implements Runnable {
 
     JPanel loginPanel;
     JPanel createPanel;
+    JPanel sellerMain;
+    JPanel sellerSub;
+    JPanel customerMain;
+    JPanel customerSub;
     JButton login;
     JButton createAccount;
     JPanel jPanel;
     JFrame frame;
-    static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-    static PrintWriter writer = new PrintWriter(new OutputStreamWriter(System.out));
+    BufferedReader reader;
+    PrintWriter writer;
 
 
     public void creationPanel() {
@@ -218,21 +223,34 @@ public class Client extends JComponent implements Runnable {
                     JOptionPane.showMessageDialog(frame.getContentPane(), "Invalid inputs");
                 } else {
                     try {
-                        writer.println("login," + userField.getText() + "," + passField);
-                        writer.flush();
-
-                        int check = Integer.parseInt(reader.readLine());
+//                        writer.println("login," + userField.getText() + "," + passField);
+//                        writer.flush();
+//
+//                        int check = Integer.parseInt(reader.readLine());
+                        int check = 1;
                         switch (check){
-                            case 1:
+                            case 1 -> {
                                 //go to the customer panel
-                            case 2:
+                                customerMain = new JPanel();
+                                customerMain.setBounds(0, 0, 30, frame.getHeight());
+                                customerMain.setLayout(new BoxLayout(customerMain, BoxLayout.Y_AXIS));
+                                customer(reader, writer);
+                                frame.remove(loginPanel);
+                                frame.add(customerMain);
+                                frame.pack();
+                            }
+                            case 2 -> {
                                 //go to the seller panel
-                                seller(reader,writer);
-                            case 0:
-                                JOptionPane.showMessageDialog(frame.getContentPane(), "Password is wrong!");
-                                break;
-                            case -1:
-                                JOptionPane.showMessageDialog(frame.getContentPane(), "Account not made yet!");
+                                sellerMain = new JPanel();
+                                sellerMain.setBounds(0, 0, 30, frame.getHeight());
+                                sellerMain.setLayout(new BoxLayout(sellerMain, BoxLayout.Y_AXIS));
+                                seller(reader, writer);
+                                frame.remove(loginPanel);
+                                frame.add(sellerMain, BorderLayout.CENTER);
+                                frame.pack();
+                            }
+                            case 0 -> JOptionPane.showMessageDialog(frame.getContentPane(), "Password is wrong!");
+                            case -1 -> JOptionPane.showMessageDialog(frame.getContentPane(), "Account not made yet!");
                         }
                     } catch (IOException a) {
                         System.out.println("This is the reason");
@@ -257,14 +275,89 @@ public class Client extends JComponent implements Runnable {
             e.printStackTrace();
         }
         */
-        reader = new BufferedReader(new InputStreamReader(System.in));
-        writer = new PrintWriter(new OutputStreamWriter(System.out));
+//        reader = new BufferedReader(new InputStreamReader(System.in));
+//        writer = new PrintWriter(new OutputStreamWriter(System.out));
 
         SwingUtilities.invokeLater(new Client());
 
     }
+
+    // ------------------------
+    // START OF CUSTOMER GUI
+    // ------------------------
+
+    private void customer(BufferedReader br, PrintWriter pw) throws IOException {
+        JLabel welcome = new JLabel("Welcome Customer! \nPlease Select what you would like to do:");
+        customerMain.add(welcome);
+
+        String[] customerOp = new String[]{
+                "Request an appointment",
+                "Cancel and appointment",
+                "View your approved appointments",
+                "Show store statistics",
+                "Logout",
+                "Quit"
+        };
+
+        JComboBox<String> customerOptions = new JComboBox<>(customerOp);
+        customerMain.add(customerOptions);
+
+        JButton choice = new JButton("Select");
+        customerMain.add(choice);
+
+        choice.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    customerSub = new JPanel();
+                    customerSub.setBounds(0, 0, 30, frame.getHeight());
+                    customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
+                    switch (customerOptions.getSelectedIndex()){
+                        case 0 -> {
+                            //c0
+                        }
+                        case 1 -> {
+                            //c1
+                        }
+                        case 2 -> {
+                            //c2
+                        }
+                        case 3 -> {
+                            //c3
+                        }
+                        case 4 -> {
+                            frame.remove(customerMain);
+                            frame.add(loginPanel);
+                            frame.pack();
+                            return;
+                        }
+                        case 5 -> {
+                            frame.remove(customerMain);
+                            writer.write("QUIT");
+                            writer.flush();
+                        }
+                    }
+                    frame.remove(customerMain);
+                    frame.add(customerSub);
+                    frame.pack();
+                } catch (Exception a) {
+                    a.printStackTrace();
+                }
+            }
+        });
+    }
+
+
+
+    // -------------------
+    // START OF SELLER GUI
+    // -------------------
+
     //Seller landing page
     private void seller(BufferedReader br, PrintWriter pw) throws IOException {
+        JLabel welcome = new JLabel("Hello Seller! \nPlease Select what you would like to do");
+        sellerMain.add(welcome);
+
         String[] selOp = new String[] {
                 "View Approved Appointments", "Appointment Requests",
                 "Create Store", "Create Calendar",
@@ -272,127 +365,161 @@ public class Client extends JComponent implements Runnable {
                 "Show Statistics", "Import Calendar",
                 "Logout", "Quit"
         };
-        jPanel = new JPanel();
-        frame.add(jPanel);
+//        frame.add(jPanel);
         JComboBox<String> sellerOptions = new JComboBox<>(selOp);
-        jPanel.add(sellerOptions);
-        frame.pack();
-        switch (sellerOptions.getSelectedIndex()) {
-            case 0 -> {
-                frame.remove(jPanel);
-                s0(br,pw);
+        sellerMain.add(sellerOptions);
+
+        JButton choice = new JButton("Select");
+        sellerMain.add(choice);
+
+        choice.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    sellerSub = new JPanel();
+                    sellerSub.setBounds(0, 0, 30, frame.getHeight());
+                    sellerSub.setLayout(new BoxLayout(sellerSub, BoxLayout.Y_AXIS));
+                    switch (sellerOptions.getSelectedIndex()) {
+                        case 0 -> {
+
+                            s0(br, pw);
+
+                        }
+                        case 1 -> {
+
+                            s1(br,pw);
+                        }
+                        case 2 -> {
+
+                            s2(br,pw);
+
+                        }
+                        case 3 -> {
+
+                            s3(br,pw);
+
+                        }
+                        case 4 -> {
+
+                            s4(br,pw);
+
+                        }
+                        case 5 -> {
+
+                            s5(br,pw);
+
+                        }
+                        case 6 -> {
+
+                            s6(br,pw);
+
+                        }
+                        case 7 -> {
+
+                            s7(br,pw);
+
+                        }
+                        //return to login
+                        case 8 -> {
+                            frame.remove(sellerMain);
+                            frame.add(loginPanel);
+                            frame.pack();
+                            return;
+                        }
+                        //quit
+                        case 9 -> {
+                            frame.remove(jPanel);
+                            writer.write("QUIT");
+                            writer.flush();
+                        }
+                    }
+                    frame.remove(sellerMain);
+                    frame.add(sellerSub, BorderLayout.CENTER);
+                    frame.pack();
+                } catch(Exception a) {
+                    a.printStackTrace();
+                }
             }
-            case 1 -> {
-                frame.remove(jPanel);
-                s1(br,pw);
-            }
-            case 2 -> {
-                frame.remove(jPanel);
-                s2(br,pw);
-            }
-            case 3 -> {
-                frame.remove(jPanel);
-                s3(br,pw);
-            }
-            case 4 -> {
-                frame.remove(jPanel);
-                s4(br,pw);
-            }
-            case 5 -> {
-                frame.remove(jPanel);
-                s5(br,pw);
-            }
-            case 6 -> {
-                frame.remove(jPanel);
-                s6(br,pw);
-            }
-            case 7 -> {
-                frame.remove(jPanel);
-                s7(br,pw);
-            }
-            //return to login
-            case 8 -> {
-                frame.remove(jPanel);
-                loginPage();
-            }
-            //quit
-            case 9 -> {
-                frame.remove(jPanel);
-                writer.write("QUIT");
-                writer.flush();
-            }
-        }
+        });
     }
     //0 "View Approved Appointments"
     private void s0(BufferedReader br, PrintWriter pw) throws IOException {
         //pw.write("s0");
         //pw.flush();
-        jPanel = new JPanel();
-        frame.add(jPanel);
-        back(br, pw, jPanel);
+        sellerBack(sellerSub);
+
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
-                frame.remove(jPanel);
+                frame.remove(sellerSub);
+                sellerSub = new JPanel();
+                sellerSub.setLayout(new BoxLayout(sellerSub, BoxLayout.Y_AXIS));
                 s0(br,pw);
+                frame.add(sellerSub, BorderLayout.CENTER);
+                frame.pack();
+
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
         });
-        jPanel.add(refresh);
+        sellerSub.add(refresh);
         JTextArea appointments = new JTextArea("",3, 20);
-        String approved = br.readLine();
-        jPanel.add(appointments);
+
+//        String approved = br.readLine();
+        String approved = "approved";
+        sellerSub.add(appointments);
         appointments.setText(approved);
-        frame.pack();
     }
     //1 "Appointment Requests"
     private void s1(BufferedReader br, PrintWriter pw) throws IOException {
-        pw.write("s1");
-        pw.flush();
-        jPanel = new JPanel();
-        frame.add(jPanel);
-        back(br, pw, jPanel);
+//        pw.write("s1");
+//        pw.flush();
+
+        sellerBack(sellerSub);
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
-                frame.remove(jPanel);
+                frame.remove(sellerSub);
+                sellerSub = new JPanel();
+                sellerSub.setLayout(new BoxLayout(sellerSub, BoxLayout.Y_AXIS));
                 s1(br,pw);
+                frame.add(sellerSub, BorderLayout.CENTER);
+                frame.pack();
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
         });
-        jPanel.add(refresh);
+        sellerSub.add(refresh);
         //i forgot if we're sending strings or objects and if so, when/where for which method :(
-        String[] requests = br.readLine().split(",");
-        JComboBox<String> appointments = new JComboBox<String>(requests);
+//        String[] requests = br.readLine().split(",");
+//        JComboBox<String> appointments = new JComboBox<String>(requests);
         JButton confirm = new JButton("Confirm");
         //error handling for appointment confirm/delete bouncing not implemented
         //because I want to delete things from the array and refresh the
         //dropdown as we go along but i could end up deleting something that
         //didn't actually get processed
         confirm.addActionListener(e -> {
-            String command = String.format("confirm,%s",(String)appointments.getSelectedItem());
-            pw.write(command);
-            pw.flush();
+//            String command = String.format("confirm,%s",(String)appointments.getSelectedItem());
+//            pw.write(command);
+//            pw.flush();
         });
         JButton delete = new JButton("Delete");
         delete.addActionListener(e -> {
-            String command = String.format("delete,%s",(String)appointments.getSelectedItem());
-            pw.write(command);
-            pw.flush();
+//            String command = String.format("delete,%s",(String)appointments.getSelectedItem());
+//            pw.write(command);
+//            pw.flush();
         });
-        jPanel.add(appointments);
-        jPanel.add(confirm);
-        jPanel.add(delete);
-        frame.pack();
+//        sellerSub.add(appointments);
+        sellerSub.add(confirm);
+        sellerSub.add(delete);
+
     }
 
     //2 "Create Store"
     private void s2(BufferedReader br, PrintWriter pw) throws IOException {
         jPanel = new JPanel();
         frame.add(jPanel);
-        back(br, pw, jPanel);
+        sellerBack(jPanel);
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
@@ -429,7 +556,7 @@ public class Client extends JComponent implements Runnable {
     private void s3(BufferedReader br, PrintWriter pw) throws IOException {
         jPanel = new JPanel();
         frame.add(jPanel);
-        back(br, pw, jPanel);
+        sellerBack(jPanel);
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
@@ -514,7 +641,7 @@ public class Client extends JComponent implements Runnable {
         pw.write("s4");
         jPanel = new JPanel();
         frame.add(jPanel);
-        back(br, pw, jPanel);
+        sellerBack(jPanel);
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
@@ -661,7 +788,7 @@ public class Client extends JComponent implements Runnable {
     private void s5(BufferedReader br, PrintWriter pw) throws IOException {
         jPanel = new JPanel();
         frame.add(jPanel);
-        back(br, pw, jPanel);
+        sellerBack(jPanel);
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
@@ -701,7 +828,7 @@ public class Client extends JComponent implements Runnable {
     private void s6(BufferedReader br, PrintWriter pw) throws IOException {
         jPanel = new JPanel();
         frame.add(jPanel);
-        back(br, pw, jPanel);
+        sellerBack(jPanel);
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
@@ -719,7 +846,7 @@ public class Client extends JComponent implements Runnable {
     private void s7(BufferedReader br, PrintWriter pw) throws IOException {
         jPanel = new JPanel();
         frame.add(jPanel);
-        back(br, pw, jPanel);
+        sellerBack(jPanel);
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
@@ -753,16 +880,26 @@ public class Client extends JComponent implements Runnable {
         result.setVisible(true);
         frame.pack();
     }
-    private void back(BufferedReader br, PrintWriter pw, JPanel panel) {
+    private void sellerBack(JPanel panel) {
         JButton back = new JButton("Back");
         back.addActionListener(e -> {
-            try {
-                seller(br,pw);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            frame.remove(panel);
+            frame.add(sellerMain, BorderLayout.CENTER);
+            frame.pack();
         });
         panel.add(back);
+    }
+
+    private void customerBack(JPanel panel) {
+        JButton back = new JButton("Back");
+        back.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.remove(panel);
+                frame.add(customerMain, BorderLayout.CENTER);
+                frame.pack();
+            }
+        });
     }
     public static int exit() {
         //send exit message here
