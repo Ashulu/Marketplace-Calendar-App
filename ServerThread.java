@@ -73,8 +73,10 @@ public class ServerThread extends Thread {
                         writer.flush();
                         break;
                     case "showStatisticsCustomer":
+                        showStatisticsCustomer(statement, writer);
                         break;
                     case "showStatisticsCustomerOrderByTotal":
+                        showStatisticsCustomerOrderByTotal(statement, writer);
                         break;
                     case "showApproved":
                         break;
@@ -349,8 +351,7 @@ public class ServerThread extends Thread {
         return arraylistToString(approved);
     }
 
-    public void showStatisticsCustomer(Statement statement, PrintWriter writer) throws
-        SQLException{
+    public void showStatisticsCustomer(Statement statement, PrintWriter writer) throws SQLException{
         ArrayList<String[]> stores = new ArrayList<>();
         ResultSet storeQuery = statement.executeQuery("SELECT * FROM stores");
         while (storeQuery.next()) {
@@ -366,6 +367,36 @@ public class ServerThread extends Thread {
         ArrayList<String[]> stats = new ArrayList<>();
         ResultSet statsQuery = statement.executeQuery("SELECT storeName, startTime, endTime, SUM(currentBookings) " +
             "AS totalCustomers, MAX(currentBookings) AS windowCustomers FROM windows GROUP BY storeName");
+        while (statsQuery.next()) {
+            String[] statsArray = new String[5];
+            statsArray[0] = statsQuery.getString("storeName");
+            statsArray[1] = statsQuery.getString("startTime");
+            statsArray[2] = statsQuery.getString("endTime");
+            statsArray[3] = statsQuery.getString("totalCustomers");
+            statsArray[4] = statsQuery.getString("windowCustomers");
+            stats.add(statsArray);
+        }
+        writer.write(arraylistToString(stats));
+        writer.println();
+        writer.flush();
+    }
+
+    public void showStatisticsCustomerOrderByTotal(Statement statement, PrintWriter writer) throws SQLException {
+        ArrayList<String[]> stores = new ArrayList<>();
+        ResultSet storeQuery = statement.executeQuery("SELECT * FROM stores");
+        while (storeQuery.next()) {
+            String[] storeArray = new String[2];
+            storeArray[0] = storeQuery.getString("sellerEmail");
+            storeArray[1] = storeQuery.getString("storeName");
+            stores.add(storeArray);
+        }
+        writer.write(arraylistToString(stores));
+        writer.println();
+        writer.flush();
+
+        ArrayList<String[]> stats = new ArrayList<>();
+        ResultSet statsQuery = statement.executeQuery("SELECT storeName, startTime, endTime, SUM(currentBookings) " +
+            "AS totalCustomers, MAX(currentBookings) AS windowCustomers FROM windows GROUP BY storeName ORDER BY totalCustomers DESC");
         while (statsQuery.next()) {
             String[] statsArray = new String[5];
             statsArray[0] = statsQuery.getString("storeName");
