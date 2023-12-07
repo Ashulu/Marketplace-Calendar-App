@@ -349,6 +349,94 @@ public class Client extends JComponent implements Runnable {
     }
 
 
+    private void c0(BufferedReader br, PrintWriter pw) throws IOException {
+        pw.write("viewCalendars");
+        pw.flush();
+        customerBack(customerSub);
+
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                frame.remove(customerSub);
+                customerSub = new JPanel();
+                customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
+                c0(br,pw);
+                frame.add(customerSub, BorderLayout.CENTER);
+                frame.pack();
+
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        customerSub.add(refresh);
+
+        //get all store names from server and print out in dropdown to user
+        //once user selects, get all calendars from that specific store and print out
+        // user should be able to select based on a dropdown
+
+    }
+
+    private void c1(BufferedReader br, PrintWriter pw) throws IOException {
+        pw.write("requestAppointment");
+        pw.flush();
+        jPanel = new JPanel();
+        frame.add(jPanel);
+        customerBack(jPanel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                frame.remove(customerSub);
+                customerSub = new JPanel();
+                customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
+                c0(br,pw);
+                frame.add(customerSub, BorderLayout.CENTER);
+                frame.pack();
+
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        customerSub.add(refresh);
+
+        //creation of appointment
+        //TODO: make storeName, calendarName, and calendarDescription into dropdowns that the user can select
+        JTextField storeName = new JTextField("Example Store", 10);
+        JTextField calendarName = new JTextField("Example Calendar", 10);
+        JTextField calendarDescription = new JTextField("Example Calendar", 10);
+        JTextField startTime = new JTextField("Example Start Time", 10);
+        JTextField endTime = new JTextField("Example End Time", 20);
+        JTextField booking = new JTextField("Example Bookng", 20);
+
+        JTextField result = new JTextField();
+        result.setVisible(false);
+        JButton create = new JButton("Create");
+        ActionListener actionListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String command = String.format("c1,%s,%s,%s",storeName.getText(),calendarName.getText(),
+                        calendarDescription.getText(), startTime.getText(), endTime.getText(), booking.getText());
+                pw.write(command);
+                pw.flush();
+            }
+        };
+        create.addActionListener(actionListener);
+        jPanel.add(storeName);
+        jPanel.add(create);
+        jPanel.add(result);
+
+        int response = br.read();
+        if (response == 0) {
+            result.setText("Unable to create calendar.");
+        } else {
+            result.setText("Creation successful!");
+        }
+
+        result.setVisible(true);
+        frame.pack();
+
+
+    }
+
 
     // -------------------
     // START OF SELLER GUI
@@ -429,7 +517,7 @@ public class Client extends JComponent implements Runnable {
                         }
                         //quit
                         case 9 -> {
-                            frame.remove(jPanel);
+                            frame.remove(sellerMain);
                             writer.write("exit");
                             writer.flush();
                         }
@@ -445,8 +533,8 @@ public class Client extends JComponent implements Runnable {
     }
     //0 "View Approved Appointments"
     private void s0(BufferedReader br, PrintWriter pw) throws IOException {
-        pw.write("viewApproved");
-        pw.flush();
+//        pw.write("viewApproved");
+//        pw.flush();
         sellerBack(sellerSub);
 
         JButton refresh = new JButton("Refresh");
@@ -921,93 +1009,93 @@ public class Client extends JComponent implements Runnable {
     }
 
     // TODO: no choice for this in the customer options !! need to change
-    private void c0(BufferedReader br, PrintWriter pw) throws IOException {
-        pw.write("viewCalendars");
-        pw.flush();
-        customerBack(customerSub);
-
-        JButton refresh = new JButton("Refresh");
-        refresh.addActionListener(e -> {
-            try {
-                frame.remove(customerSub);
-                customerSub = new JPanel();
-                customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
-                c0(br,pw);
-                frame.add(customerSub, BorderLayout.CENTER);
-                frame.pack();
-
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        });
-        customerSub.add(refresh);
-
-        //get all store names from server and print out in dropdown to user
-        //once user selects, get all calendars from that specific store and print out
-        // user should be able to select based on a dropdown
-
-    }
-
-    private void c1(BufferedReader br, PrintWriter pw) throws IOException {
-        pw.write("requestAppointment");
-        pw.flush();
-        jPanel = new JPanel();
-        frame.add(jPanel);
-        customerBack(jPanel);
-        JButton refresh = new JButton("Refresh");
-        refresh.addActionListener(e -> {
-            try {
-                frame.remove(customerSub);
-                customerSub = new JPanel();
-                customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
-                c0(br,pw);
-                frame.add(customerSub, BorderLayout.CENTER);
-                frame.pack();
-
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        });
-        customerSub.add(refresh);
-
-        //creation of appointment
-        //TODO: make storeName, calendarName, and calendarDescription into dropdowns that the user can select
-        JTextField storeName = new JTextField("Example Store", 10);
-        JTextField calendarName = new JTextField("Example Calendar", 10);
-        JTextField calendarDescription = new JTextField("Example Calendar", 10);
-        JTextField startTime = new JTextField("Example Start Time", 10);
-        JTextField endTime = new JTextField("Example End Time", 20);
-        JTextField booking = new JTextField("Example Bookng", 20);
-
-        JTextField result = new JTextField();
-        result.setVisible(false);
-        JButton create = new JButton("Create");
-        ActionListener actionListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String command = String.format("c1,%s,%s,%s",storeName.getText(),calendarName.getText(),
-                        calendarDescription.getText(), startTime.getText(), endTime.getText(), booking.getText());
-                pw.write(command);
-                pw.flush();
-            }
-        };
-        create.addActionListener(actionListener);
-        jPanel.add(storeName);
-        jPanel.add(create);
-        jPanel.add(result);
-
-        int response = br.read();
-        if (response == 0) {
-            result.setText("Unable to create calendar.");
-        } else {
-            result.setText("Creation successful!");
-        }
-
-        result.setVisible(true);
-        frame.pack();
-
-
-    }
+//    private void c0(BufferedReader br, PrintWriter pw) throws IOException {
+//        pw.write("viewCalendars");
+//        pw.flush();
+//        customerBack(customerSub);
+//
+//        JButton refresh = new JButton("Refresh");
+//        refresh.addActionListener(e -> {
+//            try {
+//                frame.remove(customerSub);
+//                customerSub = new JPanel();
+//                customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
+//                c0(br,pw);
+//                frame.add(customerSub, BorderLayout.CENTER);
+//                frame.pack();
+//
+//            } catch (IOException ex) {
+//                ex.printStackTrace();
+//            }
+//        });
+//        customerSub.add(refresh);
+//
+//        //get all store names from server and print out in dropdown to user
+//        //once user selects, get all calendars from that specific store and print out
+//        // user should be able to select based on a dropdown
+//
+//    }
+//
+//    private void c1(BufferedReader br, PrintWriter pw) throws IOException {
+//        pw.write("requestAppointment");
+//        pw.flush();
+//        jPanel = new JPanel();
+//        frame.add(jPanel);
+//        customerBack(jPanel);
+//        JButton refresh = new JButton("Refresh");
+//        refresh.addActionListener(e -> {
+//            try {
+//                frame.remove(customerSub);
+//                customerSub = new JPanel();
+//                customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
+//                c0(br,pw);
+//                frame.add(customerSub, BorderLayout.CENTER);
+//                frame.pack();
+//
+//            } catch (IOException ex) {
+//                ex.printStackTrace();
+//            }
+//        });
+//        customerSub.add(refresh);
+//
+//        //creation of appointment
+//        //TODO: make storeName, calendarName, and calendarDescription into dropdowns that the user can select
+//        JTextField storeName = new JTextField("Example Store", 10);
+//        JTextField calendarName = new JTextField("Example Calendar", 10);
+//        JTextField calendarDescription = new JTextField("Example Calendar", 10);
+//        JTextField startTime = new JTextField("Example Start Time", 10);
+//        JTextField endTime = new JTextField("Example End Time", 20);
+//        JTextField booking = new JTextField("Example Bookng", 20);
+//
+//        JTextField result = new JTextField();
+//        result.setVisible(false);
+//        JButton create = new JButton("Create");
+//        ActionListener actionListener = new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                String command = String.format("c1,%s,%s,%s",storeName.getText(),calendarName.getText(),
+//                        calendarDescription.getText(), startTime.getText(), endTime.getText(), booking.getText());
+//                pw.write(command);
+//                pw.flush();
+//            }
+//        };
+//        create.addActionListener(actionListener);
+//        jPanel.add(storeName);
+//        jPanel.add(create);
+//        jPanel.add(result);
+//
+//        int response = br.read();
+//        if (response == 0) {
+//            result.setText("Unable to create calendar.");
+//        } else {
+//            result.setText("Creation successful!");
+//        }
+//
+//        result.setVisible(true);
+//        frame.pack();
+//
+//
+//    }
 
 
 
