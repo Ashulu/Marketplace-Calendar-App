@@ -293,14 +293,15 @@ public class ServerThread extends Thread {
     }
 
     public String arraylistToString(ArrayList<String[]> arrayList) {
+        if (arrayList.isEmpty()) {
+            return "";
+        }
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("[");
         for (int j = 0; j < arrayList.size(); j++) {
             stringBuilder.append(Arrays.toString(arrayList.get(j)));
             stringBuilder.append(",");
         }
         stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-        stringBuilder.append("]");
         return String.valueOf(stringBuilder);
     }
 
