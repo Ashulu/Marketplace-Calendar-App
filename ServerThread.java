@@ -61,6 +61,7 @@ public class ServerThread extends Thread {
                         viewCalendar(statement, writer);
                         break;
                     case "requestAppointment":
+                        requestAppointment(reader, writer, statement);
                         break;
                     case "cancelRequest":
                         break;
@@ -181,47 +182,114 @@ public class ServerThread extends Thread {
         ArrayList<String[]> calendarNames = new ArrayList<>();
         ArrayList<String[]> windowArrayList = new ArrayList<>();
         ResultSet resultSet = statement.executeQuery("SELECT calendarName, calendarDescription FROM calendars");
-       while (resultSet.next()) {
-           String[] calendarNameDescription = new String[2];
-           calendarNameDescription[0] = resultSet.getString("calendarName");
-           calendarNameDescription[1] = resultSet.getString("calendarDescription");
-           calendarNames.add(calendarNameDescription);
-       }
-       for (int i = 0; i < calendarNames.size(); i++) {
-           String query = String.format("SELECT appointmentTitle, startTime, endTime, maxAttendees, currentBookings " +
-               "WHERE calendarName == '%s'", calendarNames.get(i)[0]);
-           ResultSet windowResult = statement.executeQuery(query);
-           String[] windowArray = new String[5];
-           windowArray[0] = windowResult.getString("appointmentTitle");
-           windowArray[1] = windowResult.getString("startTime");
-           windowArray[2] = windowResult.getString("endTime");
-           windowArray[3] = windowResult.getString("maxAttendees");
-           windowArray[4] = windowResult.getString("currentBookings");
-           windowArrayList.add(windowArray);
-       }
-
-       StringBuilder firstOutput = new StringBuilder();
-        firstOutput.append("[");
-        for (int j = 0; j < calendarNames.size(); j++) {
-            firstOutput.append(Arrays.toString(calendarNames.get(j)));
-            firstOutput.append(",");
+        while (resultSet.next()) {
+            String[] calendarNameDescription = new String[2];
+            calendarNameDescription[0] = resultSet.getString("calendarName");
+            calendarNameDescription[1] = resultSet.getString("calendarDescription");
+            calendarNames.add(calendarNameDescription);
         }
-        firstOutput.deleteCharAt(firstOutput.length() - 1);
-        firstOutput.append("]");
-        writer.write(String.valueOf(firstOutput));
+        for (int i = 0; i < calendarNames.size(); i++) {
+            String query = String.format("SELECT appointmentTitle, startTime, endTime, maxAttendees, currentBookings " +
+                "WHERE calendarName == '%s'", calendarNames.get(i)[0]);
+            ResultSet windowResult = statement.executeQuery(query);
+            String[] windowArray = new String[5];
+            windowArray[0] = windowResult.getString("appointmentTitle");
+            windowArray[1] = windowResult.getString("startTime");
+            windowArray[2] = windowResult.getString("endTime");
+            windowArray[3] = windowResult.getString("maxAttendees");
+            windowArray[4] = windowResult.getString("currentBookings");
+            windowArrayList.add(windowArray);
+        }
+
+        String firstOutput = arraylistToString(windowArrayList);
+        writer.write(firstOutput);
         writer.println();
         writer.flush();
 
-       StringBuilder secondOutput = new StringBuilder();
-        secondOutput.append("[");
-        for (int j = 0; j < windowArrayList.size(); j++) {
-            secondOutput.append(Arrays.toString(windowArrayList.get(j)));
-            secondOutput.append(",");
-        }
-        secondOutput.deleteCharAt(secondOutput.length() - 1);
-        secondOutput.append("]");
-        writer.write(String.valueOf(secondOutput));
+        String secondOutput = arraylistToString(calendarNames);
+        writer.write(secondOutput);
         writer.println();
         writer.flush();
+    }
+
+    public void requestAppointment(BufferedReader reader, PrintWriter writer, Statement statement) throws SQLException,
+        IOException {
+        ResultSet calendarQuery = statement.executeQuery("SELECT * FROM calendars");
+        ArrayList<String[]> calendarQueryResult = new ArrayList<>();
+        while (calendarQuery.next()) {
+            String[] calendarArray = new String[3];
+            calendarArray[0] = calendarQuery.getString("storeName");
+            calendarArray[1] = calendarQuery.getString("calendarName");
+            calendarArray[2] = calendarQuery.getString("calendarDescription");
+            calendarQueryResult.add(calendarArray);
+        }
+        String firstOutput = arraylistToString(calendarQueryResult);
+        writer.write(firstOutput);
+        writer.println();
+        writer.flush();
+
+        String firstInput = reader.readLine();
+        String[] firstInputList = firstInput.split(",");
+        String inputStore = firstInputList[0];
+        String inputCalendar = firstInputList[1];
+        String windowQueryStatement = String.format("SELECT startTime, endTime, maxAttendees, currentBookings FROM " +
+            "windows WHERE (storeName == '%s' AND calendarName == '%s' AND currentBookings < maxAttendees",
+            inputStore, inputCalendar);
+        ResultSet windowQuery = statement.executeQuery(windowQueryStatement);
+        ArrayList<String[]> windowQueryResult = new ArrayList<>();
+        while (windowQuery.next()) {
+            String[] windowArray = new String[4];
+            windowArray[0] = windowQuery.getString("startTime");
+            windowArray[1] = windowQuery.getString("endTime");
+            windowArray[2] = windowQuery.getString("maxAttendees");
+            windowArray[3] = windowQuery.getString("currentBookings");
+            windowQueryResult.add(windowArray);
+        }
+        String secondOutput = arraylistToString(windowQueryResult);
+        writer.write(secondOutput);
+        writer.println();
+        writer.flush();
+
+        String secondInput = reader.readLine();
+        String thirdOutput;
+        String[] secondInputList = secondInput.split(",");
+        String inputStartTime = secondInputList[0];
+        String inputEndTime = secondInputList[1];
+        int inputBooking = Integer.parseInt(secondInputList[3]);
+        String bookingQueryStatement = String.format("SELECT maxAttendees, currentBookings FROM windows WHERE " +
+            "(storeName == '%s' AND calendarName == '%s' AND startTime == '%s' AND endTime == '%s'", inputStore,
+            inputCalendar, inputStartTime, inputEndTime);
+        ResultSet bookingQuery = statement.executeQuery(bookingQueryStatement);
+        bookingQuery.next();
+        if (bookingQuery.getInt("maxAttendees") >= (bookingQuery.getInt("currentBookings") + inputBooking)) {
+            String sellerQueryStatement = String.format("SELECT sellerName FROM stores WHERE storeName == '%s'",
+                inputStore);
+            ResultSet sellerQuery = statement.executeQuery(sellerQueryStatement);
+            sellerQuery.next();
+            String sellerEmail = sellerQuery.getString("sellerName");
+            String updateStatement = String.format("INSERT INTO appointments (customerEmail, sellerEmail, storeName, " +
+                "calendarName, startTime, endTime, booking, isApproved, isRequest, timeStamp) VALUES ('%s', '%s', '%s', " +
+                "'%s', '%s', '%s', '%s', 0, 1, strftime('%%s', 'now'))", clientEmail, sellerEmail, inputStore,
+                inputCalendar, inputStartTime, inputEndTime, inputBooking);
+            int updates = statement.executeUpdate(updateStatement);
+            thirdOutput = String.valueOf(updates);
+        } else {
+            thirdOutput = "0";
+        }
+        writer.write(thirdOutput);
+        writer.println();
+        writer.flush();
+    }
+
+    public String arraylistToString(ArrayList<String[]> arrayList) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("[");
+        for (int j = 0; j < arrayList.size(); j++) {
+            stringBuilder.append(Arrays.toString(arrayList.get(j)));
+            stringBuilder.append(",");
+        }
+        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+        stringBuilder.append("]");
+        return String.valueOf(stringBuilder);
     }
 }

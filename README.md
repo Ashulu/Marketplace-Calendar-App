@@ -77,19 +77,19 @@ return options:
 
 **viewCalendar**
 
-SELECT calendarName, calendarDescription from calendars
-*store all calendarNames in the server, then iterate through*
-[calendarName, calendarDescription] * number of calendars
-SELECT appointmentTitle, startTime, endTime, maxAttendees, currentBookings WHERE calendarName == iteration(i)
+SELECT calendarName, calendarDescription from calendars  
+*store all calendarNames in the server, then iterate through*  
+[calendarName, calendarDescription] * number of calendars  
+SELECT appointmentTitle, startTime, endTime, maxAttendees, currentBookings WHERE calendarName == iteration(i)  
 [appointmentTitle, startTime, endTime, maxAttendees, currentBookings] * number of calendars
 
 variables needed:
 none
 
 return:
-2 arraylist
-[calendarName, calendarDescription] * number of calendars
-[appointmentTitle, startTime, endTime, maxAttendees, currentBookings] * number of calendars
+2 arraylist  
+[calendarName, calendarDescription] * number of calendars  
+[appointmentTitle, startTime, endTime, maxAttendees, currentBookings] * number of calendars  
 *They will be converted into strings. I could send the arraylist by itself if we use data output stream tho*
 
 -------------------------------------------------------------------------------------------------------------
@@ -100,19 +100,21 @@ return:
 - Server will return all the available windows to the client, and the client will choose
 - Server will then update the database if possible
 
-SELECT * FROM calendars
-SELECT startTime, endTime, maxAttendees, currentBookings FROM windows WHERE (storeName == ? AND calendarName == ? AND currentBookings < maxAttendees)
-SELECT sellerEmail FROM stores WHERE storeName == ?
+SELECT * FROM calendars  
+SELECT startTime, endTime, maxAttendees, currentBookings FROM windows WHERE (storeName == ? AND calendarName == ? 
+AND currentBookings < maxAttendees)  
+SELECT sellerEmail FROM stores WHERE storeName == ?  
 *check if adding the bookings would exceed maxAttendees on the server*
-INSERT INTO appointments (customerEmail, sellerEmail, storeName, calendarName, startTime, endTime, booking, isApproved, isRequest, timeStamp) VALUES (?, ?, ?, ?, ?, ?, ?, 0, 1, strftime('%s', 'now'))
+INSERT INTO appointments (customerEmail, sellerEmail, storeName, calendarName, startTime, endTime, booking, 
+isApproved, isRequest, timeStamp) VALUES (?, ?, ?, ?, ?, ?, ?, 0, 1, strftime('%s', 'now'))  
 
-variables needed:
-input 1: storeName, calendarName
+variables needed:  
+input 1: storeName, calendarName  
 input 2: startTime, endTime, booking
 
-return:
-output 1: arraylist of stores, calendars, and calendarDescriptions
-output 2: arraylist of startTime, endTime, maxAttendees, and currentBookings of the chosen calendar (input 1)
+return:  
+output 1: arraylist of stores, calendars, and calendarDescriptions  
+output 2: arraylist of startTime, endTime, maxAttendees, and currentBookings of the chosen calendar (input 1)  
 output 3: result of the action, 1 for success, 0 for failure (liekly due to bookings exceeding maxAttendees)
 
 -------------------------------------------------------------------------------------------------------------
