@@ -1,6 +1,8 @@
 import java.io.*;
 import java.net.Socket;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ServerThread extends Thread {
 
@@ -56,6 +58,7 @@ public class ServerThread extends Thread {
                         writer.flush();
                         break;
                     case "viewCalendar":
+                        viewCalendar(statement, writer);
                         break;
                     case "requestAppointment":
                         break;
@@ -172,5 +175,53 @@ public class ServerThread extends Thread {
         return returning;
 
 
+    }
+
+    public void viewCalendar(Statement statement, PrintWriter writer) throws SQLException {
+        ArrayList<String[]> calendarNames = new ArrayList<>();
+        ArrayList<String[]> windowArrayList = new ArrayList<>();
+        ResultSet resultSet = statement.executeQuery("SELECT calendarName, calendarDescription FROM calendars");
+       while (resultSet.next()) {
+           String[] calendarNameDescription = new String[2];
+           calendarNameDescription[0] = resultSet.getString("calendarName");
+           calendarNameDescription[1] = resultSet.getString("calendarDescription");
+           calendarNames.add(calendarNameDescription);
+       }
+       for (int i = 0; i < calendarNames.size(); i++) {
+           String query = String.format("SELECT appointmentTitle, startTime, endTime, maxAttendees, currentBookings " +
+               "WHERE calendarName == '%s'", calendarNames.get(i)[0]);
+           ResultSet windowResult = statement.executeQuery(query);
+           String[] windowArray = new String[5];
+           windowArray[0] = windowResult.getString("appointmentTitle");
+           windowArray[1] = windowResult.getString("startTime");
+           windowArray[2] = windowResult.getString("endTime");
+           windowArray[3] = windowResult.getString("maxAttendees");
+           windowArray[4] = windowResult.getString("currentBookings");
+           windowArrayList.add(windowArray);
+       }
+
+       StringBuilder firstOutput = new StringBuilder();
+        firstOutput.append("[");
+        for (int j = 0; j < calendarNames.size(); j++) {
+            firstOutput.append(Arrays.toString(calendarNames.get(j)));
+            firstOutput.append(",");
+        }
+        firstOutput.deleteCharAt(firstOutput.length() - 1);
+        firstOutput.append("]");
+        writer.write(String.valueOf(firstOutput));
+        writer.println();
+        writer.flush();
+
+       StringBuilder secondOutput = new StringBuilder();
+        secondOutput.append("[");
+        for (int j = 0; j < windowArrayList.size(); j++) {
+            secondOutput.append(Arrays.toString(windowArrayList.get(j)));
+            secondOutput.append(",");
+        }
+        secondOutput.deleteCharAt(secondOutput.length() - 1);
+        secondOutput.append("]");
+        writer.write(String.valueOf(secondOutput));
+        writer.println();
+        writer.flush();
     }
 }
