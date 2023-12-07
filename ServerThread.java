@@ -79,6 +79,10 @@ public class ServerThread extends Thread {
                         showStatisticsCustomerOrderByTotal(statement, writer);
                         break;
                     case "showApproved":
+                        String approvedSeller = showApproved(statement);
+                        writer.write(approvedSeller);
+                        writer.println();
+                        writer.flush();
                         break;
                     case "approveRequest":
                         break;
@@ -336,16 +340,18 @@ public class ServerThread extends Thread {
 
     public String viewApproved(Statement statement) throws SQLException {
         ArrayList<String[]> approved = new ArrayList<>();
-        String approvedQueryStatement = String.format("SELECT storeName, calendarName, startTime, endTime, booking " +
-            "FROM appointments WHERE (customerEmail == '%s' AND isApproved == 1", clientEmail);
+        String approvedQueryStatement = String.format("SELECT storeName, calendarName, startTime, endTime, booking, " +
+            "datetime(timeStamp, 'unixepoch') as timeStamp FROM appointments WHERE (customerEmail == '%s' AND " +
+            "isApproved == 1", clientEmail);
         ResultSet approvedQuery = statement.executeQuery(approvedQueryStatement);
         while (approvedQuery.next()) {
-            String[] approvedAppointment = new String[5];
+            String[] approvedAppointment = new String[6];
             approvedAppointment[0] = approvedQuery.getString("storeName");
             approvedAppointment[1] = approvedQuery.getString("calendarName");
             approvedAppointment[2] = approvedQuery.getString("startTime");
             approvedAppointment[3] = approvedQuery.getString("endTime");
             approvedAppointment[4] = approvedQuery.getString("booking");
+            approvedAppointment[5] = approvedQuery.getString("timeStamp");
             approved.add(approvedAppointment);
         }
         return arraylistToString(approved);
@@ -411,4 +417,23 @@ public class ServerThread extends Thread {
         writer.flush();
     }
 
+    public String showApproved(Statement statement) throws SQLException {
+        ArrayList<String[]> approved = new ArrayList<>();
+        String approvedQueryStatement = String.format("SELECT customerEmail, storeName, calendarName, startTime, " +
+            "endTime, booking, datetime(timeStamp, 'unixepoch') as timeStamp FROM appointments WHERE (sellerEmail == " +
+            "'%s' AND isApproved == 1", clientEmail);
+        ResultSet approvedQuery = statement.executeQuery(approvedQueryStatement);
+        while (approvedQuery.next()) {
+            String[] approvedArray = new String[7];
+            approvedArray[0] = approvedQuery.getString("customerEmail");
+            approvedArray[1] = approvedQuery.getString("storeName");
+            approvedArray[2] = approvedQuery.getString("calendarName");
+            approvedArray[3] = approvedQuery.getString("startTime");
+            approvedArray[4] = approvedQuery.getString("endTime");
+            approvedArray[5] = approvedQuery.getString("booking");
+            approvedArray[6] = approvedQuery.getString("timeStamp");
+            approved.add(approvedArray);
+        }
+        return arraylistToString(approved);
+    }
 }

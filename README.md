@@ -197,6 +197,10 @@ arraylist of [customerEmail, storeName, calendarName, startTime, endTime, bookin
 
 SELECT customerEmail, storeName, calendarName, startTime, endTime, booking FROM appointments WHERE (sellerEmail == ? AND isApproved == 0)
 
+variable needed:  
+customerEmail, storeName, calendarName, startTime, booking
+
+
 if approved:
 UPDATE appointments SET isApproved = 1, isRequest = 0, 
 
