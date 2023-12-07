@@ -275,8 +275,6 @@ public class Client extends JComponent implements Runnable {
             e.printStackTrace();
         }
         */
-//        reader = new BufferedReader(new InputStreamReader(System.in));
-//        writer = new PrintWriter(new OutputStreamWriter(System.out));
 
         SwingUtilities.invokeLater(new Client());
 

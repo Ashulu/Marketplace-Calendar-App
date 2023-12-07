@@ -293,6 +293,9 @@ public class ServerThread extends Thread {
     }
 
     public String arraylistToString(ArrayList<String[]> arrayList) {
+        if (arrayList.isEmpty()) {
+            return "";
+        }
         StringBuilder stringBuilder = new StringBuilder();
         for (int j = 0; j < arrayList.size(); j++) {
             stringBuilder.append(Arrays.toString(arrayList.get(j)));
