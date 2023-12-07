@@ -4,6 +4,7 @@ import java.sql.*;
 
 public class ServerThread extends Thread {
 
+    private static String clientEmail = null;
     static final String DB_URL = "jdbc:sqlite:marketplacedb.db";
     Socket socket;
 
@@ -22,9 +23,7 @@ public class ServerThread extends Thread {
             e.printStackTrace();
             return;
         }
-        boolean isSeller = false;
 
-        String clientEmail = null;
 
         Connection connection = null;
         Statement statement = null;
@@ -45,20 +44,16 @@ public class ServerThread extends Thread {
 
                 switch (clientAction) {
                     case "login":
-                        System.out.println("logging in");
-                        String input = reader.readLine();
-                        System.out.println("input: " + input);
-                        String[] inputList = input.split(",");
-                        System.out.println("inputList made");
-                        String returning = login(statement, inputList[0], inputList[1]);
-                        if ((returning.equals("1")) || (returning.equals("2"))) {
-                            clientEmail = inputList[0];
-                        }
-                        writer.write(returning);
+                        String loginResult = login(reader, statement);
+                        writer.write(loginResult);
                         writer.println();
                         writer.flush();
                         break;
                     case "createAccount":
+                        String createAccountResult = createAccount(reader, statement);
+                        writer.write(createAccountResult);
+                        writer.println();
+                        writer.flush();
                         break;
                     case "viewCalendar":
                         break;
@@ -109,17 +104,23 @@ public class ServerThread extends Thread {
         }
     }
 
-    public String login(Statement statement, String email, String password) throws IOException, SQLException {
+    public String login(BufferedReader reader, Statement statement) throws IOException, SQLException {
         String returning;
 
-        String query = String.format("SELECT type, password FROM accounts WHERE email == '%s'", email);
+        System.out.println("logging in");
+        String input = reader.readLine();
+        System.out.println("input: " + input);
+        String[] inputList = input.split(",");
+        System.out.println("inputList made");
+        String query = String.format("SELECT type, password FROM accounts WHERE email == '%s'", inputList[0]);
         System.out.println("query: " + query);
         ResultSet result = statement.executeQuery(query);
         if (result.next()) {
             String dbPassword = result.getString("password");
             System.out.println("dbPassword: " + dbPassword);
-            if (dbPassword.equals(password)) {
+            if (dbPassword.equals(inputList[1])) {
                 String dbType = result.getString("type");
+                clientEmail = inputList[0];
                 if (dbType.equals("customer")) { // type customer
                     returning = "1";
                 } else { // type seller
@@ -133,5 +134,43 @@ public class ServerThread extends Thread {
         }
         System.out.println("returning: " + returning);
         return returning;
+    }
+
+    public String createAccount(BufferedReader reader, Statement statement) throws IOException, SQLException {
+        String returning = null;
+
+        System.out.println("creating account");
+        String input = reader.readLine();
+        System.out.println("input: " + input);
+        String[] inputList = input.split(",");
+        System.out.println("inputList made");
+        String inputType = inputList[0];
+        String inputEmail = inputList[1];
+        String inputPassword = inputList[2];
+
+        String query = String.format("SELECT COUNT(email) AS count FROM accounts WHERE email == '%s'", inputEmail);
+        System.out.println("querying");
+        ResultSet result = statement.executeQuery(query);
+        result.next();
+        int count = result.getInt("count");
+        System.out.println("count: " + count);
+        if (count != 0) {
+            System.out.println("Email exists!");
+            returning = "0";
+        } else {
+            String update = String.format("INSERT INTO accounts (type, email, password) VALUES ('%s','%s','%s')",
+                inputType, inputEmail, inputPassword);
+            int updateResult = statement.executeUpdate(update);
+            if (updateResult == 1) {
+                System.out.println("Email added");
+                returning = "1";
+            } else {
+                System.out.println("Nothing added");
+                returning = "0";
+            }
+        }
+        return returning;
+
+
     }
 }
