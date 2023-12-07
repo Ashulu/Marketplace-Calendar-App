@@ -64,9 +64,13 @@ public class ServerThread extends Thread {
                         requestAppointment(reader, writer, statement);
                         break;
                     case "cancelRequest":
-
+                        cancelRequest(reader, statement, writer);
                         break;
                     case "viewApproved":
+                        String approved = viewApproved(statement);
+                        writer.write(approved);
+                        writer.println();
+                        writer.flush();
                         break;
                     case "showStatisticsCustomer":
                         break;
@@ -327,4 +331,22 @@ public class ServerThread extends Thread {
         writer.println();
         writer.flush();
     }
+
+    public String viewApproved(Statement statement) throws SQLException {
+        ArrayList<String[]> approved = new ArrayList<>();
+        String approvedQueryStatement = String.format("SELECT storeName, calendarName, startTime, endTime, booking " +
+            "FROM appointments WHERE (customerEmail == '%s' AND isApproved == 1", clientEmail);
+        ResultSet approvedQuery = statement.executeQuery(approvedQueryStatement);
+        while (approvedQuery.next()) {
+            String[] approvedAppointment = new String[5];
+            approvedAppointment[0] = approvedQuery.getString("storeName");
+            approvedAppointment[1] = approvedQuery.getString("calendarName");
+            approvedAppointment[2] = approvedQuery.getString("startTime");
+            approvedAppointment[3] = approvedQuery.getString("endTime");
+            approvedAppointment[4] = approvedQuery.getString("booking");
+            approved.add(approvedAppointment);
+        }
+        return arraylistToString(approved);
+    }
+
 }
