@@ -64,6 +64,7 @@ public class ServerThread extends Thread {
                         requestAppointment(reader, writer, statement);
                         break;
                     case "cancelRequest":
+
                         break;
                     case "viewApproved":
                         break;
@@ -293,7 +294,7 @@ public class ServerThread extends Thread {
         return String.valueOf(stringBuilder);
     }
 
-    public int cancelRequest(BufferedReader reader, Statement statement, PrintWriter writer) throws IOException,
+    public void cancelRequest(BufferedReader reader, Statement statement, PrintWriter writer) throws IOException,
         SQLException {
 
         ArrayList<String[]> requests = new ArrayList<>();
@@ -321,6 +322,9 @@ public class ServerThread extends Thread {
         String inputStartTime = inputList[2];
         String deleteStatement = String.format("DELETE FROM appointments WHERE (storeName == '%s' AND calendarName ==" +
             " '%s' AND startTime == '%s'", inputStore, inputCalendar, inputStartTime);
-        return statement.executeUpdate(deleteStatement);
+        int count = statement.executeUpdate(deleteStatement);
+        writer.write(String.valueOf(count));
+        writer.println();
+        writer.flush();
     }
 }
