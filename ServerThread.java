@@ -292,4 +292,35 @@ public class ServerThread extends Thread {
         stringBuilder.append("]");
         return String.valueOf(stringBuilder);
     }
+
+    public int cancelRequest(BufferedReader reader, Statement statement, PrintWriter writer) throws IOException,
+        SQLException {
+
+        ArrayList<String[]> requests = new ArrayList<>();
+        String requestQueryStatement = String.format("SELECT storeName, calendarName, startTime, endTime, booking " +
+            "FROM appointments WHERE (customerEmail == '%s' AND isApproved == 0)", clientEmail);
+        ResultSet requestQuery = statement.executeQuery(requestQueryStatement);
+        while (requestQuery.next()) {
+            String[] requestArray = new String[5];
+            requestArray[0] = requestQuery.getString("storeName");
+            requestArray[1] = requestQuery.getString("calendarName");
+            requestArray[2] = requestQuery.getString("startTime");
+            requestArray[3] = requestQuery.getString("endTime");
+            requestArray[4] = requestQuery.getString("booking");
+            requests.add(requestArray);
+        }
+        String firstOutput = arraylistToString(requests);
+        writer.write(firstOutput);
+        writer.println();
+        writer.flush();
+
+        String input = reader.readLine();
+        String[] inputList = input.split(",");
+        String inputStore = inputList[0];
+        String inputCalendar = inputList[1];
+        String inputStartTime = inputList[2];
+        String deleteStatement = String.format("DELETE FROM appointments WHERE (storeName == '%s' AND calendarName ==" +
+            " '%s' AND startTime == '%s'", inputStore, inputCalendar, inputStartTime);
+        return statement.executeUpdate(deleteStatement);
+    }
 }
