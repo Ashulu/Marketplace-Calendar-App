@@ -50,6 +50,10 @@ public class ServerThread extends Thread {
                         writer.flush();
                         break;
                     case "createAccount":
+                        String createAccountResult = createAccount(reader, statement);
+                        writer.write(createAccountResult);
+                        writer.println();
+                        writer.flush();
                         break;
                     case "viewCalendar":
                         break;
@@ -132,7 +136,41 @@ public class ServerThread extends Thread {
         return returning;
     }
 
-    public String createAccount(BufferedReader reader, Statement statement) {
+    public String createAccount(BufferedReader reader, Statement statement) throws IOException, SQLException {
+        String returning = null;
+
+        System.out.println("creating account");
+        String input = reader.readLine();
+        System.out.println("input: " + input);
+        String[] inputList = input.split(",");
+        System.out.println("inputList made");
+        String inputType = inputList[0];
+        String inputEmail = inputList[1];
+        String inputPassword = inputList[2];
+
+        String query = String.format("SELECT COUNT(email) AS count FROM accounts WHERE email == '%s'", inputEmail);
+        System.out.println("querying");
+        ResultSet result = statement.executeQuery(query);
+        result.next();
+        int count = result.getInt("count");
+        System.out.println("count: " + count);
+        if (count != 0) {
+            System.out.println("Email exists!");
+            returning = "0";
+        } else {
+            String update = String.format("INSERT INTO accounts (type, email, password) VALUES ('%s','%s','%s')",
+                inputType, inputEmail, inputPassword);
+            int updateResult = statement.executeUpdate(update);
+            if (updateResult == 1) {
+                System.out.println("Email added");
+                returning = "1";
+            } else {
+                System.out.println("Nothing added");
+                returning = "0";
+            }
+        }
+        return returning;
+
 
     }
 }
