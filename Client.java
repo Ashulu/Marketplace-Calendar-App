@@ -227,7 +227,7 @@ public class Client extends JComponent implements Runnable {
 //                        writer.flush();
 //
 //                        int check = Integer.parseInt(reader.readLine());
-                        int check = 1;
+                        int check = 2;
                         switch (check){
                             case 1 -> {
                                 //go to the customer panel
@@ -292,7 +292,7 @@ public class Client extends JComponent implements Runnable {
 
         String[] customerOp = new String[]{
                 "Request an appointment",
-                "Cancel and appointment",
+                "Cancel an appointment",
                 "View your approved appointments",
                 "Show store statistics",
                 "Logout",
@@ -429,7 +429,7 @@ public class Client extends JComponent implements Runnable {
                         //quit
                         case 9 -> {
                             frame.remove(jPanel);
-                            writer.write("QUIT");
+                            writer.write("exit");
                             writer.flush();
                         }
                     }
@@ -444,8 +444,8 @@ public class Client extends JComponent implements Runnable {
     }
     //0 "View Approved Appointments"
     private void s0(BufferedReader br, PrintWriter pw) throws IOException {
-        //pw.write("s0");
-        //pw.flush();
+        pw.write("viewApproved");
+        pw.flush();
         sellerBack(sellerSub);
 
         JButton refresh = new JButton("Refresh");
@@ -472,8 +472,8 @@ public class Client extends JComponent implements Runnable {
     }
     //1 "Appointment Requests"
     private void s1(BufferedReader br, PrintWriter pw) throws IOException {
-//        pw.write("s1");
-//        pw.flush();
+        pw.write("approveRequest");
+        pw.flush();
 
         sellerBack(sellerSub);
         JButton refresh = new JButton("Refresh");
@@ -517,6 +517,8 @@ public class Client extends JComponent implements Runnable {
 
     //2 "Create Store"
     private void s2(BufferedReader br, PrintWriter pw) throws IOException {
+        pw.write("createStore");
+        pw.flush();
         jPanel = new JPanel();
         frame.add(jPanel);
         sellerBack(jPanel);
@@ -554,6 +556,8 @@ public class Client extends JComponent implements Runnable {
 
     //3 "Create Calendar"
     private void s3(BufferedReader br, PrintWriter pw) throws IOException {
+        pw.write("createCalendar");
+        pw.flush();
         jPanel = new JPanel();
         frame.add(jPanel);
         sellerBack(jPanel);
@@ -638,7 +642,8 @@ public class Client extends JComponent implements Runnable {
     //4 "Edit Calendar"
     //i need to check for reply of successful or not?
     private void s4(BufferedReader br, PrintWriter pw) throws IOException {
-        pw.write("s4");
+        pw.write("editCalendar");
+        pw.flush();
         jPanel = new JPanel();
         frame.add(jPanel);
         sellerBack(jPanel);
@@ -786,6 +791,8 @@ public class Client extends JComponent implements Runnable {
 
     //5 "Delete Calendar"
     private void s5(BufferedReader br, PrintWriter pw) throws IOException {
+        pw.write("deleteCalendar");
+        pw.flush();
         jPanel = new JPanel();
         frame.add(jPanel);
         sellerBack(jPanel);
@@ -826,7 +833,15 @@ public class Client extends JComponent implements Runnable {
     //6 "Show Statistics"
     //i'll fix this tmrw after clarification
     private void s6(BufferedReader br, PrintWriter pw) throws IOException {
+        pw.write("statisticsSeller");
+        pw.flush();
         jPanel = new JPanel();
+        /*
+        i still don't know what goes here
+        output: sellerEmail, storeName [customerName, numofApproved]
+        most popular window sorted in number of customers
+
+         */
         frame.add(jPanel);
         sellerBack(jPanel);
         JButton refresh = new JButton("Refresh");
@@ -844,6 +859,8 @@ public class Client extends JComponent implements Runnable {
 
     //7 "Import Calendar"
     private void s7(BufferedReader br, PrintWriter pw) throws IOException {
+        pw.write("importCalendar");
+        pw.flush();
         jPanel = new JPanel();
         frame.add(jPanel);
         sellerBack(jPanel);
