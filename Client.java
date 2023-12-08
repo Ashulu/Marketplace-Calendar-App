@@ -235,7 +235,7 @@ public class Client extends JComponent implements Runnable {
                             c3(br, pw);
                         }
                         case 4 -> {
-                            //c4(br, pw);
+                            c4(br, pw);
                         }
                         case 5 -> {
                             frame.remove(customerMain);
@@ -432,12 +432,7 @@ public class Client extends JComponent implements Runnable {
             }
         });
 
-        create.addActionListener(actionListener);
-        customerSub.add(storeName);
-        customerSub.add(create);
-        customerSub.add(result);
-
-
+        JTextField result = new JTextField(10);
         int response = br.read();
         if (response == 0) {
             result.setText("Unable to create appointment.");
@@ -445,98 +440,8 @@ public class Client extends JComponent implements Runnable {
             result.setText("Creation successful!");
         }
 
+        jPanel.add(result);
         result.setVisible(true);
-    }
-
-    private void c3(BufferedReader br, PrintWriter pw) throws IOException{
-        JLabel askSort = new JLabel("Would you like to srt your statistics?");
-        customerSub.add(askSort);
-
-        JButton yes = new JButton("Yes");
-        customerSub.add(yes);
-
-        JButton no = new JButton("No");
-        customerSub.add(no);
-
-        yes.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                pw.println("showStatisticsCustomerOrderByTotal");
-                pw.flush();
-
-                try {
-//                    String storeString = br.readLine();
-//                    String stats = br.readLine();
-//                    String[] split = stats.split("],\\[");
-//                    split[0] = split[0].substring(2);
-//                    split[split.length - 1] = split[split.length - 1].substring(2);
-//
-//                    for (int i = 0; i < split.length; i++) {
-//                        StringBuilder line = new StringBuilder();
-//                        String[] indWindow = split[i].split(",");
-//                        line.append("Store Name: ").append(indWindow[0]).append("\n");
-//                        line.append("\t Window: ").append(indWindow[1]).append("-").append(indWindow[2]).append("\n");
-//                        line.append("\t Total store customers: ").append(indWindow[3]).append("\n");
-//                        line.append("\t This window's customers: ").append(indWindow[4]).append("\n");
-//
-//                        JLabel window = new JLabel(line.toString());
-//                        customerSub.add(window);
-//                    }
-
-                    showStats(br);
-
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
-
-        no.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                pw.println("showStatisticsCustomer");
-                pw.flush();
-
-                try {
-                    showStats(br);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
-
-        JButton refresh = new JButton("Refresh");
-        customerSub.add(refresh);
-
-        refresh.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    frame.remove(customerSub);
-                    customerSub = new JPanel();
-                    customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
-                    c3(br, pw);
-                    frame.add(customerSub);
-                    frame.pack();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        });
-
-
-        JButton back = new JButton("Back");
-        customerSub.add(back);
-
-        back.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.remove(customerSub);
-                frame.add(customerMain, BorderLayout.CENTER);
-                frame.pack();
-            }
-        });
-
     }
 
     private void c2(BufferedReader br, PrintWriter pw) throws IOException {
