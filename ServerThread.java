@@ -102,54 +102,52 @@ public class ServerThread extends Thread {
                         writer.println();
                         writer.flush();
                         break;
-                    case "editCalendarName":
-                        writer.write(showCalendars(statement));
-                        writer.println();
-                        writer.flush();
-                        int editName = editCalendarName(reader, statement);
-                        writer.write(String.valueOf(editName));
-                        writer.println();
-                        writer.flush();
-                        break;
-                    case "editCalendarDescription":
-                        writer.write(showCalendars(statement));
-                        writer.println();
-                        writer.flush();
-                        int editDescription = editCalendarDescription(reader, statement);
-                        writer.write(String.valueOf(editDescription));
-                        writer.println();
-                        writer.flush();
-                        break;
-                    case "editCalendarAddWindow":
+                    case "editCalendar":
                         writer.write(showCalendars(statement));
                         writer.println();
                         writer.flush();
 
-                        writer.write(String.valueOf(editCalendarAddWindow(reader, statement)));
-                        writer.println();
-                        writer.flush();
+                        String editChoice = reader.readLine();
+                        switch (editChoice) {
+                            case "editCalendarName":
+                                int editName = editCalendarName(reader, statement);
+                                writer.write(String.valueOf(editName));
+                                writer.println();
+                                writer.flush();
+                                break;
+                            case "editCalendarDescription":
+                                int editDescription = editCalendarDescription(reader, statement);
+                                writer.write(String.valueOf(editDescription));
+                                writer.println();
+                                writer.flush();
+                                break;
+                            case "editCalendarAddWindow":
+                                writer.write(String.valueOf(editCalendarAddWindow(reader, statement)));
+                                writer.println();
+                                writer.flush();
+                                break;
+                            case "editCalendarRemoveWindow":
+                                writer.write(String.valueOf(editCalendarRemoveWindow(reader, statement, writer)));
+                                writer.println();
+                                writer.flush();
+                                break;
+                        }
                         break;
-                    case "edit CalendarRemoveWindow":
-                        writer.write(showCalendars(statement));
-                        writer.println();
-                        writer.flush();
 
-                        writer.write(String.valueOf(editCalendarRemoveWindow(reader, statement, writer)));
-                        writer.println();
-                        writer.flush();
-                        break;
                     case "deleteCalendar":
-//                        writer.write(showCalendars(statement));
-//                        writer.println();
-//                        writer.flush();
+                        writer.write(showCalendars(statement));
+                        writer.println();
+                        writer.flush();
 
                         writer.write(String.valueOf(deleteCalendar(reader, statement)));
                         writer.println();
                         writer.flush();
                         break;
                     case "statisticsSeller":
+                        statisticsSeller(reader, statement, writer);
                         break;
                     case "statisticsSellerOrdered":
+                        statisticsSellerOrdered(reader, statement, writer);
                         break;
                     case "importCalendar":
                         break;
@@ -629,14 +627,15 @@ public class ServerThread extends Thread {
         String inputStore = inputList[0];
         String inputCalendar = inputList[1];
         ArrayList<String[]> windowTimes = new ArrayList<>();
-        String windowQueryStatement = String.format("SELECT startTime, endTime, maxAttendees FROM windows WHERE " +
-            "(storeName == '%s' AND calendarName == '%s'", inputStore, inputCalendar);
+        String windowQueryStatement = String.format("SELECT startTime, endTime, maxAttendees, currentBookings FROM " +
+            "windows WHERE (storeName == '%s' AND calendarName == '%s'", inputStore, inputCalendar);
         ResultSet windowQuery = statement.executeQuery(windowQueryStatement);
         while (windowQuery.next()) {
-            String[] windowArray = new String[3];
+            String[] windowArray = new String[4];
             windowArray[0] = windowQuery.getString("startTime");
             windowArray[1] = windowQuery.getString("endTime");
             windowArray[2] = windowQuery.getString("maxAttendees");
+            windowArray[3] = windowQuery.getString("currentBookings");
             windowTimes.add(windowArray);
         }
         writer.write(arraylistToString(windowTimes));
@@ -690,4 +689,80 @@ public class ServerThread extends Thread {
         }
         return arraylistToString(calendars);
     }
+
+    public void statisticsSeller(BufferedReader reader, Statement statement, PrintWriter writer) throws IOException,
+        SQLException {
+        ArrayList<String> stores = new ArrayList<>();
+        String storeQueryStatement = String.format("SELECT * FROM stores WHERE sellerEmail == '%s'", clientEmail);
+        ResultSet storeQuery = statement.executeQuery(storeQueryStatement);
+        while (storeQuery.next()) {
+            stores.add(storeQuery.getString("storeName"));
+        }
+        writer.write(stores.toString());
+        writer.println();
+        writer.flush();
+
+        String inputStore = reader.readLine();
+        String popularWindowQueryStatement = String.format("SELECT startTime, endTime, MAX(currentBookings) AS " +
+            "windowCustomers FROM windows WHERE storeName == '%s' GROUP BY storeName", inputStore);
+        ResultSet popularWindowQuery = statement.executeQuery(popularWindowQueryStatement);
+        popularWindowQuery.next();
+        String popularStart = popularWindowQuery.getString("startTime");
+        String popularEnd = popularWindowQuery.getString("endTime");
+        writer.write(popularStart + "," + popularEnd);
+
+
+        ArrayList<String[]> customers = new ArrayList<>();
+        String customerQueryStatement = String.format("SELECT customerEmail, SUM(isApproved) AS numOfApproved FROM " +
+            "appointments WHERE storeName == '%s' GROUP BY customerEmail", inputStore);
+        ResultSet customerQuery = statement.executeQuery(customerQueryStatement);
+        while (customerQuery.next()) {
+            String[] customerArray = new String[2];
+            customerArray[0] = customerQuery.getString("customerEmail");
+            customerArray[1] = customerQuery.getString("numOfApproved");
+            customers.add(customerArray);
+        }
+        writer.write(arraylistToString(customers));
+        writer.println();
+        writer.flush();
+    }
+
+    public void statisticsSellerOrdered(BufferedReader reader, Statement statement, PrintWriter writer) throws
+        SQLException, IOException {
+        ArrayList<String> stores = new ArrayList<>();
+        String storeQueryStatement = String.format("SELECT * FROM stores WHERE sellerEmail == '%s'", clientEmail);
+        ResultSet storeQuery = statement.executeQuery(storeQueryStatement);
+        while (storeQuery.next()) {
+            stores.add(storeQuery.getString("storeName"));
+        }
+        writer.write(stores.toString());
+        writer.println();
+        writer.flush();
+
+        String inputStore = reader.readLine();
+        String popularWindowQueryStatement = String.format("SELECT startTime, endTime, MAX(currentBookings) AS " +
+            "windowCustomers FROM windows WHERE storeName == '%s' GROUP BY storeName", inputStore);
+        ResultSet popularWindowQuery = statement.executeQuery(popularWindowQueryStatement);
+        popularWindowQuery.next();
+        String popularStart = popularWindowQuery.getString("startTime");
+        String popularEnd = popularWindowQuery.getString("endTime");
+        writer.write(popularStart + "," + popularEnd);
+
+
+        ArrayList<String[]> customers = new ArrayList<>();
+        String customerQueryStatement = String.format("SELECT customerEmail, SUM(isApproved) AS numOfApproved FROM " +
+            "appointments WHERE storeName == '%s' GROUP BY customerEmail ORDER BY numOfApproved DESC", inputStore);
+        ResultSet customerQuery = statement.executeQuery(customerQueryStatement);
+        while (customerQuery.next()) {
+            String[] customerArray = new String[2];
+            customerArray[0] = customerQuery.getString("customerEmail");
+            customerArray[1] = customerQuery.getString("numOfApproved");
+            customers.add(customerArray);
+        }
+        writer.write(arraylistToString(customers));
+        writer.println();
+        writer.flush();
+    }
+
+
 }

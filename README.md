@@ -284,7 +284,7 @@ input:
 
 output:
 1. list of stores
-2. most popular window of the store
+2. most popular window of the store startTime,endTime
 3. arraylist of [customerName, numOfApproved]
 
 -------------------------------------------------------------------------------------------------------------
