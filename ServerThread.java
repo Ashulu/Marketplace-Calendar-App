@@ -133,10 +133,23 @@ public class ServerThread extends Thread {
                         writer.write(showCalendars(statement));
                         writer.println();
                         writer.flush();
+
+                        writer.write(String.valueOf(editCalendarRemoveWindow(reader, statement, writer)));
+                        writer.println();
+                        writer.flush();
                         break;
                     case "deleteCalendar":
+//                        writer.write(showCalendars(statement));
+//                        writer.println();
+//                        writer.flush();
+
+                        writer.write(String.valueOf(deleteCalendar(reader, statement)));
+                        writer.println();
+                        writer.flush();
                         break;
                     case "statisticsSeller":
+                        break;
+                    case "statisticsSellerOrdered":
                         break;
                     case "importCalendar":
                         break;
@@ -634,6 +647,35 @@ public class ServerThread extends Thread {
         String deleteStatement = String.format("DELETE FROM windows WHERE (storeName == '%s' AND calendarName " +
             "== '%s' AND endTime == '%s'", inputStore, inputCalendar, secondInput);
         return statement.executeUpdate(deleteStatement);
+    }
+
+    public int deleteCalendar(BufferedReader reader, Statement statement) throws IOException, SQLException {
+        String input = reader.readLine();
+        String[] inputList = input.split(",");
+        String inputStore = inputList[0];
+        String inputCalendar = inputList[1];
+
+        String deleteCalendarStatement = String.format("DELETE FROM calendars WHERE (storeName == '%s' AND " +
+            "calendarName == '%s'", inputStore, inputCalendar);
+        int deleteFromCalendar = statement.executeUpdate(deleteCalendarStatement);
+        if (deleteFromCalendar < 1) {
+            return 0;
+        }
+
+        String deleteAppointmentStatement = String.format("DELETE FROM appointments WHERE (storeName == '%s' AND " +
+            "calendarName == '%s'", inputStore, inputCalendar);
+        int deleteFromAppointment = statement.executeUpdate(deleteAppointmentStatement);
+        if (deleteFromAppointment < 1) {
+            return 0;
+        }
+
+        String deleteWindowStatement = String.format("DELETE FROM windows WHERE (storeName == '%s' AND " +
+            "calendarName == '%s'", inputStore, inputCalendar);
+        int deleteFromWindow = statement.executeUpdate(deleteWindowStatement);
+        if (deleteFromWindow < 1) {
+            return 0;
+        }
+        return 1;
     }
 
     public String showCalendars(Statement statement) throws SQLException {
