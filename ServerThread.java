@@ -85,20 +85,77 @@ public class ServerThread extends Thread {
                         writer.flush();
                         break;
                     case "approveRequest":
+                        String approvedNumber = approveRequest(reader, statement, writer);
+                        writer.write(approvedNumber);
+                        writer.println();
+                        writer.flush();
                         break;
                     case "createStore":
+                        int updated = createStore(reader, statement);
+                        writer.write(String.valueOf(updated));
+                        writer.println();
+                        writer.flush();
                         break;
                     case "createCalendar":
+                        int createdCalendar = createCalendar(reader, statement);
+                        writer.write(String.valueOf(createdCalendar));
+                        writer.println();
+                        writer.flush();
                         break;
                     case "editCalendar":
+                        writer.write(showCalendars(statement));
+                        writer.println();
+                        writer.flush();
+
+                        String editChoice = reader.readLine();
+                        switch (editChoice) {
+                            case "editCalendarName":
+                                int editName = editCalendarName(reader, statement);
+                                writer.write(String.valueOf(editName));
+                                writer.println();
+                                writer.flush();
+                                break;
+                            case "editCalendarDescription":
+                                int editDescription = editCalendarDescription(reader, statement);
+                                writer.write(String.valueOf(editDescription));
+                                writer.println();
+                                writer.flush();
+                                break;
+                            case "editCalendarAddWindow":
+                                writer.write(String.valueOf(editCalendarAddWindow(reader, statement)));
+                                writer.println();
+                                writer.flush();
+                                break;
+                            case "editCalendarRemoveWindow":
+                                writer.write(String.valueOf(editCalendarRemoveWindow(reader, statement, writer)));
+                                writer.println();
+                                writer.flush();
+                                break;
+                        }
                         break;
+
                     case "deleteCalendar":
+                        writer.write(showCalendars(statement));
+                        writer.println();
+                        writer.flush();
+
+                        writer.write(String.valueOf(deleteCalendar(reader, statement)));
+                        writer.println();
+                        writer.flush();
                         break;
                     case "statisticsSeller":
+                        statisticsSeller(reader, statement, writer);
+                        break;
+                    case "statisticsSellerOrdered":
+                        statisticsSellerOrdered(reader, statement, writer);
                         break;
                     case "importCalendar":
+
                         break;
                     case "exportApprovedRequests":
+                        String fileName = reader.readLine();
+                        String approvedRequests = viewApproved(statement);
+                        exportCalendar(approvedRequests, fileName);
                         break;
                     case "quit":
                         System.out.println("closing");
@@ -439,5 +496,326 @@ public class ServerThread extends Thread {
             approved.add(approvedArray);
         }
         return arraylistToString(approved);
+    }
+
+    public String approveRequest(BufferedReader reader, Statement statement, PrintWriter writer) throws SQLException,
+        IOException {
+        ArrayList<String[]> requests = new ArrayList<>();
+        String requestsQueryStatement = String.format("SELECT customerEmail, storeName, calendarName, startTime, " +
+            "endTime, booking FROM appointments WHERE (sellerEmail == '%s' AND isApproved == 0)", clientEmail);
+        ResultSet requestsQuery = statement.executeQuery(requestsQueryStatement);
+        while (requestsQuery.next()) {
+            String[] requestArray = new String[6];
+            requestArray[0] = requestsQuery.getString("customerEmail");
+            requestArray[1] = requestsQuery.getString("storeName");
+            requestArray[2] = requestsQuery.getString("calendarName");
+            requestArray[3] = requestsQuery.getString("startTime");
+            requestArray[4] = requestsQuery.getString("endTime");
+            requestArray[5] = requestsQuery.getString("booking");
+            requests.add(requestArray);
+        }
+        writer.write(arraylistToString(requests));
+        writer.println();
+        writer.flush();
+
+        String input = reader.readLine();
+        String[] inputList = input.split(",");
+        String inputCustomer = inputList[0];
+        String inputStore = inputList[1];
+        String inputCalendar = inputList[2];
+        String inputStart = inputList[3];
+        String inputBooking = inputList[4];
+        String updateStatement = String.format("UPDATE appointments SET isApproved = 1, isRequest = 0, timeStamp = " +
+            "strftime('s', now) WHERE (customerEmail = '%s' AND storeName = '%s' AND calendarName = '%s' AND " +
+            "startTime = '%s' and booking = '%s'", inputCustomer, inputStore, inputCalendar, inputStart,
+            inputBooking);
+        int changes = statement.executeUpdate(updateStatement);
+        return String.valueOf(changes);
+    }
+
+    public int createStore(BufferedReader reader, Statement statement) throws IOException, SQLException {
+        String input = reader.readLine();
+        String existQueryStatement = String.format("SELECT COUNT(storeName) AS count FROM stores WHERE storeName == " +
+            "'%s'", input);
+        ResultSet existQuery = statement.executeQuery(existQueryStatement);
+        existQuery.next();
+        int existing = existQuery.getInt("count");
+        if (existing < 1) {
+            String updateQueryStatement = String.format("INSERT INTO stores (sellerEmail, storeName) VALUES ('%s', " +
+                "'%s'", clientEmail, input);
+            return statement.executeUpdate(updateQueryStatement);
+        } else {
+            return 0;
+        }
+    }
+
+    public int createCalendar(BufferedReader reader, Statement statement) throws IOException, SQLException {
+        String input = reader.readLine();
+        String[] inputList = input.split(",");
+        String inputStore = inputList[0];
+        String inputCalendar = inputList[1];
+        String inputDescription = inputList[2];
+
+        String calendarUpdateStatement = String.format("INSERT INTO calendars (storeName, calendarName, " +
+            "calendarDescription) VALUES ('%s','%s','%s')", inputStore, inputCalendar, inputDescription);
+        return statement.executeUpdate(calendarUpdateStatement);
+    }
+
+    public int editCalendarName(BufferedReader reader, Statement statement) throws IOException, SQLException {
+        String input = reader.readLine();
+        String[] inputList = input.split(",");
+        String inputStore = inputList[0];
+        String inputOld = inputList[1];
+        String inputNew = inputList[2];
+
+        String updateStatement = String.format("UPDATE calendars SET calendarName = '%s' WHERE (storeName == '%s' AND" +
+            "calendarName == '%s'", inputNew, inputStore, inputOld);
+        return statement.executeUpdate(updateStatement);
+    }
+
+    public int editCalendarDescription(BufferedReader reader, Statement statement) throws IOException, SQLException {
+        String input = reader.readLine();
+        String[] inputList = input.split(",");
+        String inputStore = inputList[0];
+        String inputCalendar = inputList[1];
+        String inputDescription = inputList[2];
+
+        String updateStatement = String.format("UPDATE calendars SET description = '%s' WHERE (storeName == '%s' AND " +
+            "calendarName == '%s'", inputDescription, inputStore, inputCalendar);
+        return statement.executeUpdate(updateStatement);
+    }
+
+    public int editCalendarAddWindow(BufferedReader reader, Statement statement) throws IOException, SQLException {
+        String input = reader.readLine();
+        String[] inputList = input.split(",");
+        String inputStore = inputList[0];
+        String inputCalendar = inputList[1];
+        String inputTitle = inputList[2];
+        String inputStart = inputList[3];
+        String inputEnd = inputList[4];
+        String inputMax = inputList[5];
+
+        ArrayList<String[]> windowTimes = new ArrayList<>();
+        String windowQueryStatement = String.format("SELECT startTime, endTime FROM windows WHERE (storeName == '%s' " +
+            "AND calendarName == '%s') ORDER BY startTime", inputStore, inputCalendar);
+        ResultSet windowQuery = statement.executeQuery(windowQueryStatement);
+        while (windowQuery.next()) {
+            String[] windowArray = new String[2];
+            windowArray[0] = windowQuery.getString("startTime");
+            windowArray[1] = windowQuery.getString("endTime");
+            windowTimes.add(windowArray);
+        }
+        boolean overlap = false;
+        for (int i = 0; i < windowTimes.size(); i++) {
+            if ((inputStart.compareTo(windowTimes.get(i)[0]) >= 0) && (inputStart.compareTo(windowTimes.get(i)[1]) < 0))
+            {
+                overlap = true;
+            }
+        }
+
+        if (!overlap) {
+            String addWindowStatement = String.format("INSERT INTO windows (storeName, calendarName, " +
+                "appointmentTitle, startTime, endTime, maxAttendees, currentBookings) VALUES ('%s', '%s', '%s', '%s'," +
+                " '%s', '%s', '%s'", inputStore, inputCalendar, inputTitle, inputStart, inputEnd, inputMax, 0);
+            return statement.executeUpdate(addWindowStatement);
+        } else {
+            return -1;
+        }
+
+    }
+
+    public int editCalendarRemoveWindow(BufferedReader reader, Statement statement, PrintWriter writer) throws
+        IOException, SQLException {
+        String input = reader.readLine();
+        String[] inputList = input.split(",");
+        String inputStore = inputList[0];
+        String inputCalendar = inputList[1];
+        ArrayList<String[]> windowTimes = new ArrayList<>();
+        String windowQueryStatement = String.format("SELECT startTime, endTime, maxAttendees, currentBookings FROM " +
+            "windows WHERE (storeName == '%s' AND calendarName == '%s'", inputStore, inputCalendar);
+        ResultSet windowQuery = statement.executeQuery(windowQueryStatement);
+        while (windowQuery.next()) {
+            String[] windowArray = new String[4];
+            windowArray[0] = windowQuery.getString("startTime");
+            windowArray[1] = windowQuery.getString("endTime");
+            windowArray[2] = windowQuery.getString("maxAttendees");
+            windowArray[3] = windowQuery.getString("currentBookings");
+            windowTimes.add(windowArray);
+        }
+        writer.write(arraylistToString(windowTimes));
+        writer.println();
+        writer.flush();
+
+        String secondInput = reader.readLine();
+        String deleteStatement = String.format("DELETE FROM windows WHERE (storeName == '%s' AND calendarName " +
+            "== '%s' AND endTime == '%s'", inputStore, inputCalendar, secondInput);
+        return statement.executeUpdate(deleteStatement);
+    }
+
+    public int deleteCalendar(BufferedReader reader, Statement statement) throws IOException, SQLException {
+        String input = reader.readLine();
+        String[] inputList = input.split(",");
+        String inputStore = inputList[0];
+        String inputCalendar = inputList[1];
+
+        String deleteCalendarStatement = String.format("DELETE FROM calendars WHERE (storeName == '%s' AND " +
+            "calendarName == '%s'", inputStore, inputCalendar);
+        int deleteFromCalendar = statement.executeUpdate(deleteCalendarStatement);
+        if (deleteFromCalendar < 1) {
+            return 0;
+        }
+
+        String deleteAppointmentStatement = String.format("DELETE FROM appointments WHERE (storeName == '%s' AND " +
+            "calendarName == '%s'", inputStore, inputCalendar);
+        int deleteFromAppointment = statement.executeUpdate(deleteAppointmentStatement);
+        if (deleteFromAppointment < 1) {
+            return 0;
+        }
+
+        String deleteWindowStatement = String.format("DELETE FROM windows WHERE (storeName == '%s' AND " +
+            "calendarName == '%s'", inputStore, inputCalendar);
+        int deleteFromWindow = statement.executeUpdate(deleteWindowStatement);
+        if (deleteFromWindow < 1) {
+            return 0;
+        }
+        return 1;
+    }
+
+    public String showCalendars(Statement statement) throws SQLException {
+        ArrayList<String[]> calendars = new ArrayList<>();
+        ResultSet calendarsQuery = statement.executeQuery("SELECT * FROM calendars");
+        while (calendarsQuery.next()) {
+            String[] calendarArray = new String[3];
+            calendarArray[0] = calendarsQuery.getString("storeName");
+            calendarArray[1] = calendarsQuery.getString("calendarName");
+            calendarArray[2] = calendarsQuery.getString("calendarDescription");
+            calendars.add(calendarArray);
+        }
+        return arraylistToString(calendars);
+    }
+
+    public void statisticsSeller(BufferedReader reader, Statement statement, PrintWriter writer) throws IOException,
+        SQLException {
+        ArrayList<String> stores = new ArrayList<>();
+        String storeQueryStatement = String.format("SELECT * FROM stores WHERE sellerEmail == '%s'", clientEmail);
+        ResultSet storeQuery = statement.executeQuery(storeQueryStatement);
+        while (storeQuery.next()) {
+            stores.add(storeQuery.getString("storeName"));
+        }
+        writer.write(stores.toString());
+        writer.println();
+        writer.flush();
+
+        String inputStore = reader.readLine();
+        String popularWindowQueryStatement = String.format("SELECT startTime, endTime, MAX(currentBookings) AS " +
+            "windowCustomers FROM windows WHERE storeName == '%s' GROUP BY storeName", inputStore);
+        ResultSet popularWindowQuery = statement.executeQuery(popularWindowQueryStatement);
+        popularWindowQuery.next();
+        String popularStart = popularWindowQuery.getString("startTime");
+        String popularEnd = popularWindowQuery.getString("endTime");
+        writer.write(popularStart + "," + popularEnd);
+
+
+        ArrayList<String[]> customers = new ArrayList<>();
+        String customerQueryStatement = String.format("SELECT customerEmail, SUM(isApproved) AS numOfApproved FROM " +
+            "appointments WHERE storeName == '%s' GROUP BY customerEmail", inputStore);
+        ResultSet customerQuery = statement.executeQuery(customerQueryStatement);
+        while (customerQuery.next()) {
+            String[] customerArray = new String[2];
+            customerArray[0] = customerQuery.getString("customerEmail");
+            customerArray[1] = customerQuery.getString("numOfApproved");
+            customers.add(customerArray);
+        }
+        writer.write(arraylistToString(customers));
+        writer.println();
+        writer.flush();
+    }
+
+    public void statisticsSellerOrdered(BufferedReader reader, Statement statement, PrintWriter writer) throws
+        SQLException, IOException {
+        ArrayList<String> stores = new ArrayList<>();
+        String storeQueryStatement = String.format("SELECT * FROM stores WHERE sellerEmail == '%s'", clientEmail);
+        ResultSet storeQuery = statement.executeQuery(storeQueryStatement);
+        while (storeQuery.next()) {
+            stores.add(storeQuery.getString("storeName"));
+        }
+        writer.write(stores.toString());
+        writer.println();
+        writer.flush();
+
+        String inputStore = reader.readLine();
+        String popularWindowQueryStatement = String.format("SELECT startTime, endTime, MAX(currentBookings) AS " +
+            "windowCustomers FROM windows WHERE storeName == '%s' GROUP BY storeName", inputStore);
+        ResultSet popularWindowQuery = statement.executeQuery(popularWindowQueryStatement);
+        popularWindowQuery.next();
+        String popularStart = popularWindowQuery.getString("startTime");
+        String popularEnd = popularWindowQuery.getString("endTime");
+        writer.write(popularStart + "," + popularEnd);
+
+
+        ArrayList<String[]> customers = new ArrayList<>();
+        String customerQueryStatement = String.format("SELECT customerEmail, SUM(isApproved) AS numOfApproved FROM " +
+            "appointments WHERE storeName == '%s' GROUP BY customerEmail ORDER BY numOfApproved DESC", inputStore);
+        ResultSet customerQuery = statement.executeQuery(customerQueryStatement);
+        while (customerQuery.next()) {
+            String[] customerArray = new String[2];
+            customerArray[0] = customerQuery.getString("customerEmail");
+            customerArray[1] = customerQuery.getString("numOfApproved");
+            customers.add(customerArray);
+        }
+        writer.write(arraylistToString(customers));
+        writer.println();
+        writer.flush();
+    }
+
+    public void importCalendar(BufferedReader reader, Statement statement, PrintWriter writer)
+        throws IOException, SQLException {
+
+        ArrayList<String[]> stores = new ArrayList<>();
+        ResultSet storeQuery = statement.executeQuery("SELECT * FROM stores");
+        while (storeQuery.next()) {
+            String[] storeArray = new String[2];
+            storeArray[0] = storeQuery.getString("sellerEmail");
+            storeArray[1] = storeQuery.getString("storeName");
+            stores.add(storeArray);
+        }
+        writer.write(arraylistToString(stores));
+        writer.println();
+        writer.flush();
+
+        String input = reader.readLine();
+        String[] inputList = input.split(",");
+        String storeName = inputList[0];
+        String fileName = inputList[1];
+
+        BufferedReader fileReader = new BufferedReader(new FileReader(fileName));
+        String importCalendar = fileReader.readLine();
+        String importDescription = fileReader.readLine();
+        String insertCalendarStatement = String.format("INSERT INTO calendars (storeName, calendarName, " +
+            "calendarDescription) VALUES ('%s', '%s', '%s')", storeName, importCalendar, importDescription);
+        statement.executeUpdate(insertCalendarStatement);
+
+        String window = fileReader.readLine();
+        String[] windowList = window.split(",");
+        while (fileReader.readLine() != null) {
+            String insertWindowStatement = String.format("INSERT INTO windows (storeName, calendarName, " +
+                "appointmentTitle, startTime, endTime, maxAttendees, currentBookings) VALUES ('%s', '%s', '%s', '%s'," +
+                " '%s', '%s', 0", storeName, importCalendar, windowList[0], windowList[1], windowList[2],
+                windowList[3], windowList[4]);
+            statement.executeUpdate(insertWindowStatement);
+        }
+        fileReader.close();
+    }
+
+    public void exportCalendar(String approved, String fileName) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new FileWriter(fileName));
+        approved = approved.substring(1, approved.length() - 1);
+        String[] approvedList = approved.split("],\\[");
+        for (int i = 0; i < approvedList.length; i++) {
+            bw.write(approvedList[i]);
+            bw.write("\n");
+        }
+        bw.flush();
+        bw.close();
     }
 }
