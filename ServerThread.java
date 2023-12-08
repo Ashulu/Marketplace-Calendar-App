@@ -581,7 +581,9 @@ public class ServerThread extends Thread {
         String inputMax = inputList[5];
 
         ArrayList<String[]> windowTimes = new ArrayList<>();
-        ResultSet windowQuery = statement.executeQuery("SELECT startTime, endTime FROM windows ORDER BY startTime");
+        String windowQueryStatement = String.format("SELECT startTime, endTime FROM windows WHERE (storeName == '%s' " +
+            "AND calendarName == '%s') ORDER BY startTime", inputStore, inputCalendar);
+        ResultSet windowQuery = statement.executeQuery(windowQueryStatement);
         while (windowQuery.next()) {
             String[] windowArray = new String[2];
             windowArray[0] = windowQuery.getString("startTime");
@@ -605,6 +607,33 @@ public class ServerThread extends Thread {
             return -1;
         }
 
+    }
+
+    public int editCalendarRemoveWindow(BufferedReader reader, Statement statement, PrintWriter writer) throws
+        IOException, SQLException {
+        String input = reader.readLine();
+        String[] inputList = input.split(",");
+        String inputStore = inputList[0];
+        String inputCalendar = inputList[1];
+        ArrayList<String[]> windowTimes = new ArrayList<>();
+        String windowQueryStatement = String.format("SELECT startTime, endTime, maxAttendees FROM windows WHERE " +
+            "(storeName == '%s' AND calendarName == '%s'", inputStore, inputCalendar);
+        ResultSet windowQuery = statement.executeQuery(windowQueryStatement);
+        while (windowQuery.next()) {
+            String[] windowArray = new String[3];
+            windowArray[0] = windowQuery.getString("startTime");
+            windowArray[1] = windowQuery.getString("endTime");
+            windowArray[2] = windowQuery.getString("maxAttendees");
+            windowTimes.add(windowArray);
+        }
+        writer.write(arraylistToString(windowTimes));
+        writer.println();
+        writer.flush();
+
+        String secondInput = reader.readLine();
+        String deleteStatement = String.format("DELETE FROM windows WHERE (storeName == '%s' AND calendarName " +
+            "== '%s' AND endTime == '%s'", inputStore, inputCalendar, secondInput);
+        return statement.executeUpdate(deleteStatement);
     }
 
     public String showCalendars(Statement statement) throws SQLException {

@@ -260,7 +260,8 @@ return
 **editCalendarRemoveWindow**
 
 variables needed:
-storeName, calendarName, startTime
+1. storeName, calendarName
+2. endTime
 
 return:
 1. list of store and calendar
