@@ -80,8 +80,8 @@ return options:
 SELECT calendarName, calendarDescription from calendars  
 *store all calendarNames in the server, then iterate through*  
 [calendarName, calendarDescription] * number of calendars  
-SELECT appointmentTitle, startTime, endTime, maxAttendees, currentBookings WHERE calendarName == iteration(i)  
-[appointmentTitle, startTime, endTime, maxAttendees, currentBookings] * number of calendars
+SELECT calendarName, appointmentTitle, startTime, endTime, maxAttendees, currentBookings WHERE calendarName == iteration(i)  
+[calendarName, appointmentTitle, startTime, endTime, maxAttendees, currentBookings] * number of windows
 
 variables needed:
 none
