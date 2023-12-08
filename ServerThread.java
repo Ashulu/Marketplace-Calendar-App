@@ -581,8 +581,7 @@ public class ServerThread extends Thread {
         String inputMax = inputList[5];
 
         ArrayList<String[]> windowTimes = new ArrayList<>();
-        String windowQueryStatement = String.format("SELECT startTime, endTime FROM windows ORDER BY startTime");
-        ResultSet windowQuery = statement.executeQuery(windowQueryStatement);
+        ResultSet windowQuery = statement.executeQuery("SELECT startTime, endTime FROM windows ORDER BY startTime");
         while (windowQuery.next()) {
             String[] windowArray = new String[2];
             windowArray[0] = windowQuery.getString("startTime");
