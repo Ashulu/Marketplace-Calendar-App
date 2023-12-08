@@ -91,6 +91,10 @@ public class ServerThread extends Thread {
                         writer.flush();
                         break;
                     case "createStore":
+                        int updated = createStore(reader, statement);
+                        writer.write(String.valueOf(updated));
+                        writer.println();
+                        writer.flush();
                         break;
                     case "createCalendar":
                         break;
@@ -445,7 +449,8 @@ public class ServerThread extends Thread {
         return arraylistToString(approved);
     }
 
-    public String approveRequest(BufferedReader reader, Statement statement, PrintWriter writer) throws SQLException, IOException {
+    public String approveRequest(BufferedReader reader, Statement statement, PrintWriter writer) throws SQLException,
+        IOException {
         ArrayList<String[]> requests = new ArrayList<>();
         String requestsQueryStatement = String.format("SELECT customerEmail, storeName, calendarName, startTime, " +
             "endTime, booking FROM appointments WHERE (sellerEmail == '%s' AND isApproved == 0)", clientEmail);
@@ -473,9 +478,25 @@ public class ServerThread extends Thread {
         String inputBooking = inputList[4];
         String updateStatement = String.format("UPDATE appointments SET isApproved = 1, isRequest = 0, timeStamp = " +
             "strftime('s', now) WHERE (customerEmail = '%s' AND storeName = '%s' AND calendarName = '%s' AND " +
-            "startTime = '%s' and booking = '%s'", inputCustomer, inputStore, inputStore, inputCalendar, inputStart,
+            "startTime = '%s' and booking = '%s'", inputCustomer, inputStore, inputCalendar, inputStart,
             inputBooking);
         int changes = statement.executeUpdate(updateStatement);
         return String.valueOf(changes);
+    }
+
+    public int createStore(BufferedReader reader, Statement statement) throws IOException, SQLException {
+        String input = reader.readLine();
+        String existQueryStatement = String.format("SELECT COUNT(storeName) AS count FROM stores WHERE storeName == " +
+            "'%s'", input);
+        ResultSet existQuery = statement.executeQuery(existQueryStatement);
+        existQuery.next();
+        int existing = existQuery.getInt("count");
+        if (existing < 1) {
+            String updateQueryStatement = String.format("INSERT INTO stores (sellerEmail, storeName) VALUES ('%s', " +
+                "'%s'", clientEmail, input);
+            return statement.executeUpdate(updateQueryStatement);
+        } else {
+            return 0;
+        }
     }
 }
