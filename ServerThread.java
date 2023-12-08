@@ -519,4 +519,18 @@ public class ServerThread extends Thread {
             "calendarDescription) VALUES ('%s','%s','%s')", inputStore, inputCalendar, inputDescription);
         return statement.executeUpdate(calendarUpdateStatement);
     }
+
+
+
+    public int editCalendarDescription(BufferedReader reader, Statement statement) throws IOException, SQLException {
+        String input = reader.readLine();
+        String[] inputList = input.split(",");
+        String inputStore = inputList[0];
+        String inputCalendar = inputList[1];
+        String inputDescription = inputList[2];
+
+        String updateStatement = String.format("UPDATE calendars SET description = '%s' WHERE (storeName == '%s' AND " +
+            "calendarName == '%s'", inputDescription, inputStore, inputCalendar);
+        return statement.executeUpdate(updateStatement);
+    }
 }
