@@ -222,7 +222,6 @@ return:
 
 variables needed:
 1. storeName, calendarName, calendarDescription
-2. startTime, endTime, maxAttendees * number of windows
 
 return:
 0 or 1
@@ -248,7 +247,7 @@ return
 2. 1 or 0
 
 -------------------------------------------------------------------------------------------------------------
-**editCalendarAddWindow
+**editCalendarAddWindow**
 
 variables needed:
 storeName, calendarName, startTime, endTime, maxAttendees

@@ -97,9 +97,17 @@ public class ServerThread extends Thread {
                         writer.flush();
                         break;
                     case "createCalendar":
+                        int createdCalendar = createCalendar(reader, statement);
+                        writer.write(String.valueOf(createdCalendar));
+                        writer.println();
+                        writer.flush();
                         break;
-                    case "editCalendar":
+                    case "editCalendarName":
                         break;
+                    case "editCalendarDescription":
+                        break;
+                    case "editCalendarAddWindow":
+                        break;;
                     case "deleteCalendar":
                         break;
                     case "statisticsSeller":
@@ -498,5 +506,17 @@ public class ServerThread extends Thread {
         } else {
             return 0;
         }
+    }
+
+    public int createCalendar(BufferedReader reader, Statement statement) throws IOException, SQLException {
+        String input = reader.readLine();
+        String[] inputList = input.split(",");
+        String inputStore = inputList[0];
+        String inputCalendar = inputList[1];
+        String inputDescription = inputList[2];
+
+        String calendarUpdateStatement = String.format("INSERT INTO calendars (storeName, calendarName, " +
+            "calendarDescription) VALUES ('%s','%s','%s')", inputStore, inputCalendar, inputDescription);
+        return statement.executeUpdate(calendarUpdateStatement);
     }
 }
