@@ -589,7 +589,7 @@ public class ServerThread extends Thread {
             windowArray[1] = windowQuery.getString("endTime");
             windowTimes.add(windowArray);
         }
-        Boolean overlap = false;
+        boolean overlap = false;
         for (int i = 0; i < windowTimes.size(); i++) {
             if ((inputStart.compareTo(windowTimes.get(i)[0]) >= 0) && (inputStart.compareTo(windowTimes.get(i)[1]) < 0))
             {
@@ -601,8 +601,7 @@ public class ServerThread extends Thread {
             String addWindowStatement = String.format("INSERT INTO windows (storeName, calendarName, " +
                 "appointmentTitle, startTime, endTime, maxAttendees, currentBookings) VALUES ('%s', '%s', '%s', '%s'," +
                 " '%s', '%s', '%s'", inputStore, inputCalendar, inputTitle, inputStart, inputEnd, inputMax, 0);
-            int updates = statement.executeUpdate(addWindowStatement);
-            return updates;
+            return statement.executeUpdate(addWindowStatement);
         } else {
             return -1;
         }
