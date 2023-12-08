@@ -250,17 +250,17 @@ return
 **editCalendarAddWindow**
 
 variables needed:
-storeName, calendarName, startTime, endTime, maxAttendees
+storeName, calendarName, appointmentTitle, startTime, endTime, maxAttendees
 
 return
 1. list of store and calendar
 2. 1 or 0
 
 -------------------------------------------------------------------------------------------------------------
-**editCalendarRemoveWindow
+**editCalendarRemoveWindow**
 
 variables needed:
-storeName, calendarName, startTime, endTime
+storeName, calendarName, startTime
 
 return:
 1. list of store and calendar
