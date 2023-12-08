@@ -85,6 +85,10 @@ public class ServerThread extends Thread {
                         writer.flush();
                         break;
                     case "approveRequest":
+                        String approvedNumber = approveRequest(reader, statement, writer);
+                        writer.write(approvedNumber);
+                        writer.println();
+                        writer.flush();
                         break;
                     case "createStore":
                         break;
@@ -439,5 +443,39 @@ public class ServerThread extends Thread {
             approved.add(approvedArray);
         }
         return arraylistToString(approved);
+    }
+
+    public String approveRequest(BufferedReader reader, Statement statement, PrintWriter writer) throws SQLException, IOException {
+        ArrayList<String[]> requests = new ArrayList<>();
+        String requestsQueryStatement = String.format("SELECT customerEmail, storeName, calendarName, startTime, " +
+            "endTime, booking FROM appointments WHERE (sellerEmail == '%s' AND isApproved == 0)", clientEmail);
+        ResultSet requestsQuery = statement.executeQuery(requestsQueryStatement);
+        while (requestsQuery.next()) {
+            String[] requestArray = new String[6];
+            requestArray[0] = requestsQuery.getString("customerEmail");
+            requestArray[1] = requestsQuery.getString("storeName");
+            requestArray[2] = requestsQuery.getString("calendarName");
+            requestArray[3] = requestsQuery.getString("startTime");
+            requestArray[4] = requestsQuery.getString("endTime");
+            requestArray[5] = requestsQuery.getString("booking");
+            requests.add(requestArray);
+        }
+        writer.write(arraylistToString(requests));
+        writer.println();
+        writer.flush();
+
+        String input = reader.readLine();
+        String[] inputList = input.split(",");
+        String inputCustomer = inputList[0];
+        String inputStore = inputList[1];
+        String inputCalendar = inputList[2];
+        String inputStart = inputList[3];
+        String inputBooking = inputList[4];
+        String updateStatement = String.format("UPDATE appointments SET isApproved = 1, isRequest = 0, timeStamp = " +
+            "strftime('s', now) WHERE (customerEmail = '%s' AND storeName = '%s' AND calendarName = '%s' AND " +
+            "startTime = '%s' and booking = '%s'", inputCustomer, inputStore, inputStore, inputCalendar, inputStart,
+            inputBooking);
+        int changes = statement.executeUpdate(updateStatement);
+        return String.valueOf(changes);
     }
 }

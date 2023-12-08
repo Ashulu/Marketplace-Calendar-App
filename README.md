@@ -202,7 +202,10 @@ customerEmail, storeName, calendarName, startTime, booking
 
 
 if approved:
-UPDATE appointments SET isApproved = 1, isRequest = 0, 
+UPDATE appointments SET isApproved = 1, isRequest = 0,
+
+return:
+1 if correct, 0 if not
 
 
 -------------------------------------------------------------------------------------------------------------
