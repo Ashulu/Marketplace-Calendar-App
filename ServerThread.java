@@ -150,8 +150,12 @@ public class ServerThread extends Thread {
                         statisticsSellerOrdered(reader, statement, writer);
                         break;
                     case "importCalendar":
+
                         break;
                     case "exportApprovedRequests":
+                        String fileName = reader.readLine();
+                        String approvedRequests = viewApproved(statement);
+                        exportCalendar(approvedRequests, fileName);
                         break;
                     case "quit":
                         System.out.println("closing");
@@ -764,5 +768,54 @@ public class ServerThread extends Thread {
         writer.flush();
     }
 
+    public void importCalendar(BufferedReader reader, Statement statement, PrintWriter writer)
+        throws IOException, SQLException {
 
+        ArrayList<String[]> stores = new ArrayList<>();
+        ResultSet storeQuery = statement.executeQuery("SELECT * FROM stores");
+        while (storeQuery.next()) {
+            String[] storeArray = new String[2];
+            storeArray[0] = storeQuery.getString("sellerEmail");
+            storeArray[1] = storeQuery.getString("storeName");
+            stores.add(storeArray);
+        }
+        writer.write(arraylistToString(stores));
+        writer.println();
+        writer.flush();
+
+        String input = reader.readLine();
+        String[] inputList = input.split(",");
+        String storeName = inputList[0];
+        String fileName = inputList[1];
+
+        BufferedReader fileReader = new BufferedReader(new FileReader(fileName));
+        String importCalendar = fileReader.readLine();
+        String importDescription = fileReader.readLine();
+        String insertCalendarStatement = String.format("INSERT INTO calendars (storeName, calendarName, " +
+            "calendarDescription) VALUES ('%s', '%s', '%s')", storeName, importCalendar, importDescription);
+        statement.executeUpdate(insertCalendarStatement);
+
+        String window = fileReader.readLine();
+        String[] windowList = window.split(",");
+        while (fileReader.readLine() != null) {
+            String insertWindowStatement = String.format("INSERT INTO windows (storeName, calendarName, " +
+                "appointmentTitle, startTime, endTime, maxAttendees, currentBookings) VALUES ('%s', '%s', '%s', '%s'," +
+                " '%s', '%s', 0", storeName, importCalendar, windowList[0], windowList[1], windowList[2],
+                windowList[3], windowList[4]);
+            statement.executeUpdate(insertWindowStatement);
+        }
+        fileReader.close();
+    }
+
+    public void exportCalendar(String approved, String fileName) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new FileWriter(fileName));
+        approved = approved.substring(1, approved.length() - 1);
+        String[] approvedList = approved.split("],\\[");
+        for (int i = 0; i < approvedList.length; i++) {
+            bw.write(approvedList[i]);
+            bw.write("\n");
+        }
+        bw.flush();
+        bw.close();
+    }
 }

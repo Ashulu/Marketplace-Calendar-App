@@ -304,6 +304,9 @@ output:
 variablesNeeded:
 storeName, fileName
 
+output:
+list of stores
+
 -------------------------------------------------------------------------------------------------------------
 **exportApprovedRequests**
 
