@@ -200,16 +200,19 @@ public class ServerThread extends Thread {
             calendarNames.add(calendarNameDescription);
         }
         for (int i = 0; i < calendarNames.size(); i++) {
-            String query = String.format("SELECT appointmentTitle, startTime, endTime, maxAttendees, currentBookings " +
-                "WHERE calendarName == '%s'", calendarNames.get(i)[0]);
+            String query = String.format("SELECT calendarName, appointmentTitle, startTime, endTime, maxAttendees, " +
+                "currentBookings WHERE calendarName == '%s'", calendarNames.get(i)[0]);
             ResultSet windowResult = statement.executeQuery(query);
-            String[] windowArray = new String[5];
-            windowArray[0] = windowResult.getString("appointmentTitle");
-            windowArray[1] = windowResult.getString("startTime");
-            windowArray[2] = windowResult.getString("endTime");
-            windowArray[3] = windowResult.getString("maxAttendees");
-            windowArray[4] = windowResult.getString("currentBookings");
-            windowArrayList.add(windowArray);
+            while (windowResult.next()) {
+                String[] windowArray = new String[6];
+                windowArray[0] = windowResult.getString("calendarName");
+                windowArray[1] = windowResult.getString("appointmentTitle");
+                windowArray[2] = windowResult.getString("startTime");
+                windowArray[3] = windowResult.getString("endTime");
+                windowArray[4] = windowResult.getString("maxAttendees");
+                windowArray[5] = windowResult.getString("currentBookings");
+                windowArrayList.add(windowArray);
+            }
         }
 
         String firstOutput = arraylistToString(windowArrayList);
