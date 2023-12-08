@@ -57,7 +57,7 @@ public class Client extends JComponent implements Runnable {
 
                     JOptionPane.showMessageDialog(frame.getContentPane(), "Account already Exists!");
                 } else if (userField.getText().equals("Email") || passField.getText().equals("Password") ){
-                    JOptionPane.showMessageDialog(frame.getContentPane(), "Enter an Eamil and/or password");
+                    JOptionPane.showMessageDialog(frame.getContentPane(), "Enter an email and/or password");
                 } else {
                     //goes back to the main page to then login with the newly created account
                     frame.remove(createPanel);
@@ -132,11 +132,12 @@ public class Client extends JComponent implements Runnable {
                     JOptionPane.showMessageDialog(frame.getContentPane(), "Invalid inputs");
                 } else {
                     try {
-//                        writer.println("login," + userField.getText() + "," + passField);
-//                        writer.flush();
-//
-//                        int check = Integer.parseInt(reader.readLine());
-                        int check = 2;
+                        writer.println("login");
+                        writer.flush();
+
+                        writer.println(userField.getText() + "," + passField.getText());
+                        writer.flush();
+                        int check = Integer.parseInt(reader.readLine());
                         switch (check){
                             case 1 -> {
                                 //go to the customer panel
@@ -171,7 +172,7 @@ public class Client extends JComponent implements Runnable {
     }
 
     public static void main(String[] args) {
-        String host = JOptionPane.showInputDialog(null, "Enter the IP you want to connect to:", "Calender System",
+        String host = JOptionPane.showInputDialog(null, "Enter the IP you want to connect to:", "Calendar System",
                 JOptionPane.QUESTION_MESSAGE);
         try {
             Socket socket = new Socket(host,5555);
@@ -185,7 +186,7 @@ public class Client extends JComponent implements Runnable {
         }
 
 
-        SwingUtilities.invokeLater(new Client());
+        //SwingUtilities.invokeLater(new Client());
 
     }
 
@@ -659,7 +660,7 @@ public class Client extends JComponent implements Runnable {
 
     //Seller landing page
     private void seller(BufferedReader br, PrintWriter pw) throws IOException {
-        JLabel welcome = new JLabel("Hello Seller! \nPlease Select what you would like to do");
+        JLabel welcome = new JLabel("Hello Seller! \nPlease Select what you would like to do.");
         sellerMain.add(welcome);
 
         String[] selOp = new String[] {
@@ -734,6 +735,7 @@ public class Client extends JComponent implements Runnable {
                         case 9 -> {
                             frame.remove(sellerMain);
                             exit();
+                            return;
                         }
                     }
                     frame.remove(sellerMain);
@@ -748,6 +750,8 @@ public class Client extends JComponent implements Runnable {
     //0 "View Approved Appointments"
     private void s0(BufferedReader br, PrintWriter pw) throws IOException {
         pw.write("viewApproved");
+        pw.println();
+
         pw.flush();
         sellerBack(sellerSub);
 
@@ -777,6 +781,8 @@ public class Client extends JComponent implements Runnable {
     //1 "Appointment Requests"
     private void s1(BufferedReader br, PrintWriter pw) throws IOException {
         pw.write("approveRequest");
+        pw.println();
+
         pw.flush();
 
         sellerBack(sellerSub);
@@ -803,6 +809,8 @@ public class Client extends JComponent implements Runnable {
             String command = String.format("confirm,%s,%s,%s,%s,%s",
                     temp2[0],temp2[1],temp2[2],temp2[3],temp2[5]);
             pw.write(command);
+            pw.println();
+
             pw.flush();
             int response;
             try {
@@ -827,6 +835,8 @@ public class Client extends JComponent implements Runnable {
             String command = String.format("delete,%s,%s,%s,%s,%s",
                     temp2[0],temp2[1],temp2[2],temp2[3],temp2[5]);
             pw.write(command);
+            pw.println();
+
             pw.flush();
             int response;
             try {
@@ -853,6 +863,7 @@ public class Client extends JComponent implements Runnable {
     //2 "Create Store"
     private void s2(BufferedReader br, PrintWriter pw) throws IOException {
         pw.write("createStore");
+        pw.println();
         pw.flush();
         frame.add(sellerSub);
         sellerBack(sellerSub);
@@ -871,8 +882,10 @@ public class Client extends JComponent implements Runnable {
         result.setVisible(false);
         JButton create = new JButton("Create");
         create.addActionListener(e -> {
-            String command = String.format("s2,%s",storeName.getText());
+            String command = String.format("%s",storeName.getText());
             pw.write(command);
+            pw.println();
+
             pw.flush();
             int response;
             try {
@@ -901,6 +914,8 @@ public class Client extends JComponent implements Runnable {
     //3 "Create Calendar"
     private void s3(BufferedReader br, PrintWriter pw) throws IOException {
         pw.write("createCalendar");
+        pw.println();
+
         pw.flush();
         frame.add(sellerSub);
         sellerBack(sellerSub);
@@ -925,6 +940,8 @@ public class Client extends JComponent implements Runnable {
                 String command = String.format("s2,%s,%s,%s",storeName.getText(),calendarName.getText(),
                         calendarDescription.getText());
                 pw.write(command);
+                pw.println();
+
                 pw.flush();
                 int response = 0;
                 try {
@@ -954,6 +971,8 @@ public class Client extends JComponent implements Runnable {
     //i need to check for reply of successful or not?
     private void s4(BufferedReader br, PrintWriter pw) throws IOException {
         pw.write("editCalendar");
+        pw.println();
+
         pw.flush();
         frame.add(sellerSub);
         JButton back = new JButton("Back");
@@ -1000,6 +1019,8 @@ public class Client extends JComponent implements Runnable {
             switch (edit.getSelectedIndex()) {
                 case 0 -> {
                     pw.write("editCalendarName");
+                    pw.println();
+
                     pw.flush();
                     JButton submit = new JButton("Edit");
                     sellerSub.add(edit);
@@ -1011,6 +1032,8 @@ public class Client extends JComponent implements Runnable {
                         String command = String.format("%s,%s,%s",storeName,
                                 calendarName,newName.getText());
                         pw.write(command);
+                        pw.println();
+
                         pw.flush();
 
                         frame.remove(sellerSub);
@@ -1020,6 +1043,8 @@ public class Client extends JComponent implements Runnable {
                 }
                 case 1 -> {
                     pw.write("editCalendarName");
+                    pw.println();
+
                     pw.flush();
                     frame.add(sellerSub);
                     JButton submit = new JButton("Edit");
@@ -1032,6 +1057,8 @@ public class Client extends JComponent implements Runnable {
                         String command = String.format("%s,%s,%s",storeName,
                                 calendarName,calendarDescription.getText());
                         pw.write(command);
+                        pw.println();
+
                         pw.flush();
 
                         frame.remove(sellerSub);
@@ -1041,6 +1068,8 @@ public class Client extends JComponent implements Runnable {
                 }
                 case 2 -> {
                     pw.write("editCalendarAddWindow");
+                    pw.println();
+
                     pw.flush();
                     frame.add(sellerSub);
                     JButton submit = new JButton("Add");
@@ -1061,6 +1090,9 @@ public class Client extends JComponent implements Runnable {
                                 calendarName,start.getText(),end.getText(),
                                 capacity.getText(),desc.getText());
                         pw.write(command);
+
+                        pw.println();
+
                         pw.flush();
 
                         frame.remove(sellerSub);
@@ -1071,6 +1103,8 @@ public class Client extends JComponent implements Runnable {
                 }
                 case 3 -> {
                     pw.write("editCalendarRemoveWindow");
+                    pw.println();
+
                     pw.flush();
                     String command = String.format("%s,%s", storeName,
                             calendarName);
@@ -1096,6 +1130,8 @@ public class Client extends JComponent implements Runnable {
                         String[] temp4 = ((String)winOp.getSelectedItem()).split(",");
                         String command2 = String.format("%s", temp4[4]);
                         pw.write(command2);
+                        pw.println();
+
                         pw.flush();
                         result.setVisible(true);
                         frame.remove(sellerSub);
@@ -1125,6 +1161,8 @@ public class Client extends JComponent implements Runnable {
     //5 "Delete Calendar"
     private void s5(BufferedReader br, PrintWriter pw) throws IOException {
         pw.write("deleteCalendar");
+        pw.println();
+
         pw.flush();
 
         frame.add(sellerSub);
@@ -1147,6 +1185,8 @@ public class Client extends JComponent implements Runnable {
         delete.addActionListener(e -> {
             String command = String.format("%s,%s",storeName.getText(),calendarName.getText());
             pw.write(command);
+            pw.println();
+
             pw.flush();
             frame.remove(sellerSub);
             frame.add(sellerMain, BorderLayout.CENTER);
@@ -1176,6 +1216,8 @@ public class Client extends JComponent implements Runnable {
     //6 "Show Statistics"
     private void s6(BufferedReader br, PrintWriter pw) throws IOException {
         pw.write("statisticsSeller");
+        pw.println();
+
         pw.flush();
         String[] stores = br.readLine().split(",");
         JComboBox<String> storeOptions = new JComboBox<String>(stores);
@@ -1193,6 +1235,8 @@ public class Client extends JComponent implements Runnable {
         JButton confirm = new JButton("Confirm");
         confirm.addActionListener(e -> {
             pw.write((String)storeOptions.getSelectedItem());
+            pw.println();
+            pw.flush();
             try {
                 tempWind.setText(br.readLine());
                 tempCust.setText(br.readLine());
@@ -1227,9 +1271,13 @@ public class Client extends JComponent implements Runnable {
         JButton sort = new JButton("Sort");
         sort.addActionListener(e -> {
             pw.write("statisticsSellerOrdered");
+            pw.println();
+            pw.flush();
             try {
                 br.readLine();
                 pw.write((String)storeOptions.getSelectedItem());
+                pw.println();
+                pw.flush();
                 tempWind.setText(br.readLine());
                 tempCust.setText(br.readLine());
             } catch (IOException ex) {
@@ -1253,6 +1301,8 @@ public class Client extends JComponent implements Runnable {
     //7 "Import Calendar"
     private void s7(BufferedReader br, PrintWriter pw) throws IOException {
         pw.write("importCalendar");
+        pw.println();
+
         pw.flush();
 
         frame.add(sellerSub);
@@ -1275,6 +1325,8 @@ public class Client extends JComponent implements Runnable {
         imp.addActionListener(e -> {
             String command = String.format("s7,%s,%s",storeName.getText(),fileName.getText());
             pw.write(command);
+            pw.println();
+
             pw.flush();
             frame.remove(sellerSub);
             frame.add(sellerMain, BorderLayout.CENTER);

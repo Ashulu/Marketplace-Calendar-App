@@ -176,6 +176,7 @@ public class ServerThread extends Thread {
         }
     }
 
+    //works after adjusting clientside
     public String login(BufferedReader reader, Statement statement) throws IOException, SQLException {
         String returning;
 
@@ -184,7 +185,7 @@ public class ServerThread extends Thread {
         System.out.println("input: " + input);
         String[] inputList = input.split(",");
         System.out.println("inputList made");
-        String query = String.format("SELECT type, password FROM accounts WHERE email == '%s'", inputList[0]);
+        String query = String.format("SELECT type, password FROM accounts WHERE email = '%s'", inputList[0]);
         System.out.println("query: " + query);
         ResultSet result = statement.executeQuery(query);
         if (result.next()) {
@@ -220,7 +221,7 @@ public class ServerThread extends Thread {
         String inputEmail = inputList[1];
         String inputPassword = inputList[2];
 
-        String query = String.format("SELECT COUNT(email) AS count FROM accounts WHERE email == '%s'", inputEmail);
+        String query = String.format("SELECT COUNT(email) AS count FROM accounts WHERE email = '%s'", inputEmail);
         System.out.println("querying");
         ResultSet result = statement.executeQuery(query);
         result.next();
@@ -258,7 +259,7 @@ public class ServerThread extends Thread {
         }
         for (int i = 0; i < calendarNames.size(); i++) {
             String query = String.format("SELECT calendarName, appointmentTitle, startTime, endTime, maxAttendees, " +
-                "currentBookings WHERE calendarName == '%s'", calendarNames.get(i)[0]);
+                "currentBookings WHERE calendarName = '%s'", calendarNames.get(i)[0]);
             ResultSet windowResult = statement.executeQuery(query);
             while (windowResult.next()) {
                 String[] windowArray = new String[6];
@@ -304,7 +305,7 @@ public class ServerThread extends Thread {
         String inputStore = firstInputList[0];
         String inputCalendar = firstInputList[1];
         String windowQueryStatement = String.format("SELECT startTime, endTime, maxAttendees, currentBookings FROM " +
-            "windows WHERE (storeName == '%s' AND calendarName == '%s' AND currentBookings < maxAttendees",
+            "windows WHERE (storeName = '%s' AND calendarName = '%s' AND currentBookings < maxAttendees",
             inputStore, inputCalendar);
         ResultSet windowQuery = statement.executeQuery(windowQueryStatement);
         ArrayList<String[]> windowQueryResult = new ArrayList<>();
@@ -328,12 +329,12 @@ public class ServerThread extends Thread {
         String inputEndTime = secondInputList[1];
         int inputBooking = Integer.parseInt(secondInputList[3]);
         String bookingQueryStatement = String.format("SELECT maxAttendees, currentBookings FROM windows WHERE " +
-            "(storeName == '%s' AND calendarName == '%s' AND startTime == '%s' AND endTime == '%s'", inputStore,
+            "(storeName = '%s' AND calendarName = '%s' AND startTime = '%s' AND endTime = '%s'", inputStore,
             inputCalendar, inputStartTime, inputEndTime);
         ResultSet bookingQuery = statement.executeQuery(bookingQueryStatement);
         bookingQuery.next();
         if (bookingQuery.getInt("maxAttendees") >= (bookingQuery.getInt("currentBookings") + inputBooking)) {
-            String sellerQueryStatement = String.format("SELECT sellerName FROM stores WHERE storeName == '%s'",
+            String sellerQueryStatement = String.format("SELECT sellerName FROM stores WHERE storeName = '%s'",
                 inputStore);
             ResultSet sellerQuery = statement.executeQuery(sellerQueryStatement);
             sellerQuery.next();
@@ -370,7 +371,7 @@ public class ServerThread extends Thread {
 
         ArrayList<String[]> requests = new ArrayList<>();
         String requestQueryStatement = String.format("SELECT storeName, calendarName, startTime, endTime, booking " +
-            "FROM appointments WHERE (customerEmail == '%s' AND isApproved == 0)", clientEmail);
+            "FROM appointments WHERE (customerEmail = '%s' AND isApproved = 0)", clientEmail);
         ResultSet requestQuery = statement.executeQuery(requestQueryStatement);
         while (requestQuery.next()) {
             String[] requestArray = new String[5];
@@ -391,8 +392,8 @@ public class ServerThread extends Thread {
         String inputStore = inputList[0];
         String inputCalendar = inputList[1];
         String inputStartTime = inputList[2];
-        String deleteStatement = String.format("DELETE FROM appointments WHERE (storeName == '%s' AND calendarName ==" +
-            " '%s' AND startTime == '%s'", inputStore, inputCalendar, inputStartTime);
+        String deleteStatement = String.format("DELETE FROM appointments WHERE (storeName = '%s' AND calendarName =" +
+            " '%s' AND startTime = '%s'", inputStore, inputCalendar, inputStartTime);
         int count = statement.executeUpdate(deleteStatement);
         writer.write(String.valueOf(count));
         writer.println();
@@ -402,8 +403,8 @@ public class ServerThread extends Thread {
     public String viewApproved(Statement statement) throws SQLException {
         ArrayList<String[]> approved = new ArrayList<>();
         String approvedQueryStatement = String.format("SELECT storeName, calendarName, startTime, endTime, booking, " +
-            "datetime(timeStamp, 'unixepoch') as timeStamp FROM appointments WHERE (customerEmail == '%s' AND " +
-            "isApproved == 1", clientEmail);
+            "datetime(timeStamp, 'unixepoch') as timeStamp FROM appointments WHERE (customerEmail = '%s' AND " +
+            "isApproved = 1", clientEmail);
         ResultSet approvedQuery = statement.executeQuery(approvedQueryStatement);
         while (approvedQuery.next()) {
             String[] approvedAppointment = new String[6];
@@ -481,8 +482,8 @@ public class ServerThread extends Thread {
     public String showApproved(Statement statement) throws SQLException {
         ArrayList<String[]> approved = new ArrayList<>();
         String approvedQueryStatement = String.format("SELECT customerEmail, storeName, calendarName, startTime, " +
-            "endTime, booking, datetime(timeStamp, 'unixepoch') as timeStamp FROM appointments WHERE (sellerEmail == " +
-            "'%s' AND isApproved == 1", clientEmail);
+            "endTime, booking, datetime(timeStamp, 'unixepoch') as timeStamp FROM appointments WHERE (sellerEmail = " +
+            "'%s' AND isApproved = 1", clientEmail);
         ResultSet approvedQuery = statement.executeQuery(approvedQueryStatement);
         while (approvedQuery.next()) {
             String[] approvedArray = new String[7];
@@ -502,7 +503,7 @@ public class ServerThread extends Thread {
         IOException {
         ArrayList<String[]> requests = new ArrayList<>();
         String requestsQueryStatement = String.format("SELECT customerEmail, storeName, calendarName, startTime, " +
-            "endTime, booking FROM appointments WHERE (sellerEmail == '%s' AND isApproved == 0)", clientEmail);
+            "endTime, booking FROM appointments WHERE (sellerEmail = '%s' AND isApproved = 0)", clientEmail);
         ResultSet requestsQuery = statement.executeQuery(requestsQueryStatement);
         while (requestsQuery.next()) {
             String[] requestArray = new String[6];
@@ -533,16 +534,20 @@ public class ServerThread extends Thread {
         return String.valueOf(changes);
     }
 
+    //works after adjustment here
     public int createStore(BufferedReader reader, Statement statement) throws IOException, SQLException {
         String input = reader.readLine();
-        String existQueryStatement = String.format("SELECT COUNT(storeName) AS count FROM stores WHERE storeName == " +
+        System.out.println(input);
+        String existQueryStatement = String.format("SELECT COUNT(storeName) AS count FROM stores WHERE storeName = " +
             "'%s'", input);
+        System.out.println(existQueryStatement);
         ResultSet existQuery = statement.executeQuery(existQueryStatement);
         existQuery.next();
+        System.out.println("ok we got to this part");
         int existing = existQuery.getInt("count");
         if (existing < 1) {
             String updateQueryStatement = String.format("INSERT INTO stores (sellerEmail, storeName) VALUES ('%s', " +
-                "'%s'", clientEmail, input);
+                "'%s')", clientEmail, input);
             return statement.executeUpdate(updateQueryStatement);
         } else {
             return 0;
@@ -568,8 +573,8 @@ public class ServerThread extends Thread {
         String inputOld = inputList[1];
         String inputNew = inputList[2];
 
-        String updateStatement = String.format("UPDATE calendars SET calendarName = '%s' WHERE (storeName == '%s' AND" +
-            "calendarName == '%s'", inputNew, inputStore, inputOld);
+        String updateStatement = String.format("UPDATE calendars SET calendarName = '%s' WHERE (storeName = '%s' AND" +
+            "calendarName = '%s'", inputNew, inputStore, inputOld);
         return statement.executeUpdate(updateStatement);
     }
 
@@ -580,8 +585,8 @@ public class ServerThread extends Thread {
         String inputCalendar = inputList[1];
         String inputDescription = inputList[2];
 
-        String updateStatement = String.format("UPDATE calendars SET description = '%s' WHERE (storeName == '%s' AND " +
-            "calendarName == '%s'", inputDescription, inputStore, inputCalendar);
+        String updateStatement = String.format("UPDATE calendars SET description = '%s' WHERE (storeName = '%s' AND " +
+            "calendarName = '%s'", inputDescription, inputStore, inputCalendar);
         return statement.executeUpdate(updateStatement);
     }
 
@@ -596,8 +601,8 @@ public class ServerThread extends Thread {
         String inputMax = inputList[5];
 
         ArrayList<String[]> windowTimes = new ArrayList<>();
-        String windowQueryStatement = String.format("SELECT startTime, endTime FROM windows WHERE (storeName == '%s' " +
-            "AND calendarName == '%s') ORDER BY startTime", inputStore, inputCalendar);
+        String windowQueryStatement = String.format("SELECT startTime, endTime FROM windows WHERE (storeName = '%s' " +
+            "AND calendarName = '%s') ORDER BY startTime", inputStore, inputCalendar);
         ResultSet windowQuery = statement.executeQuery(windowQueryStatement);
         while (windowQuery.next()) {
             String[] windowArray = new String[2];
@@ -632,7 +637,7 @@ public class ServerThread extends Thread {
         String inputCalendar = inputList[1];
         ArrayList<String[]> windowTimes = new ArrayList<>();
         String windowQueryStatement = String.format("SELECT startTime, endTime, maxAttendees, currentBookings FROM " +
-            "windows WHERE (storeName == '%s' AND calendarName == '%s'", inputStore, inputCalendar);
+            "windows WHERE (storeName = '%s' AND calendarName = '%s'", inputStore, inputCalendar);
         ResultSet windowQuery = statement.executeQuery(windowQueryStatement);
         while (windowQuery.next()) {
             String[] windowArray = new String[4];
@@ -647,8 +652,8 @@ public class ServerThread extends Thread {
         writer.flush();
 
         String secondInput = reader.readLine();
-        String deleteStatement = String.format("DELETE FROM windows WHERE (storeName == '%s' AND calendarName " +
-            "== '%s' AND endTime == '%s'", inputStore, inputCalendar, secondInput);
+        String deleteStatement = String.format("DELETE FROM windows WHERE (storeName = '%s' AND calendarName " +
+            "= '%s' AND endTime = '%s'", inputStore, inputCalendar, secondInput);
         return statement.executeUpdate(deleteStatement);
     }
 
@@ -658,22 +663,22 @@ public class ServerThread extends Thread {
         String inputStore = inputList[0];
         String inputCalendar = inputList[1];
 
-        String deleteCalendarStatement = String.format("DELETE FROM calendars WHERE (storeName == '%s' AND " +
-            "calendarName == '%s'", inputStore, inputCalendar);
+        String deleteCalendarStatement = String.format("DELETE FROM calendars WHERE (storeName = '%s' AND " +
+            "calendarName = '%s'", inputStore, inputCalendar);
         int deleteFromCalendar = statement.executeUpdate(deleteCalendarStatement);
         if (deleteFromCalendar < 1) {
             return 0;
         }
 
-        String deleteAppointmentStatement = String.format("DELETE FROM appointments WHERE (storeName == '%s' AND " +
-            "calendarName == '%s'", inputStore, inputCalendar);
+        String deleteAppointmentStatement = String.format("DELETE FROM appointments WHERE (storeName = '%s' AND " +
+            "calendarName = '%s'", inputStore, inputCalendar);
         int deleteFromAppointment = statement.executeUpdate(deleteAppointmentStatement);
         if (deleteFromAppointment < 1) {
             return 0;
         }
 
-        String deleteWindowStatement = String.format("DELETE FROM windows WHERE (storeName == '%s' AND " +
-            "calendarName == '%s'", inputStore, inputCalendar);
+        String deleteWindowStatement = String.format("DELETE FROM windows WHERE (storeName = '%s' AND " +
+            "calendarName = '%s'", inputStore, inputCalendar);
         int deleteFromWindow = statement.executeUpdate(deleteWindowStatement);
         if (deleteFromWindow < 1) {
             return 0;
@@ -697,7 +702,7 @@ public class ServerThread extends Thread {
     public void statisticsSeller(BufferedReader reader, Statement statement, PrintWriter writer) throws IOException,
         SQLException {
         ArrayList<String> stores = new ArrayList<>();
-        String storeQueryStatement = String.format("SELECT * FROM stores WHERE sellerEmail == '%s'", clientEmail);
+        String storeQueryStatement = String.format("SELECT * FROM stores WHERE sellerEmail = '%s'", clientEmail);
         ResultSet storeQuery = statement.executeQuery(storeQueryStatement);
         while (storeQuery.next()) {
             stores.add(storeQuery.getString("storeName"));
@@ -708,7 +713,7 @@ public class ServerThread extends Thread {
 
         String inputStore = reader.readLine();
         String popularWindowQueryStatement = String.format("SELECT startTime, endTime, MAX(currentBookings) AS " +
-            "windowCustomers FROM windows WHERE storeName == '%s' GROUP BY storeName", inputStore);
+            "windowCustomers FROM windows WHERE storeName = '%s' GROUP BY storeName", inputStore);
         ResultSet popularWindowQuery = statement.executeQuery(popularWindowQueryStatement);
         popularWindowQuery.next();
         String popularStart = popularWindowQuery.getString("startTime");
@@ -718,7 +723,7 @@ public class ServerThread extends Thread {
 
         ArrayList<String[]> customers = new ArrayList<>();
         String customerQueryStatement = String.format("SELECT customerEmail, SUM(isApproved) AS numOfApproved FROM " +
-            "appointments WHERE storeName == '%s' GROUP BY customerEmail", inputStore);
+            "appointments WHERE storeName = '%s' GROUP BY customerEmail", inputStore);
         ResultSet customerQuery = statement.executeQuery(customerQueryStatement);
         while (customerQuery.next()) {
             String[] customerArray = new String[2];
@@ -734,7 +739,7 @@ public class ServerThread extends Thread {
     public void statisticsSellerOrdered(BufferedReader reader, Statement statement, PrintWriter writer) throws
         SQLException, IOException {
         ArrayList<String> stores = new ArrayList<>();
-        String storeQueryStatement = String.format("SELECT * FROM stores WHERE sellerEmail == '%s'", clientEmail);
+        String storeQueryStatement = String.format("SELECT * FROM stores WHERE sellerEmail = '%s'", clientEmail);
         ResultSet storeQuery = statement.executeQuery(storeQueryStatement);
         while (storeQuery.next()) {
             stores.add(storeQuery.getString("storeName"));
@@ -745,7 +750,7 @@ public class ServerThread extends Thread {
 
         String inputStore = reader.readLine();
         String popularWindowQueryStatement = String.format("SELECT startTime, endTime, MAX(currentBookings) AS " +
-            "windowCustomers FROM windows WHERE storeName == '%s' GROUP BY storeName", inputStore);
+            "windowCustomers FROM windows WHERE storeName = '%s' GROUP BY storeName", inputStore);
         ResultSet popularWindowQuery = statement.executeQuery(popularWindowQueryStatement);
         popularWindowQuery.next();
         String popularStart = popularWindowQuery.getString("startTime");
@@ -755,7 +760,7 @@ public class ServerThread extends Thread {
 
         ArrayList<String[]> customers = new ArrayList<>();
         String customerQueryStatement = String.format("SELECT customerEmail, SUM(isApproved) AS numOfApproved FROM " +
-            "appointments WHERE storeName == '%s' GROUP BY customerEmail ORDER BY numOfApproved DESC", inputStore);
+            "appointments WHERE storeName = '%s' GROUP BY customerEmail ORDER BY numOfApproved DESC", inputStore);
         ResultSet customerQuery = statement.executeQuery(customerQueryStatement);
         while (customerQuery.next()) {
             String[] customerArray = new String[2];
