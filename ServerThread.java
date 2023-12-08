@@ -103,11 +103,21 @@ public class ServerThread extends Thread {
                         writer.flush();
                         break;
                     case "editCalendarName":
+                        int editName = editCalendarName(reader, statement);
+                        writer.write(String.valueOf(editName));
+                        writer.println();
+                        writer.flush();
                         break;
                     case "editCalendarDescription":
+                        int editDescription = editCalendarDescription(reader, statement);
+                        writer.write(String.valueOf(editDescription));
+                        writer.println();
+                        writer.flush();
                         break;
                     case "editCalendarAddWindow":
-                        break;;
+                        break;
+                    case "edit CalendarRemoveWindow":
+                        break;
                     case "deleteCalendar":
                         break;
                     case "statisticsSeller":
@@ -520,7 +530,17 @@ public class ServerThread extends Thread {
         return statement.executeUpdate(calendarUpdateStatement);
     }
 
+    public int editCalendarName(BufferedReader reader, Statement statement) throws IOException, SQLException {
+        String input = reader.readLine();
+        String[] inputList = input.split(",");
+        String inputStore = inputList[0];
+        String inputOld = inputList[1];
+        String inputNew = inputList[2];
 
+        String updateStatement = String.format("UPDATE calendars SET calendarName = '%s' WHERE (storeName == '%s' AND" +
+            "calendarName == '%s'", inputNew, inputStore, inputOld);
+        return statement.executeUpdate(updateStatement);
+    }
 
     public int editCalendarDescription(BufferedReader reader, Statement statement) throws IOException, SQLException {
         String input = reader.readLine();
