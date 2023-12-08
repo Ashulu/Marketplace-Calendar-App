@@ -1000,8 +1000,6 @@ public class Client extends JComponent implements Runnable {
         JTextField storeName = new JTextField("Example Store", 10);
         JTextField calendarName = new JTextField("Example Calendar", 10);
         JTextField calendarDescription = new JTextField("Example Description", 20);
-        JTextField result = new JTextField();
-        result.setVisible(false);
         JButton create = new JButton("Create");
         ActionListener actionListener = new ActionListener() {
             @Override
@@ -1010,74 +1008,27 @@ public class Client extends JComponent implements Runnable {
                         calendarDescription.getText());
                 pw.write(command);
                 pw.flush();
-
+                int response = 0;
+                try {
+                    response = Integer.parseInt(br.readLine());
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+                if (response == 0) {
+                    JOptionPane.showMessageDialog(null, "Calendar creation failed.",
+                            "Seller Client", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Calendar creation successful!",
+                            "Seller Client", JOptionPane.INFORMATION_MESSAGE);
+                }
+                frame.remove(sellerSub);
+                frame.add(sellerMain, BorderLayout.CENTER);
+                frame.pack();
             }
         };
         create.addActionListener(actionListener);
         sellerSub.add(storeName);
         sellerSub.add(create);
-        sellerSub.add(result);
-        //creation of windows section
-        JTextArea appointments = new JTextArea("start,end,maxCapacity\nstart,end,maxCapacity\n...",
-                3, 20);
-        appointments.setVisible(false);
-        sellerSub.add(appointments);
-
-        int response = br.read();
-        if (response == 0) {
-            result.setText("Calendar creation failed.");
-        } else {
-            result.setText("Calendar creation successful!");
-            appointments.setVisible(true);
-        }
-        create.removeActionListener(actionListener);
-        actionListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String command = appointments.getText();
-                command = command.strip();
-                command = command.replace("\n",",");
-                String[] check = command.split(",");
-                boolean vFormat = true;
-                for (int i = 0; i < check.length; i++) {
-                    switch (i % 3) {
-                        case 1:
-                            if (Integer.parseInt(check[i]) < Integer.parseInt(check[i - 1])) {
-                                vFormat = false;
-                            }
-                        case 0:
-                            if (check[i].length() != 4) {
-                                vFormat = false;
-                            }
-                    }
-                }
-                if (command.replace(",","").matches("\\d+")
-                        && check.length % 3 == 0 && vFormat) {
-                    pw.write(command);
-                    pw.flush();
-                    int response;
-                    try {
-                        response = Integer.parseInt(br.readLine());
-                    } catch (IOException exc) {
-                        throw new RuntimeException(exc);
-                    }
-                    if (response == 0) {
-                        JOptionPane.showMessageDialog(null, "Operation failed.",
-                                "Seller Client", JOptionPane.ERROR_MESSAGE);
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Operation successful!",
-                                "Seller Client", JOptionPane.INFORMATION_MESSAGE);
-                    }
-                    frame.remove(sellerSub);
-                    frame.add(sellerMain, BorderLayout.CENTER);
-                    frame.pack();
-                } else {
-                    result.setText("Invalid format.");
-                }
-            }
-        };
-        create.addActionListener(actionListener);
-        result.setVisible(true);
         frame.pack();
     }
 
@@ -1106,7 +1057,10 @@ public class Client extends JComponent implements Runnable {
             }
         });
         sellerSub.add(refresh);
-        String[] options = { "Edit Name", "Edit Description", "Add Windows", "Delete Windows" };
+        String temp = br.readLine();
+        String[] calendars = temp.substring(1, temp.length() - 1).split("],\\[");
+        String[] options = { "Edit Name", "Edit Description", "Add Window", "Delete Window" };
+        JComboBox<String> selection = new JComboBox<String>(calendars);
         JComboBox<String> edit = new JComboBox<String>(options);
         JTextField result = new JTextField();
         result.setVisible(false);
@@ -1115,6 +1069,9 @@ public class Client extends JComponent implements Runnable {
         JButton select = new JButton("Select");
         select.addActionListener(ex -> {
             sellerSub.remove(back);
+            String[] temp2 = ((String)edit.getSelectedItem()).split(", ");
+            String storeName = temp2[0];
+            String calendarName = temp2[1];
             switch (edit.getSelectedIndex()) {
                 case 0 -> {
                     pw.write("editCalendarName");
@@ -1122,35 +1079,17 @@ public class Client extends JComponent implements Runnable {
                     sellerSub.add(edit);
                     sellerSub.add(result);
                     sellerSub.add(submit);
-                    JTextField oldName = new JTextField("Old Name");
                     JTextField newName = new JTextField("New Name");
-                    sellerSub.add(oldName);
                     sellerSub.add(newName);
                     submit.addActionListener(e -> {
-                        if (oldName.getText().isEmpty() || newName.getText().isEmpty()) {
-                            result.setText("Invalid input.");
-                            result.setVisible(true);
-                        } else {
-                            String command = String.format("editName,%s,%s",oldName.getText(),newName.getText());
-                            pw.write(command);
-                            pw.flush();
-                            int response;
-                            try {
-                                response = Integer.parseInt(br.readLine());
-                            } catch (IOException exc) {
-                                throw new RuntimeException(exc);
-                            }
-                            if (response == 0) {
-                                JOptionPane.showMessageDialog(null, "Operation failed.",
-                                        "Seller Client", JOptionPane.ERROR_MESSAGE);
-                            } else {
-                                JOptionPane.showMessageDialog(null, "Operation successful!",
-                                        "Seller Client", JOptionPane.INFORMATION_MESSAGE);
-                            }
-                            frame.remove(sellerSub);
-                            frame.add(sellerMain, BorderLayout.CENTER);
-                            frame.pack();
-                        }
+                        String command = String.format("%s,%s,%s",storeName,
+                                calendarName,newName.getText());
+                        pw.write(command);
+                        pw.flush();
+
+                        frame.remove(sellerSub);
+                        frame.add(sellerMain, BorderLayout.CENTER);
+                        frame.pack();
                     });
                 }
                 case 1 -> {
@@ -1160,36 +1099,17 @@ public class Client extends JComponent implements Runnable {
                     sellerSub.add(edit);
                     sellerSub.add(result);
                     sellerSub.add(submit);
-                    JTextField calendarName = new JTextField("Calendar Name");
                     JTextField calendarDescription = new JTextField("New Description");
-                    sellerSub.add(calendarName);
                     sellerSub.add(calendarDescription);
                     submit.addActionListener(e -> {
-                        if (calendarName.getText().isEmpty() || calendarDescription.getText().isEmpty()) {
-                            result.setText("Invalid input.");
-                            result.setVisible(true);
-                        } else {
-                            String command = String.format("editDescription,%s,%s",calendarName.getText(),
-                                    calendarDescription.getText());
-                            pw.write(command);
-                            pw.flush();
-                            int response;
-                            try {
-                                response = Integer.parseInt(br.readLine());
-                            } catch (IOException exc) {
-                                throw new RuntimeException(exc);
-                            }
-                            if (response == 0) {
-                                JOptionPane.showMessageDialog(null, "Operation failed.",
-                                        "Seller Client", JOptionPane.ERROR_MESSAGE);
-                            } else {
-                                JOptionPane.showMessageDialog(null, "Operation successful!",
-                                        "Seller Client", JOptionPane.INFORMATION_MESSAGE);
-                            }
-                            frame.remove(sellerSub);
-                            frame.add(sellerMain, BorderLayout.CENTER);
-                            frame.pack();
-                        }
+                        String command = String.format("%s,%s,%s",storeName,
+                                calendarName,calendarDescription.getText());
+                        pw.write(command);
+                        pw.flush();
+
+                        frame.remove(sellerSub);
+                        frame.add(sellerMain, BorderLayout.CENTER);
+                        frame.pack();
                     });
                 }
                 case 2 -> {
@@ -1199,54 +1119,24 @@ public class Client extends JComponent implements Runnable {
                     sellerSub.add(edit);
                     sellerSub.add(result);
                     sellerSub.add(submit);
-                    JTextField storeName = new JTextField("Calendar Name");
-                    JTextField calendarName = new JTextField("New Description");
-                    JTextField window = new JTextField("start,end,maxCapacity");
-                    sellerSub.add(storeName);
-                    sellerSub.add(calendarName);
-                    sellerSub.add(window);
+                    JTextField start = new JTextField("0900");
+                    JTextField end = new JTextField("1700");
+                    JTextField capacity = new JTextField("Enter capacity");
+                    JTextField desc = new JTextField("Enter description");
+                    sellerSub.add(start);
+                    sellerSub.add(end);
+                    sellerSub.add(capacity);
+                    sellerSub.add(desc);
                     submit.addActionListener(e -> {
-                        String[] check = window.getText().split(",");
-                        boolean vFormat = true;
-                        for (int i = 0; i < check.length; i++) {
-                            switch (i % 3) {
-                                case 1:
-                                    if (Integer.parseInt(check[i]) < Integer.parseInt(check[i - 1])) {
-                                        vFormat = false;
-                                    }
-                                case 0:
-                                    if (check[i].length() != 4) {
-                                        vFormat = false;
-                                    }
-                            }
-                        }
-                        if (storeName.getText().isEmpty() || calendarName.getText().isEmpty() ||
-                                window.getText().replace(",","").matches("\\d+")
-                                        && check.length == 3 && vFormat) {
-                            result.setText("Invalid input.");
-                            result.setVisible(true);
-                        } else {
-                            String command = String.format("addWindow,%s,%s,%s",storeName.getText(),
-                                    calendarName.getText(),window.getText());
-                            pw.write(command);
-                            pw.flush();
-                            int response;
-                            try {
-                                response = Integer.parseInt(br.readLine());
-                            } catch (IOException exc) {
-                                throw new RuntimeException(exc);
-                            }
-                            if (response == 0) {
-                                JOptionPane.showMessageDialog(null, "Operation failed.",
-                                        "Seller Client", JOptionPane.ERROR_MESSAGE);
-                            } else {
-                                JOptionPane.showMessageDialog(null, "Operation successful!",
-                                        "Seller Client", JOptionPane.INFORMATION_MESSAGE);
-                            }
-                            frame.remove(sellerSub);
-                            frame.add(sellerMain, BorderLayout.CENTER);
-                            frame.pack();
-                        }
+                        String command = String.format("%s,%s,%s,%s,%s,%s",storeName,
+                                calendarName,start.getText(),end.getText(),
+                                capacity.getText(),desc.getText());
+                        pw.write(command);
+                        pw.flush();
+
+                        frame.remove(sellerSub);
+                        frame.add(sellerMain, BorderLayout.CENTER);
+                        frame.pack();
                     });
                     frame.pack();
                 }
@@ -1257,49 +1147,17 @@ public class Client extends JComponent implements Runnable {
                     sellerSub.add(edit);
                     sellerSub.add(result);
                     sellerSub.add(submit);
-                    JTextField storeName = new JTextField("Store Name");
-                    JTextField calendarName = new JTextField("Calendar Name");
-                    JTextField window = new JTextField("start,end");
-                    sellerSub.add(storeName);
-                    sellerSub.add(calendarName);
-                    sellerSub.add(window);
+                    JTextField end = new JTextField("1700");
+                    sellerSub.add(end);
                     submit.addActionListener(e -> {
-                        String[] check = window.getText().split(",");
-                        boolean vFormat = true;
-                        if (Integer.parseInt(check[1]) < Integer.parseInt(check[0])) {
-                            vFormat = false;
-                        }
-                        if (check[0].length() != 4 || check[1].length() != 4) {
-                            vFormat = false;
-                        }
-                        if (storeName.getText().isEmpty() || calendarName.getText().isEmpty() ||
-                                window.getText().replace(",", "").matches("\\d+")
-                                        && vFormat) {
-                            result.setText("Invalid input.");
-                            result.setVisible(true);
-                        } else {
-                            String command = String.format("addWindow,%s,%s,%s", storeName.getText(),
-                                    calendarName.getText(), window.getText());
-                            pw.write(command);
-                            pw.flush();
-                            int response;
-                            try {
-                                response = Integer.parseInt(br.readLine());
-                            } catch (IOException exc) {
-                                throw new RuntimeException(exc);
-                            }
-                            if (response == 0) {
-                                JOptionPane.showMessageDialog(null, "Operation failed.",
-                                        "Seller Client", JOptionPane.ERROR_MESSAGE);
-                            } else {
-                                JOptionPane.showMessageDialog(null, "Operation successful!",
-                                        "Seller Client", JOptionPane.INFORMATION_MESSAGE);
-                            }
-                            result.setVisible(true);
-                            frame.remove(sellerSub);
-                            frame.add(sellerMain, BorderLayout.CENTER);
-                            frame.pack();
-                        }
+                        String command = String.format("%s,%s,%s", storeName,
+                                calendarName, end.getText());
+                        pw.write(command);
+                        pw.flush();
+                        result.setVisible(true);
+                        frame.remove(sellerSub);
+                        frame.add(sellerMain, BorderLayout.CENTER);
+                        frame.pack();
                     });
                     frame.pack();
                 }
@@ -1344,7 +1202,7 @@ public class Client extends JComponent implements Runnable {
         result.setVisible(false);
         JButton delete = new JButton("Delete");
         delete.addActionListener(e -> {
-            String command = String.format("s5,%s,%s",storeName.getText(),calendarName.getText());
+            String command = String.format("%s,%s",storeName.getText(),calendarName.getText());
             pw.write(command);
             pw.flush();
             frame.remove(sellerSub);
@@ -1373,11 +1231,9 @@ public class Client extends JComponent implements Runnable {
     }
 
     //6 "Show Statistics"
-    //i'll fix this tmrw after clarification
     private void s6(BufferedReader br, PrintWriter pw) throws IOException {
         pw.write("statisticsSeller");
         pw.flush();
-
         String[] stores = br.readLine().split(",");
         JComboBox<String> storeOptions = new JComboBox<String>(stores);
         sellerSub.add(storeOptions);
@@ -1385,34 +1241,22 @@ public class Client extends JComponent implements Runnable {
         sellerBack(sellerSub);
         JTextArea result = new JTextArea(3,20);
         sellerSub.add(result);
-        String[] sort = new String[] { "Most Popular Window",
+        String[] sortOp = new String[] { "Most Popular Window",
                 "Customer Appointments"};
-        JComboBox<String> sortOptions = new JComboBox<String>(sort);
+        JComboBox<String> sortOptions = new JComboBox<String>(sortOp);
         sellerSub.add(sortOptions);
-        JButton sorted = new JButton("Sort");
-        sorted.addActionListener(e -> {
-            switch (sortOptions.getSelectedIndex()) {
-                case 0 -> {
-                    try {
-                        result.setText(br.readLine());
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-                case 1 -> {
-                    //i'll handle formatting later
-                    try {
-                        result.setText(br.readLine());
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-            }
-        });
-        sellerSub.add(sorted);
+        JTextField tempWind = new JTextField();
+        JTextField tempCust = new JTextField();
         JButton confirm = new JButton("Confirm");
         confirm.addActionListener(e -> {
             pw.write((String)storeOptions.getSelectedItem());
+            try {
+                tempWind.setText(br.readLine());
+                tempCust.setText(br.readLine());
+                confirm.setVisible(false);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         JButton refresh = new JButton("Refresh");
@@ -1424,6 +1268,41 @@ public class Client extends JComponent implements Runnable {
                 ex.printStackTrace();
             }
         });
+        JButton display = new JButton("Display");
+        display.addActionListener(e -> {
+
+            switch (sortOptions.getSelectedIndex()) {
+                case 0 -> {
+                     result.setText(tempWind.getText());
+                }
+                case 1 -> {
+                    result.setText(tempCust.getText());
+                }
+            }
+        });
+
+        JButton sort = new JButton("Sort");
+        sort.addActionListener(e -> {
+            pw.write("statisticsSellerOrdered");
+            try {
+                br.readLine();
+                pw.write((String)storeOptions.getSelectedItem());
+                tempWind.setText(br.readLine());
+                tempCust.setText(br.readLine());
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            switch (sortOptions.getSelectedIndex()) {
+                case 0 -> {
+                    result.setText(tempWind.getText());
+                }
+                case 1 -> {
+                    result.setText(tempCust.getText());
+                }
+            }
+        });
+        sellerSub.add(display);
+        sellerSub.add(display);
         sellerSub.add(refresh);
         frame.pack();
     }
@@ -1504,7 +1383,7 @@ public class Client extends JComponent implements Runnable {
 
     public static int exit() {
         //send exit message here
-        writer.write("QUIT");
+        writer.write("quit");
         writer.flush();
         return JFrame.DISPOSE_ON_CLOSE;
     }
