@@ -225,22 +225,45 @@ return:
 0 or 1
 
 -------------------------------------------------------------------------------------------------------------
-**editCalendar**
-
-- edit name
-- edit description
-- edit windows (add or remove)
+**editCalendarName**
 
 variables needed:
-if name:
-old name, new name
-if description:
-calendarName, description
-if adding windows:
+storeName, old name, new name
+
+return
+1. list of store and calendar
+2. 1 or 0
+
+-------------------------------------------------------------------------------------------------------------
+**editCalendarDescription**
+
+variables needed:
+storeName, calendarName, description
+
+return
+1. list of store and calendar
+2. 1 or 0
+
+-------------------------------------------------------------------------------------------------------------
+**editCalendarAddWindow
+
+variables needed:
 storeName, calendarName, startTime, endTime, maxAttendees
-if deleting windows:
+
+return
+1. list of store and calendar
+2. 1 or 0
+
+-------------------------------------------------------------------------------------------------------------
+**editCalendarRemoveWindow
+
+variables needed:
 storeName, calendarName, startTime, endTime
 
+return:
+1. list of store and calendar
+2. list of windows
+3. 1 or 0
 
 -------------------------------------------------------------------------------------------------------------
 **deleteCalendar**
@@ -248,15 +271,29 @@ storeName, calendarName, startTime, endTime
 variables needed:
 storeName, calendarName
 
+return 0 or 1
+
 -------------------------------------------------------------------------------------------------------------
 **statisticsSeller**
 
-output:
-sellerEmail, storeName
-[customerName, numofApproved]
-most popular window
-sorted in number of customers
+input:
+1. name of the store
 
+output:
+1. list of stores
+2. most popular window of the store
+3. arraylist of [customerName, numOfApproved]
+
+-------------------------------------------------------------------------------------------------------------
+**statisticsSellerOrdered**
+
+input:
+1. name of the store
+
+output:
+1. list of stores
+2. most popular window of the store
+3. arraylist of [customerName, numOfApproved] - ordered
 
 -------------------------------------------------------------------------------------------------------------
 **importCalendar**
