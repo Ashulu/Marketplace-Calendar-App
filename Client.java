@@ -285,7 +285,6 @@ public class Client extends JComponent implements Runnable {
         //once user selects, get all calendars from that specific store and print out
         // user should be able to select based on a dropdown
 
-        // calendarName is index 0, and there are 6 elements in the window
         String windows = br.readLine();
 
         String calendarNames = br.readLine();
@@ -533,7 +532,21 @@ public class Client extends JComponent implements Runnable {
         jPanel.add(refresh);
 
 
-        // TODO: add code to view approved appointments
+        // code to view approved appointments
+        String data = br.readLine();
+        String[] appointments = data.substring(1, data.length()-1).split("],\\[");
+        String result = "";
+        for (int i = 0; i < appointments.length; i++) {
+            String[] appt = appointments[i].split(",");
+            result += (i + 1) + ". \n" + "Store Name: " + appt[0] + "\nCalendar Name: " + appt[1] +
+                    "\nTime Window: " + appt[2] + " - " + appt[3] + "\nBookings: " + appt[4] + "\n\n";
+        }
+
+        JTextField displayAppointments = new JTextField(50);
+        displayAppointments.setText(result);
+        jPanel.add(displayAppointments);
+        displayAppointments.setVisible(true);
+        frame.pack();
     }
   
   
