@@ -9,99 +9,6 @@ import java.util.ArrayList;
 
 public class Client extends JComponent implements Runnable {
 
-//    userInput
-//private JFrame frame;
-//    private JTextField username;
-//    private JTextField password;
-//    private JButton enter;
-//    private JButton createAccount;
-//    private int choice = -1;
-//    public Client() {
-//        this.frame = new JFrame("Calendar");
-//    }
-//
-//    public static void main(String[] args) {
-//        SwingUtilities.invokeLater(new Client());
-//    }
-//
-//    public void run() {
-//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//
-//        Container content = frame.getContentPane();
-//        content.setLayout(new BorderLayout());
-//
-//        frame.setSize(600, 400);
-//        frame.setLocationRelativeTo(null);
-//
-//        JPanel mainPanel = new JPanel(new CardLayout());
-//        CardLayout cardLayout = (CardLayout)  mainPanel.getLayout();
-//
-//        String[] selOp = new String[] {
-//                "View Approved", "Appointment Requests",
-//                "Create Store", "Create Calendar",
-//                "Edit Calendar", "Delete Calendar",
-//                "Show Statistics", "Import Calendar",
-//                "Logout", "Quit"
-//        };
-//        String[] selPans = new String[] {
-//                "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9"
-//        };
-//
-//
-//        //maybe exit works?
-//        frame.setDefaultCloseOperation(exit());
-//        frame.setVisible(true);
-//
-//        JPanel user = new JPanel();
-//        user.setLayout(new BoxLayout(user, BoxLayout.Y_AXIS));
-//        JPanel account = new JPanel();
-//        username = new JTextField("username", 10);
-//        password = new JTextField("password", 10);
-//        enter = new JButton("Enter");
-//        enter.addActionListener(actionListener);
-//        account.add(new JLabel("Account Login"));
-//        account.add(username);
-//        account.add(password);
-//        account.add(enter);
-//
-//        JPanel create = new JPanel();
-//        createAccount = new JButton("Create Account");
-//        createAccount.addActionListener(actionListener);
-//        create.add(new JLabel("Don't have an account?"), BorderLayout.PAGE_START);
-//        create.add(createAccount, BorderLayout.PAGE_END);
-//
-//        user.add(account);
-//        user.add(create);
-//        mainPanel.add(user);
-//
-//    ActionListener actionListener = new ActionListener() {
-//        @Override
-//        public void actionPerformed(ActionEvent e) {
-//            if (e.getSource() == enter) {
-//                String Username = username.getText();
-//                String Password = password.getText();
-//                if (Username.equals("username") || Username.isEmpty() || Password.equals("password") || Password.isEmpty()) {
-//                    JOptionPane.showMessageDialog(null, "Please enter an email and password or create an account.");
-//                } else {
-//                    // TODO: check the username and password to make sure it is valid (SQL Query) and
-//                    //  then change to specific calendar (seller vs. customer)
-//                    String type = "";
-//                    // SQL Query: 'SELECT type FROM accounts WHERE (email == Username AND password == Password)'
-//                    if (type == "c") {
-//                        //TODO: make ian's code methods and call them here?
-//                    } else if (type == "s") {
-//                        //TODO: same here as previous TODO
-//                    } else {
-//                        JOptionPane.showMessageDialog(null, "Username or Password are incorrect");
-//                    }
-//                }
-//            } else if (e.getSource() == createAccount) {
-//                // TODO: change panel and display text fields for user to enter type, email, and password
-//                // SQL Query: 'INSERT INTO accounts (type, email, password, password) VALUES (userInput, userInput, userInput)'
-//            }
-//        }
-//    };
-
     JPanel loginPanel;
     JPanel createPanel;
     JPanel sellerMain;
@@ -112,8 +19,8 @@ public class Client extends JComponent implements Runnable {
     JButton createAccount;
     JPanel jPanel;
     JFrame frame;
-    BufferedReader reader;
-    PrintWriter writer;
+    static BufferedReader reader;
+    static PrintWriter writer;
 
 
     public void creationPanel() {
@@ -264,7 +171,7 @@ public class Client extends JComponent implements Runnable {
     }
 
     public static void main(String[] args) {
-        /*String host = JOptionPane.showInputDialog(null, "Enter the IP you want to connect to:", "Calender System",
+        String host = JOptionPane.showInputDialog(null, "Enter the IP you want to connect to:", "Calender System",
                 JOptionPane.QUESTION_MESSAGE);
         try {
             Socket socket = new Socket(host,5555);
@@ -276,7 +183,7 @@ public class Client extends JComponent implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        */
+
 
         SwingUtilities.invokeLater(new Client());
 
@@ -338,8 +245,7 @@ public class Client extends JComponent implements Runnable {
                         }
                         case 6 -> {
                             frame.remove(customerMain);
-                            writer.write("QUIT");
-                            writer.flush();
+                            exit();
                         }
                     }
                     frame.remove(customerMain);
@@ -354,7 +260,8 @@ public class Client extends JComponent implements Runnable {
 
 
     private void c0(BufferedReader br, PrintWriter pw) throws IOException {
-        pw.write("viewCalendar");
+        pw.println("viewCalendars");
+
         pw.flush();
         customerBack(customerSub);
 
@@ -429,19 +336,18 @@ public class Client extends JComponent implements Runnable {
     }
 
     private void c1(BufferedReader br, PrintWriter pw) throws IOException {
-        pw.write("requestAppointment");
+        pw.println("requestAppointment");
         pw.flush();
-        jPanel = new JPanel();
-        frame.add(jPanel);
-        customerBack(jPanel);
+        customerBack(customerSub);
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
-                frame.remove(jPanel);
-                jPanel = new JPanel();
-                jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
+
+                frame.remove(customerSub);
+                customerSub = new JPanel();
+                customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
                 c1(br,pw);
-                frame.add(jPanel, BorderLayout.CENTER);
+                frame.add(customerSub, BorderLayout.CENTER);
                 frame.pack();
 
             } catch (IOException ex) {
@@ -451,6 +357,7 @@ public class Client extends JComponent implements Runnable {
         jPanel.add(refresh);
 
         //creation of appointment
+
         String storeData = br.readLine();
         String[] calendars = storeData.substring(1, storeData.length()-1).split("],\\[");
         ArrayList<String> stores = new ArrayList<String>();
@@ -475,6 +382,7 @@ public class Client extends JComponent implements Runnable {
         storeChoices = stores.toArray(storeChoices);
         final String[] allStores = storeChoices;
         final String[][] allCalendars = calNames.toArray(new String[calNames.size()][]);
+
 
         JComboBox<String> storeName = new JComboBox<String>(allStores);
         jPanel.add(storeName);
@@ -512,6 +420,7 @@ public class Client extends JComponent implements Runnable {
         create.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
                 String command = String.format("%s,%s,%s,%s",
                         String.valueOf(chooseWindow.getSelectedItem()).split(" - ")[0],
                         String.valueOf(calendarName.getSelectedItem()).split(" - ")[1],
@@ -523,8 +432,11 @@ public class Client extends JComponent implements Runnable {
             }
         });
 
-        JTextField result = new JTextField();
-        jPanel.add(result);
+        create.addActionListener(actionListener);
+        customerSub.add(storeName);
+        customerSub.add(create);
+        customerSub.add(result);
+
 
         int response = br.read();
         if (response == 0) {
@@ -534,7 +446,96 @@ public class Client extends JComponent implements Runnable {
         }
 
         result.setVisible(true);
-        frame.pack();
+    }
+
+    private void c3(BufferedReader br, PrintWriter pw) throws IOException{
+        JLabel askSort = new JLabel("Would you like to srt your statistics?");
+        customerSub.add(askSort);
+
+        JButton yes = new JButton("Yes");
+        customerSub.add(yes);
+
+        JButton no = new JButton("No");
+        customerSub.add(no);
+
+        yes.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pw.println("showStatisticsCustomerOrderByTotal");
+                pw.flush();
+
+                try {
+//                    String storeString = br.readLine();
+//                    String stats = br.readLine();
+//                    String[] split = stats.split("],\\[");
+//                    split[0] = split[0].substring(2);
+//                    split[split.length - 1] = split[split.length - 1].substring(2);
+//
+//                    for (int i = 0; i < split.length; i++) {
+//                        StringBuilder line = new StringBuilder();
+//                        String[] indWindow = split[i].split(",");
+//                        line.append("Store Name: ").append(indWindow[0]).append("\n");
+//                        line.append("\t Window: ").append(indWindow[1]).append("-").append(indWindow[2]).append("\n");
+//                        line.append("\t Total store customers: ").append(indWindow[3]).append("\n");
+//                        line.append("\t This window's customers: ").append(indWindow[4]).append("\n");
+//
+//                        JLabel window = new JLabel(line.toString());
+//                        customerSub.add(window);
+//                    }
+
+                    showStats(br);
+
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+
+        no.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pw.println("showStatisticsCustomer");
+                pw.flush();
+
+                try {
+                    showStats(br);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+
+        JButton refresh = new JButton("Refresh");
+        customerSub.add(refresh);
+
+        refresh.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    frame.remove(customerSub);
+                    customerSub = new JPanel();
+                    customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
+                    c3(br, pw);
+                    frame.add(customerSub);
+                    frame.pack();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+
+        JButton back = new JButton("Back");
+        customerSub.add(back);
+
+        back.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.remove(customerSub);
+                frame.add(customerMain, BorderLayout.CENTER);
+                frame.pack();
+            }
+        });
 
     }
 
@@ -626,9 +627,112 @@ public class Client extends JComponent implements Runnable {
         });
         jPanel.add(refresh);
 
+
         // TODO: add code to view approved appointments
     }
+  
+  
+    private void c4(BufferedReader br, PrintWriter pw) throws IOException{
+        JLabel askSort = new JLabel("Would you like to srt your statistics?");
+        customerSub.add(askSort);
 
+        JButton yes = new JButton("Yes");
+        customerSub.add(yes);
+
+        JButton no = new JButton("No");
+        customerSub.add(no);
+
+        yes.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pw.println("showStatisticsCustomerOrderByTotal");
+                pw.flush();
+
+                try {
+//                    String storeString = br.readLine();
+//                    String stats = br.readLine();
+//                    String[] split = stats.split("],\\[");
+//                    split[0] = split[0].substring(2);
+//                    split[split.length - 1] = split[split.length - 1].substring(2);
+//
+//                    for (int i = 0; i < split.length; i++) {
+//                        StringBuilder line = new StringBuilder();
+//                        String[] indWindow = split[i].split(",");
+//                        line.append("Store Name: ").append(indWindow[0]).append("\n");
+//                        line.append("\t Window: ").append(indWindow[1]).append("-").append(indWindow[2]).append("\n");
+//                        line.append("\t Total store customers: ").append(indWindow[3]).append("\n");
+//                        line.append("\t This window's customers: ").append(indWindow[4]).append("\n");
+//
+//                        JLabel window = new JLabel(line.toString());
+//                        customerSub.add(window);
+//                    }
+
+                    showStats(br);
+
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+
+        no.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pw.println("showStatisticsCustomer");
+                pw.flush();
+
+                try {
+                    showStats(br);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+
+        JButton refresh = new JButton("Refresh");
+        customerSub.add(refresh);
+
+        refresh.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    frame.remove(customerSub);
+                    customerSub = new JPanel();
+                    customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
+                    c3(br, pw);
+                    frame.add(customerSub);
+                    frame.pack();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+
+        customerBack(customerSub);
+
+    }  
+
+    //shows the stats for customers, regardless of whether its sorted or not
+    public void showStats(BufferedReader br) throws IOException{
+        String storeString = br.readLine();
+        String stats = br.readLine();
+        String[] split = stats.split("],\\[");
+        split[0] = split[0].substring(2);
+        split[split.length - 1] = split[split.length - 1].substring(2);
+
+        for (int i = 0; i < split.length; i++) {
+            StringBuilder line = new StringBuilder();
+            String[] indWindow = split[i].split(",");
+            line.append("Store Name: ").append(indWindow[0]).append("\n");
+            line.append("\t Window: ").append(indWindow[1]).append("-").append(indWindow[2]).append("\n");
+            line.append("\t Total store customers: ").append(indWindow[3]).append("\n");
+            line.append("\t This window's customers: ").append(indWindow[4]).append("\n");
+
+            JLabel window = new JLabel(line.toString());
+            customerSub.add(window);
+        }
+    }
 
 
     // -------------------
@@ -711,8 +815,7 @@ public class Client extends JComponent implements Runnable {
                         //quit
                         case 9 -> {
                             frame.remove(sellerMain);
-                            writer.write("exit");
-                            writer.flush();
+                            exit();
                         }
                     }
                     frame.remove(sellerMain);
@@ -1274,6 +1377,7 @@ public class Client extends JComponent implements Runnable {
     private void s6(BufferedReader br, PrintWriter pw) throws IOException {
         pw.write("statisticsSeller");
         pw.flush();
+
         String[] stores = br.readLine().split(",");
         JComboBox<String> storeOptions = new JComboBox<String>(stores);
         sellerSub.add(storeOptions);
@@ -1310,6 +1414,7 @@ public class Client extends JComponent implements Runnable {
         confirm.addActionListener(e -> {
             pw.write((String)storeOptions.getSelectedItem());
         });
+
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
@@ -1395,99 +1500,12 @@ public class Client extends JComponent implements Runnable {
         });
     }
 
-    // TODO: no choice for this in the customer options !! need to change
-//    private void c0(BufferedReader br, PrintWriter pw) throws IOException {
-//        pw.write("viewCalendars");
-//        pw.flush();
-//        customerBack(customerSub);
-//
-//        JButton refresh = new JButton("Refresh");
-//        refresh.addActionListener(e -> {
-//            try {
-//                frame.remove(customerSub);
-//                customerSub = new JPanel();
-//                customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
-//                c0(br,pw);
-//                frame.add(customerSub, BorderLayout.CENTER);
-//                frame.pack();
-//
-//            } catch (IOException ex) {
-//                ex.printStackTrace();
-//            }
-//        });
-//        customerSub.add(refresh);
-//
-//        //get all store names from server and print out in dropdown to user
-//        //once user selects, get all calendars from that specific store and print out
-//        // user should be able to select based on a dropdown
-//
-//    }
-//
-//    private void c1(BufferedReader br, PrintWriter pw) throws IOException {
-//        pw.write("requestAppointment");
-//        pw.flush();
-//        jPanel = new JPanel();
-//        frame.add(jPanel);
-//        customerBack(jPanel);
-//        JButton refresh = new JButton("Refresh");
-//        refresh.addActionListener(e -> {
-//            try {
-//                frame.remove(customerSub);
-//                customerSub = new JPanel();
-//                customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
-//                c0(br,pw);
-//                frame.add(customerSub, BorderLayout.CENTER);
-//                frame.pack();
-//
-//            } catch (IOException ex) {
-//                ex.printStackTrace();
-//            }
-//        });
-//        customerSub.add(refresh);
-//
-//        //creation of appointment
-//        //TODO: make storeName, calendarName, and calendarDescription into dropdowns that the user can select
-//        JTextField storeName = new JTextField("Example Store", 10);
-//        JTextField calendarName = new JTextField("Example Calendar", 10);
-//        JTextField calendarDescription = new JTextField("Example Calendar", 10);
-//        JTextField startTime = new JTextField("Example Start Time", 10);
-//        JTextField endTime = new JTextField("Example End Time", 20);
-//        JTextField booking = new JTextField("Example Bookng", 20);
-//
-//        JTextField result = new JTextField();
-//        result.setVisible(false);
-//        JButton create = new JButton("Create");
-//        ActionListener actionListener = new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                String command = String.format("c1,%s,%s,%s",storeName.getText(),calendarName.getText(),
-//                        calendarDescription.getText(), startTime.getText(), endTime.getText(), booking.getText());
-//                pw.write(command);
-//                pw.flush();
-//            }
-//        };
-//        create.addActionListener(actionListener);
-//        jPanel.add(storeName);
-//        jPanel.add(create);
-//        jPanel.add(result);
-//
-//        int response = br.read();
-//        if (response == 0) {
-//            result.setText("Unable to create calendar.");
-//        } else {
-//            result.setText("Creation successful!");
-//        }
-//
-//        result.setVisible(true);
-//        frame.pack();
-//
-//
-//    }
-
 
 
     public static int exit() {
         //send exit message here
+        writer.write("QUIT");
+        writer.flush();
         return JFrame.DISPOSE_ON_CLOSE;
     }
 }
