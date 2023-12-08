@@ -1057,10 +1057,8 @@ public class Client extends JComponent implements Runnable {
             }
         });
         sellerSub.add(refresh);
-        String temp = br.readLine();
-        String[] calendars = temp.substring(1, temp.length() - 1).split("],\\[");
         String[] options = { "Edit Name", "Edit Description", "Add Window", "Delete Window" };
-        JComboBox<String> selection = new JComboBox<String>(calendars);
+
         JComboBox<String> edit = new JComboBox<String>(options);
         JTextField result = new JTextField();
         result.setVisible(false);
@@ -1069,12 +1067,22 @@ public class Client extends JComponent implements Runnable {
         JButton select = new JButton("Select");
         select.addActionListener(ex -> {
             sellerSub.remove(back);
-            String[] temp2 = ((String)edit.getSelectedItem()).split(", ");
+            String temp = null;
+            try {
+                temp = br.readLine();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            String[] calendars = temp.substring(1, temp.length() - 1).split("],\\[");
+            JComboBox<String> selection = new JComboBox<String>(calendars);
+            sellerSub.add(selection);
+            String[] temp2 = ((String)selection.getSelectedItem()).split(", ");
             String storeName = temp2[0];
             String calendarName = temp2[1];
             switch (edit.getSelectedIndex()) {
                 case 0 -> {
                     pw.write("editCalendarName");
+                    pw.flush();
                     JButton submit = new JButton("Edit");
                     sellerSub.add(edit);
                     sellerSub.add(result);
@@ -1094,6 +1102,7 @@ public class Client extends JComponent implements Runnable {
                 }
                 case 1 -> {
                     pw.write("editCalendarName");
+                    pw.flush();
                     frame.add(sellerSub);
                     JButton submit = new JButton("Edit");
                     sellerSub.add(edit);
@@ -1114,11 +1123,13 @@ public class Client extends JComponent implements Runnable {
                 }
                 case 2 -> {
                     pw.write("editCalendarAddWindow");
+                    pw.flush();
                     frame.add(sellerSub);
                     JButton submit = new JButton("Add");
                     sellerSub.add(edit);
                     sellerSub.add(result);
                     sellerSub.add(submit);
+
                     JTextField start = new JTextField("0900");
                     JTextField end = new JTextField("1700");
                     JTextField capacity = new JTextField("Enter capacity");
@@ -1142,6 +1153,20 @@ public class Client extends JComponent implements Runnable {
                 }
                 case 3 -> {
                     pw.write("editCalendarRemoveWindow");
+                    pw.flush();
+                    String command = String.format("%s,%s", storeName,
+                            calendarName);
+                    pw.write(command);
+                    String[] windows;
+
+                    try {
+                        String temp3 = br.readLine();
+                        windows = temp3.substring(1, temp3.length() - 1).split("],\\[");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    JComboBox<String> winOp = new JComboBox<String>(windows);
+                    sellerSub.add(winOp);
                     frame.add(sellerSub);
                     JButton submit = new JButton("Delete");
                     sellerSub.add(edit);
@@ -1150,9 +1175,9 @@ public class Client extends JComponent implements Runnable {
                     JTextField end = new JTextField("1700");
                     sellerSub.add(end);
                     submit.addActionListener(e -> {
-                        String command = String.format("%s,%s,%s", storeName,
-                                calendarName, end.getText());
-                        pw.write(command);
+                        String[] temp4 = ((String)winOp.getSelectedItem()).split(",");
+                        String command2 = String.format("%s", temp4[4]);
+                        pw.write(command2);
                         pw.flush();
                         result.setVisible(true);
                         frame.remove(sellerSub);
