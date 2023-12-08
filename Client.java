@@ -2,8 +2,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.Socket;
 import java.nio.Buffer;
+import java.util.ArrayList;
 
 public class Client extends JComponent implements Runnable {
 
@@ -290,6 +292,7 @@ public class Client extends JComponent implements Runnable {
 
         String[] customerOp = new String[]{
                 // TODO: Add view calendars option
+                "View Calendars",
                 "Request an appointment",
                 "Cancel an appointment",
                 "View your approved appointments",
@@ -313,24 +316,27 @@ public class Client extends JComponent implements Runnable {
                     customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
                     switch (customerOptions.getSelectedIndex()){
                         case 0 -> {
-                            //c0
+                            c0(br, pw);
                         }
                         case 1 -> {
-                            //c1
+                            c1(br, pw);
                         }
                         case 2 -> {
-                            //c2
+                            c2(br, pw);
                         }
                         case 3 -> {
-                            //c3
+                            c3(br, pw);
                         }
                         case 4 -> {
+                            //c4(br, pw);
+                        }
+                        case 5 -> {
                             frame.remove(customerMain);
                             frame.add(loginPanel);
                             frame.pack();
                             return;
                         }
-                        case 5 -> {
+                        case 6 -> {
                             frame.remove(customerMain);
                             writer.write("QUIT");
                             writer.flush();
@@ -348,7 +354,7 @@ public class Client extends JComponent implements Runnable {
 
 
     private void c0(BufferedReader br, PrintWriter pw) throws IOException {
-        pw.write("viewCalendars");
+        pw.write("viewCalendar");
         pw.flush();
         customerBack(customerSub);
 
@@ -372,6 +378,54 @@ public class Client extends JComponent implements Runnable {
         //once user selects, get all calendars from that specific store and print out
         // user should be able to select based on a dropdown
 
+        // calendarName is index 0, and there are 6 elements in the window
+        String windows = br.readLine();
+
+        String calendarNames = br.readLine();
+        String[] strCalChoices = calendarNames.substring(1, calendarNames.length()-1).split("],\\[");
+        ArrayList<String> calNames = new ArrayList<String>();
+        ArrayList<String> calDesc = new ArrayList<String>();
+        for (int i = 0; i < strCalChoices.length; i++) {
+            calNames.add(strCalChoices[i].split(",")[0]);
+            calDesc.add(strCalChoices[i].split(",")[1]);
+        }
+        String[] calChoices = new String[calNames.size()];
+        calChoices = calNames.toArray(calChoices);
+        final String[] cals = calChoices;
+        String[] calDescs = new String[calNames.size()];
+        calDescs = calDesc.toArray(calDescs);
+        final String[] calInfo = calDescs;
+
+        JComboBox<String> calendarChoices = new JComboBox<String>(cals);
+        customerSub.add(calendarChoices);
+        JButton enter = new JButton("Enter");
+        JTextField displayWindows = new JTextField(80);
+        enter.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                customerSub.remove(displayWindows);
+                String choice = cals[calendarChoices.getSelectedIndex()];
+                String[] appointmentWindowsData = windows.substring(1, windows.length()-1).split("],\\[");
+                String result = "";
+                for (int i = 0; i < appointmentWindowsData.length; i++) {
+                    String[] data = appointmentWindowsData[i].split(",");
+                    if (data[0].equals(choice)) {
+                        String windowData = String.format("Appointment Title: %s \nTime: %s - %s \nMaximum Attendees: %s \nCurrent Bookings: %s \n",
+                                data[1], data[2], data[3], data[4], data[5]);
+                        result += windowData;
+                    }
+                }
+                if (result.isEmpty()) {
+                    displayWindows.setText("Calendar Description: " + calInfo[calendarChoices.getSelectedIndex()] +
+                            "\n\nNo appointments were found!");
+                } else {
+                    displayWindows.setText("Calendar Description: " + calInfo[calendarChoices.getSelectedIndex()] +
+                            "\n\n" + result);
+                }
+                customerSub.add(displayWindows);
+            }
+        });
+        customerSub.add(enter);
     }
 
     private void c1(BufferedReader br, PrintWriter pw) throws IOException {
@@ -383,48 +437,98 @@ public class Client extends JComponent implements Runnable {
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
-                frame.remove(customerSub);
-                customerSub = new JPanel();
-                customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
-                c0(br,pw);
-                frame.add(customerSub, BorderLayout.CENTER);
+                frame.remove(jPanel);
+                jPanel = new JPanel();
+                jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
+                c1(br,pw);
+                frame.add(jPanel, BorderLayout.CENTER);
                 frame.pack();
 
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
         });
-        customerSub.add(refresh);
+        jPanel.add(refresh);
 
         //creation of appointment
-        //TODO: make storeName, calendarName, and calendarDescription into dropdowns that the user can select
-        JTextField storeName = new JTextField("Example Store", 10);
-        JTextField calendarName = new JTextField("Example Calendar", 10);
-        JTextField calendarDescription = new JTextField("Example Calendar", 10);
-        JTextField startTime = new JTextField("Example Start Time", 10);
-        JTextField endTime = new JTextField("Example End Time", 20);
-        JTextField booking = new JTextField("Example Bookng", 20);
+        String storeData = br.readLine();
+        String[] calendars = storeData.substring(1, storeData.length()-1).split("],\\[");
+        ArrayList<String> stores = new ArrayList<String>();
+        ArrayList<String[]> calNames = new ArrayList<String[]>();
+        for (int i = 0; i < calendars.length; i++) {
+            String[] calInfo = calendars[i].split(",");
+            stores.add(calInfo[0]);
+        }
+        for (int j = 0; j < stores.size(); j++) {
+            ArrayList<String> storeCalendars = new ArrayList<String>();
+            for (int k = 0; k < calendars.length; k++) {
+                String[] calInfo = calendars[k].split(",");
+                if (calendars[k].equals(stores.get(j))) {
+                    storeCalendars.add(calInfo[1]);
+                }
+            }
+            String[] storeCals = new String[storeCalendars.size()];
+            storeCals = storeCalendars.toArray(storeCals);
+            calNames.add(storeCals);
+        }
+        String[] storeChoices = new String[stores.size()];
+        storeChoices = stores.toArray(storeChoices);
+        final String[] allStores = storeChoices;
+        final String[][] allCalendars = calNames.toArray(new String[calNames.size()][]);
 
-        JTextField result = new JTextField();
-        result.setVisible(false);
-        JButton create = new JButton("Create");
-        ActionListener actionListener = new ActionListener() {
+        JComboBox<String> storeName = new JComboBox<String>(allStores);
+        jPanel.add(storeName);
+        JComboBox<String> calendarName = new JComboBox<String>(allCalendars[storeName.getSelectedIndex()]);
+        jPanel.add(calendarName);
+
+        JButton enter = new JButton("Enter");
+        enter.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String command = String.format("c1,%s,%s,%s",storeName.getText(),calendarName.getText(),
-                        calendarDescription.getText(), startTime.getText(), endTime.getText(), booking.getText());
+                String command = String.format("%s,%s",storeName.getSelectedItem(), calendarName.getSelectedItem());
                 pw.write(command);
                 pw.flush();
             }
-        };
-        create.addActionListener(actionListener);
-        jPanel.add(storeName);
-        jPanel.add(create);
+        });
+        jPanel.add(enter);
+
+        String windows = br.readLine();
+        String[] appointmentWindows = windows.substring(1, windows.length()-1).split("],\\[");
+        String[] appointments = new String[appointmentWindows.length];
+        String[] maxAttendees = new String[appointmentWindows.length];
+        String[] currentBookings = new String[appointmentWindows.length];
+        for (int i = 0; i < appointmentWindows.length; i++) {
+            String[] data = appointmentWindows[i].split(",");
+            appointments[i] = String.format("%s - %s", data[0], data[1]);
+            maxAttendees[i] = data[2];
+            currentBookings[i] = data[3];
+        }
+
+        JComboBox<String> chooseWindow = new JComboBox<String>(appointments);
+        jPanel.add(chooseWindow);
+        JTextField bookings = new JTextField("Enter number of bookings", 10);
+        jPanel.add(bookings);
+        JButton create = new JButton("Create");
+        create.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String command = String.format("%s,%s,%s,%s",
+                        String.valueOf(chooseWindow.getSelectedItem()).split(" - ")[0],
+                        String.valueOf(calendarName.getSelectedItem()).split(" - ")[1],
+                        maxAttendees[chooseWindow.getSelectedIndex()],
+                        Integer.parseInt(currentBookings[chooseWindow.getSelectedIndex()]) +
+                                Integer.parseInt(bookings.getText()));
+                pw.write(command);
+                pw.flush();
+            }
+        });
+
+        JTextField result = new JTextField();
         jPanel.add(result);
 
         int response = br.read();
         if (response == 0) {
-            result.setText("Unable to create calendar.");
+            result.setText("Unable to create appointment.");
         } else {
             result.setText("Creation successful!");
         }
@@ -432,8 +536,99 @@ public class Client extends JComponent implements Runnable {
         result.setVisible(true);
         frame.pack();
 
+    }
+
+    private void c2(BufferedReader br, PrintWriter pw) throws IOException {
+        pw.write("cancelRequest");
+        pw.flush();
+        jPanel = new JPanel();
+        frame.add(jPanel);
+        customerBack(jPanel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                frame.remove(jPanel);
+                jPanel = new JPanel();
+                jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
+                c1(br,pw);
+                frame.add(jPanel, BorderLayout.CENTER);
+                frame.pack();
+
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        jPanel.add(refresh);
+
+        String clientRequests = br.readLine();
+        String[] requests = clientRequests.substring(1, clientRequests.length()-1).split("],\\[");
+        String result = "";
+        for (int i = 0; i < requests.length; i++) {
+            String[] data = requests[i].split(",");
+            result += (i + 1) + ". \n" + "Store Name: " + data[0] + "\nCalendar Name: " + data[1] +
+                    "\nTime Window: " + data[2] + " - " + data[3] + "\nBookings: " + data[4] + "\n\n";
+        }
+
+        JTextField allAppointments = new JTextField(result, 50);
+        jPanel.add(allAppointments);
+        String[] options = new String[requests.length];
+        for (int i = 1; i <= requests.length; i++) {
+            options[i-1] = String.valueOf(i);
+        }
+        JComboBox<String> appointment = new JComboBox<String>(options);
+        jPanel.add(appointment);
+        JButton delete = new JButton("Delete");
+        delete.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String[] choice = requests[appointment.getSelectedIndex()].split(",");
+                String command = String.format("%s,%s,%s", choice[0], choice[1], choice[2]);
+                pw.write(command);
+                pw.flush();
+            }
+        });
+        jPanel.add(delete);
+
+        JTextField success = new JTextField();
+        jPanel.add(success);
+
+        int response = br.read();
+        if (response == 0) {
+            success.setText("Unable to delete appointment.");
+        } else {
+            success.setText("Deletion successful!");
+        }
+
+        success.setVisible(true);
+        frame.pack();
 
     }
+
+    private void c3(BufferedReader br, PrintWriter pw) throws IOException {
+        pw.write("viewApproved");
+        pw.flush();
+        jPanel = new JPanel();
+        frame.add(jPanel);
+        customerBack(jPanel);
+        JButton refresh = new JButton("Refresh");
+        refresh.addActionListener(e -> {
+            try {
+                frame.remove(jPanel);
+                jPanel = new JPanel();
+                jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
+                c1(br,pw);
+                frame.add(jPanel, BorderLayout.CENTER);
+                frame.pack();
+
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        jPanel.add(refresh);
+
+        // TODO: add code to view approved appointments
+    }
+
 
 
     // -------------------
