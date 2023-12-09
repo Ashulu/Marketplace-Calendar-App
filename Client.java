@@ -23,7 +23,10 @@ public class Client extends JComponent implements Runnable {
     static PrintWriter writer;
 
 
-    public void creationPanel() {
+    public void creationPanel(BufferedReader br, PrintWriter pw) {
+        pw.println("createAccount");
+        pw.flush();
+
         JLabel createLabel = new JLabel("Account creation");
         createPanel.add(createLabel);
 
@@ -37,7 +40,6 @@ public class Client extends JComponent implements Runnable {
 
         JComboBox<String> types = new JComboBox<>(choices);
         createPanel.add(types);
-        String type = (String)types.getSelectedItem();
 
         JButton create = new JButton("Create Account");
         createPanel.add(create);
@@ -45,24 +47,35 @@ public class Client extends JComponent implements Runnable {
         JButton back = new JButton("Back");
         createPanel.add(back);
 
-
-
         create.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //send the user and pass to the server to add to the database
-                boolean exists = false;
-                if (exists) {
-                    //server checks if the account already exists and writes true or false back to the client. Exists is then updated to that value
-
-                    JOptionPane.showMessageDialog(frame.getContentPane(), "Account already Exists!");
-                } else if (userField.getText().equals("Email") || passField.getText().equals("Password") ){
+                if (userField.getText().equals("Email") || passField.getText().equals("Password")) {
                     JOptionPane.showMessageDialog(frame.getContentPane(), "Enter an email and/or password");
                 } else {
-                    //goes back to the main page to then login with the newly created account
-                    frame.remove(createPanel);
-                    frame.add(loginPanel, BorderLayout.CENTER);
-                    frame.pack();
+                    try {
+
+                        pw.println(String.format("%s,%s,%s", types.getSelectedItem(), userField.getText(), passField.getText()));
+                        pw.flush();
+
+                        int check = Integer.parseInt(br.readLine());
+                        if (check == 0) {
+                            JOptionPane.showMessageDialog(frame.getContentPane(), "Account already Exists!");
+                        } else if (check == 1) {
+                            JOptionPane.showMessageDialog(frame.getContentPane(), "Account created!");
+                            loginPanel = new JPanel();
+                            loginPanel.setBounds(0, 0, 30, frame.getHeight());
+                            loginPanel.setLayout(new BoxLayout(loginPanel, BoxLayout.Y_AXIS));
+                            loginPage();
+                            frame.remove(createPanel);
+                            frame.add(loginPanel, BorderLayout.CENTER);
+                            frame.pack();
+                        } else {
+                            JOptionPane.showMessageDialog(frame.getContentPane(), "An error occured!");
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         });
@@ -118,7 +131,7 @@ public class Client extends JComponent implements Runnable {
                 createPanel = new JPanel();
                 createPanel.setBounds(0, 0, 30, frame.getHeight());
                 createPanel.setLayout(new BoxLayout(createPanel, BoxLayout.Y_AXIS));
-                creationPanel();
+                creationPanel(reader, writer);
                 frame.remove(loginPanel);
                 frame.add(createPanel, BorderLayout.CENTER);
                 frame.pack();
@@ -262,7 +275,6 @@ public class Client extends JComponent implements Runnable {
 
     private void c0(BufferedReader br, PrintWriter pw) throws IOException {
         pw.println("viewCalendars");
-
         pw.flush();
         customerBack(customerSub);
 
