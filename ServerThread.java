@@ -197,7 +197,7 @@ public class ServerThread extends Thread {
             String dbPassword = result.getString("password");
             System.out.println("dbPassword: " + dbPassword);
             if (dbPassword.equals(inputList[1])) {
-                String dbType = result.getString("type");
+                String dbType = result.getString("type").toLowerCase();
                 clientEmail = inputList[0];
                 if (dbType.equals("customer")) { // type customer
                     returning = "1";
