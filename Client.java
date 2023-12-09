@@ -22,6 +22,33 @@ public class Client extends JComponent implements Runnable {
     static BufferedReader reader;
     static PrintWriter writer;
 
+    public void run(){
+        frame = new JFrame("Calendar");
+
+        frame.setSize(500,500);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        loginPage();
+
+        frame.setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        String host = JOptionPane.showInputDialog(null, "Enter the IP you want to connect to:", "Calendar System",
+                JOptionPane.QUESTION_MESSAGE);
+        try {
+            Socket socket = new Socket(host,5555);
+            JOptionPane.showMessageDialog(null, "Client connected");
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            writer = new PrintWriter(socket.getOutputStream());
+
+            SwingUtilities.invokeLater(new Client());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
 
     public void creationPanel(BufferedReader br, PrintWriter pw) {
         pw.println("createAccount");
@@ -91,16 +118,6 @@ public class Client extends JComponent implements Runnable {
 
     }
 
-    public void run(){
-        frame = new JFrame("Calendar");
-
-        frame.setSize(500,500);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        loginPage();
-
-        frame.setVisible(true);
-    }
 
     public void loginPage() {
 
@@ -184,25 +201,6 @@ public class Client extends JComponent implements Runnable {
         });
     }
 
-    public static void main(String[] args) {
-        String host = JOptionPane.showInputDialog(null, "Enter the IP you want to connect to:", "Calendar System",
-                JOptionPane.QUESTION_MESSAGE);
-        try {
-            Socket socket = new Socket(host,5555);
-            JOptionPane.showMessageDialog(null, "Client connected");
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            writer = new PrintWriter(socket.getOutputStream());
-
-            SwingUtilities.invokeLater(new Client());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-        //SwingUtilities.invokeLater(new Client());
-
-    }
-
     // ------------------------
     // START OF CUSTOMER GUI
     // ------------------------
@@ -253,7 +251,7 @@ public class Client extends JComponent implements Runnable {
                         }
                         case 5 -> {
                             frame.remove(customerMain);
-                            frame.add(loginPanel);
+                            frame.add(loginPanel, BorderLayout.CENTER);
                             frame.pack();
                             return;
                         }
@@ -276,7 +274,6 @@ public class Client extends JComponent implements Runnable {
     private void c0(BufferedReader br, PrintWriter pw) throws IOException {
         pw.println("viewCalendars");
         pw.flush();
-        customerBack(customerSub);
 
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
@@ -345,12 +342,12 @@ public class Client extends JComponent implements Runnable {
             }
         });
         customerSub.add(enter);
+        customerBack(customerSub);
     }
 
     private void c1(BufferedReader br, PrintWriter pw) throws IOException {
         pw.println("requestAppointment");
         pw.flush();
-        customerBack(customerSub);
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
@@ -366,7 +363,7 @@ public class Client extends JComponent implements Runnable {
                 ex.printStackTrace();
             }
         });
-        jPanel.add(refresh);
+         customerSub.add(refresh);
 
         //creation of appointment
 
@@ -397,9 +394,9 @@ public class Client extends JComponent implements Runnable {
 
 
         JComboBox<String> storeName = new JComboBox<String>(allStores);
-        jPanel.add(storeName);
+        customerSub.add(storeName);
         JComboBox<String> calendarName = new JComboBox<String>(allCalendars[storeName.getSelectedIndex()]);
-        jPanel.add(calendarName);
+        customerSub.add(calendarName);
 
         JButton enter = new JButton("Enter");
         enter.addActionListener(new ActionListener() {
@@ -410,7 +407,7 @@ public class Client extends JComponent implements Runnable {
                 pw.flush();
             }
         });
-        jPanel.add(enter);
+        customerSub.add(enter);
 
         String windows = br.readLine();
         String[] appointmentWindows = windows.substring(1, windows.length()-1).split("],\\[");
@@ -425,9 +422,9 @@ public class Client extends JComponent implements Runnable {
         }
 
         JComboBox<String> chooseWindow = new JComboBox<String>(appointments);
-        jPanel.add(chooseWindow);
+        customerSub.add(chooseWindow);
         JTextField bookings = new JTextField("Enter number of bookings", 10);
-        jPanel.add(bookings);
+        customerSub.add(bookings);
         JButton create = new JButton("Create");
         create.addActionListener(new ActionListener() {
             @Override
@@ -452,16 +449,15 @@ public class Client extends JComponent implements Runnable {
             result.setText("Creation successful!");
         }
 
-        jPanel.add(result);
+        customerSub.add(result);
         result.setVisible(true);
+        customerBack(customerSub);
     }
 
     private void c2(BufferedReader br, PrintWriter pw) throws IOException {
         pw.println("cancelRequest");
         pw.flush();
-        jPanel = new JPanel();
-        frame.add(jPanel);
-        customerBack(jPanel);
+
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
@@ -476,7 +472,7 @@ public class Client extends JComponent implements Runnable {
                 ex.printStackTrace();
             }
         });
-        jPanel.add(refresh);
+        customerSub.add(refresh);
 
         String clientRequests = br.readLine();
         String[] requests = clientRequests.substring(1, clientRequests.length()-1).split("],\\[");
@@ -488,13 +484,13 @@ public class Client extends JComponent implements Runnable {
         }
 
         JTextField allAppointments = new JTextField(result, 50);
-        jPanel.add(allAppointments);
+        customerSub.add(allAppointments);
         String[] options = new String[requests.length];
         for (int i = 1; i <= requests.length; i++) {
             options[i-1] = String.valueOf(i);
         }
         JComboBox<String> appointment = new JComboBox<String>(options);
-        jPanel.add(appointment);
+        customerSub.add(appointment);
         JButton delete = new JButton("Delete");
         delete.addActionListener(new ActionListener() {
             @Override
@@ -505,10 +501,10 @@ public class Client extends JComponent implements Runnable {
                 pw.flush();
             }
         });
-        jPanel.add(delete);
+        customerSub.add(delete);
 
         JTextField success = new JTextField();
-        jPanel.add(success);
+        customerSub.add(success);
 
         int response = br.read();
         if (response == 0) {
@@ -518,16 +514,14 @@ public class Client extends JComponent implements Runnable {
         }
 
         success.setVisible(true);
-        frame.pack();
+        customerBack(customerSub);
 
     }
 
     private void c3(BufferedReader br, PrintWriter pw) throws IOException {
         pw.println("viewApproved");
         pw.flush();
-        jPanel = new JPanel();
-        frame.add(jPanel);
-        customerBack(jPanel);
+
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
@@ -542,7 +536,7 @@ public class Client extends JComponent implements Runnable {
                 ex.printStackTrace();
             }
         });
-        jPanel.add(refresh);
+        customerSub.add(refresh);
 
 
         // code to view approved appointments
@@ -557,14 +551,15 @@ public class Client extends JComponent implements Runnable {
 
         JTextField displayAppointments = new JTextField(50);
         displayAppointments.setText(result);
-        jPanel.add(displayAppointments);
+        customerSub.add(displayAppointments);
         displayAppointments.setVisible(true);
-        frame.pack();
+
+        customerBack(customerSub);
     }
   
   
     private void c4(BufferedReader br, PrintWriter pw) throws IOException{
-        JLabel askSort = new JLabel("Would you like to srt your statistics?");
+        JLabel askSort = new JLabel("Would you like to sort your statistics?");
         customerSub.add(askSort);
 
         JButton yes = new JButton("Yes");
@@ -580,23 +575,6 @@ public class Client extends JComponent implements Runnable {
                 pw.flush();
 
                 try {
-//                    String storeString = br.readLine();
-//                    String stats = br.readLine();
-//                    String[] split = stats.split("],\\[");
-//                    split[0] = split[0].substring(2);
-//                    split[split.length - 1] = split[split.length - 1].substring(2);
-//
-//                    for (int i = 0; i < split.length; i++) {
-//                        StringBuilder line = new StringBuilder();
-//                        String[] indWindow = split[i].split(",");
-//                        line.append("Store Name: ").append(indWindow[0]).append("\n");
-//                        line.append("\t Window: ").append(indWindow[1]).append("-").append(indWindow[2]).append("\n");
-//                        line.append("\t Total store customers: ").append(indWindow[3]).append("\n");
-//                        line.append("\t This window's customers: ").append(indWindow[4]).append("\n");
-//
-//                        JLabel window = new JLabel(line.toString());
-//                        customerSub.add(window);
-//                    }
 
                     showStats(br);
 
