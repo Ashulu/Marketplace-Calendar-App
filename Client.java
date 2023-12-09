@@ -749,7 +749,7 @@ public class Client extends JComponent implements Runnable {
     }
     //0 "View Approved Appointments"
     private void s0(BufferedReader br, PrintWriter pw) throws IOException {
-        pw.write("viewApproved");
+        pw.write("showApproved");
         pw.println();
 
         pw.flush();
@@ -774,9 +774,19 @@ public class Client extends JComponent implements Runnable {
 
         //add processing a little later
         String approved = br.readLine();
+        String result = "";
 
+        if (approved.isEmpty()) {
+            result = "No approved appointments.";
+        } else {
+            String[] appoints = approved.substring(1, approved.length() - 1).split("],\\[");
+            for (int i = 0; i < appoints.length; i++) {
+                result += appoints[i] + "\n";
+            }
+        }
         sellerSub.add(appointments);
-        appointments.setText(approved);
+
+        appointments.setText(result);
     }
     //1 "Appointment Requests"
     private void s1(BufferedReader br, PrintWriter pw) throws IOException {
@@ -801,7 +811,7 @@ public class Client extends JComponent implements Runnable {
         });
         sellerSub.add(refresh);
         String temp = br.readLine();
-        String[] requests = temp.substring(0,temp.length() - 1).split("],\\[");
+        String[] requests = temp.substring(1,temp.length() - 1).split("],\\[");
         JComboBox<String> appointments = new JComboBox<String>(requests);
         JButton confirm = new JButton("Confirm");
         confirm.addActionListener(e -> {
@@ -810,7 +820,8 @@ public class Client extends JComponent implements Runnable {
                     temp2[0],temp2[1],temp2[2],temp2[3],temp2[5]);
             pw.write(command);
             pw.println();
-
+            System.out.println("wrote to confirm");
+            System.out.println(command);
             pw.flush();
             int response;
             try {
@@ -836,7 +847,8 @@ public class Client extends JComponent implements Runnable {
                     temp2[0],temp2[1],temp2[2],temp2[3],temp2[5]);
             pw.write(command);
             pw.println();
-
+            System.out.println("wrote to reject");
+            System.out.println(command);
             pw.flush();
             int response;
             try {
