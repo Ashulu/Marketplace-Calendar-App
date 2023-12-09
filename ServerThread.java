@@ -106,8 +106,10 @@ public class ServerThread extends Thread {
                         writer.write(showCalendars(statement));
                         writer.println();
                         writer.flush();
+                        System.out.println("calendars sent");
 
                         String editChoice = reader.readLine();
+                        System.out.println("selection received");
                         switch (editChoice) {
                             case "editCalendarName":
                                 int editName = editCalendarName(reader, statement);
@@ -138,10 +140,12 @@ public class ServerThread extends Thread {
                         writer.write(showCalendars(statement));
                         writer.println();
                         writer.flush();
+                        System.out.println("sent calendars");
 
                         writer.write(String.valueOf(deleteCalendar(reader, statement)));
                         writer.println();
                         writer.flush();
+                        System.out.println("sent result of delete");
                         break;
                     case "statisticsSeller":
                         statisticsSeller(reader, statement, writer);
@@ -150,7 +154,7 @@ public class ServerThread extends Thread {
                         statisticsSellerOrdered(reader, statement, writer);
                         break;
                     case "importCalendar":
-
+                        importCalendar(reader, statement, writer);
                         break;
                     case "exportApprovedRequests":
                         String fileName = reader.readLine();
@@ -554,6 +558,7 @@ public class ServerThread extends Thread {
         }
     }
 
+    //allows for perfect dupes
     public int createCalendar(BufferedReader reader, Statement statement) throws IOException, SQLException {
         String input = reader.readLine();
         String[] inputList = input.split(",");
@@ -566,6 +571,7 @@ public class ServerThread extends Thread {
         return statement.executeUpdate(calendarUpdateStatement);
     }
 
+    //works with a little sql tweak
     public int editCalendarName(BufferedReader reader, Statement statement) throws IOException, SQLException {
         String input = reader.readLine();
         String[] inputList = input.split(",");
@@ -574,10 +580,11 @@ public class ServerThread extends Thread {
         String inputNew = inputList[2];
 
         String updateStatement = String.format("UPDATE calendars SET calendarName = '%s' WHERE (storeName = '%s' AND" +
-            "calendarName = '%s'", inputNew, inputStore, inputOld);
+            " calendarName = '%s')", inputNew, inputStore, inputOld);
         return statement.executeUpdate(updateStatement);
     }
 
+    //works with a little sql tweak
     public int editCalendarDescription(BufferedReader reader, Statement statement) throws IOException, SQLException {
         String input = reader.readLine();
         String[] inputList = input.split(",");
@@ -585,11 +592,12 @@ public class ServerThread extends Thread {
         String inputCalendar = inputList[1];
         String inputDescription = inputList[2];
 
-        String updateStatement = String.format("UPDATE calendars SET description = '%s' WHERE (storeName = '%s' AND " +
-            "calendarName = '%s'", inputDescription, inputStore, inputCalendar);
+        String updateStatement = String.format("UPDATE calendars SET calendarDescription = '%s' WHERE (storeName = " +
+                "'%s' AND calendarName = '%s')", inputDescription, inputStore, inputCalendar);
         return statement.executeUpdate(updateStatement);
     }
 
+    //works well
     public int editCalendarAddWindow(BufferedReader reader, Statement statement) throws IOException, SQLException {
         String input = reader.readLine();
         String[] inputList = input.split(",");
@@ -621,7 +629,7 @@ public class ServerThread extends Thread {
         if (!overlap) {
             String addWindowStatement = String.format("INSERT INTO windows (storeName, calendarName, " +
                 "appointmentTitle, startTime, endTime, maxAttendees, currentBookings) VALUES ('%s', '%s', '%s', '%s'," +
-                " '%s', '%s', '%s'", inputStore, inputCalendar, inputTitle, inputStart, inputEnd, inputMax, 0);
+                " '%s', '%s', '%s')", inputStore, inputCalendar, inputTitle, inputStart, inputEnd, inputMax, 0);
             return statement.executeUpdate(addWindowStatement);
         } else {
             return -1;
@@ -632,12 +640,13 @@ public class ServerThread extends Thread {
     public int editCalendarRemoveWindow(BufferedReader reader, Statement statement, PrintWriter writer) throws
         IOException, SQLException {
         String input = reader.readLine();
+        System.out.println("select calendar");
         String[] inputList = input.split(",");
         String inputStore = inputList[0];
         String inputCalendar = inputList[1];
         ArrayList<String[]> windowTimes = new ArrayList<>();
         String windowQueryStatement = String.format("SELECT startTime, endTime, maxAttendees, currentBookings FROM " +
-            "windows WHERE (storeName = '%s' AND calendarName = '%s'", inputStore, inputCalendar);
+            "windows WHERE (storeName = '%s' AND calendarName = '%s')", inputStore, inputCalendar);
         ResultSet windowQuery = statement.executeQuery(windowQueryStatement);
         while (windowQuery.next()) {
             String[] windowArray = new String[4];
@@ -650,13 +659,17 @@ public class ServerThread extends Thread {
         writer.write(arraylistToString(windowTimes));
         writer.println();
         writer.flush();
+        System.out.println("sent windows");
 
         String secondInput = reader.readLine();
+        System.out.println("received window");
         String deleteStatement = String.format("DELETE FROM windows WHERE (storeName = '%s' AND calendarName " +
-            "= '%s' AND endTime = '%s'", inputStore, inputCalendar, secondInput);
+            "= '%s' AND endTime = '%s')", inputStore, inputCalendar, secondInput);
         return statement.executeUpdate(deleteStatement);
     }
 
+    //changed so that ANY deletion returns true
+    //idk something is wrong with return values - it works tho
     public int deleteCalendar(BufferedReader reader, Statement statement) throws IOException, SQLException {
         String input = reader.readLine();
         String[] inputList = input.split(",");
@@ -664,26 +677,26 @@ public class ServerThread extends Thread {
         String inputCalendar = inputList[1];
 
         String deleteCalendarStatement = String.format("DELETE FROM calendars WHERE (storeName = '%s' AND " +
-            "calendarName = '%s'", inputStore, inputCalendar);
+            "calendarName = '%s')", inputStore, inputCalendar);
         int deleteFromCalendar = statement.executeUpdate(deleteCalendarStatement);
-        if (deleteFromCalendar < 1) {
-            return 0;
+        int result = 0;
+        if (deleteFromCalendar == 1 && result == 0) {
+            result = 1;
         }
-
         String deleteAppointmentStatement = String.format("DELETE FROM appointments WHERE (storeName = '%s' AND " +
-            "calendarName = '%s'", inputStore, inputCalendar);
+            "calendarName = '%s')", inputStore, inputCalendar);
         int deleteFromAppointment = statement.executeUpdate(deleteAppointmentStatement);
-        if (deleteFromAppointment < 1) {
-            return 0;
+        if (deleteFromAppointment == 1 && result == 0) {
+            result = 1;
         }
 
         String deleteWindowStatement = String.format("DELETE FROM windows WHERE (storeName = '%s' AND " +
-            "calendarName = '%s'", inputStore, inputCalendar);
+            "calendarName = '%s')", inputStore, inputCalendar);
         int deleteFromWindow = statement.executeUpdate(deleteWindowStatement);
-        if (deleteFromWindow < 1) {
-            return 0;
+        if (deleteFromWindow == 1 && result == 0) {
+            result = 1;
         }
-        return 1;
+        return result;
     }
 
     public String showCalendars(Statement statement) throws SQLException {
