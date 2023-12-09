@@ -344,8 +344,8 @@ public class ServerThread extends Thread {
             sellerQuery.next();
             String sellerEmail = sellerQuery.getString("sellerName");
             String updateStatement = String.format("INSERT INTO appointments (customerEmail, sellerEmail, storeName, " +
-                "calendarName, startTime, endTime, booking, isApproved, isRequest, timeStamp) VALUES ('%s', '%s', '%s', " +
-                "'%s', '%s', '%s', '%s', 0, 1, strftime('%%s', 'now'))", clientEmail, sellerEmail, inputStore,
+                "calendarName, startTime, endTime, booking, isApproved, isRequest, timeStamp) VALUES ('%s', '%s', " +
+                "'%s', '%s', '%s', '%s', '%s', 0, 1, strftime('%%s', 'now'))", clientEmail, sellerEmail, inputStore,
                 inputCalendar, inputStartTime, inputEndTime, inputBooking);
             int updates = statement.executeUpdate(updateStatement);
             thirdOutput = String.valueOf(updates);
