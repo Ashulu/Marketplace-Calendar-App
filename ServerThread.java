@@ -345,7 +345,7 @@ public class ServerThread extends Thread {
             String sellerEmail = sellerQuery.getString("sellerName");
             String updateStatement = String.format("INSERT INTO appointments (customerEmail, sellerEmail, storeName, " +
                 "calendarName, startTime, endTime, booking, isApproved, isRequest, timeStamp) VALUES ('%s', '%s', " +
-                "'%s', '%s', '%s', '%s', '%s', 0, 1, strftime('%%s', 'now'))", clientEmail, sellerEmail, inputStore,
+                "'%s', '%s', '%s', '%s', '%s', 0, 1, strftime('%%Y-%%m-%%d %%H:%%M:%%S', 'now'))", clientEmail, sellerEmail, inputStore,
                 inputCalendar, inputStartTime, inputEndTime, inputBooking);
             int updates = statement.executeUpdate(updateStatement);
             thirdOutput = String.valueOf(updates);
@@ -483,11 +483,13 @@ public class ServerThread extends Thread {
         writer.flush();
     }
 
+    //this is done after edit clientside - works even when empty string
     public String showApproved(Statement statement) throws SQLException {
         ArrayList<String[]> approved = new ArrayList<>();
         String approvedQueryStatement = String.format("SELECT customerEmail, storeName, calendarName, startTime, " +
             "endTime, booking, datetime(timeStamp, 'unixepoch') as timeStamp FROM appointments WHERE (sellerEmail = " +
-            "'%s' AND isApproved = 1", clientEmail);
+            "'%s' AND isApproved = 1)", clientEmail);
+        System.out.println(approvedQueryStatement);
         ResultSet approvedQuery = statement.executeQuery(approvedQueryStatement);
         while (approvedQuery.next()) {
             String[] approvedArray = new String[7];
@@ -500,9 +502,11 @@ public class ServerThread extends Thread {
             approvedArray[6] = approvedQuery.getString("timeStamp");
             approved.add(approvedArray);
         }
+        System.out.println(arraylistToString(approved));
         return arraylistToString(approved);
     }
 
+    //can approve and deny requests - i don't know what happens if no requests
     public String approveRequest(BufferedReader reader, Statement statement, PrintWriter writer) throws SQLException,
         IOException {
         ArrayList<String[]> requests = new ArrayList<>();
@@ -525,15 +529,26 @@ public class ServerThread extends Thread {
 
         String input = reader.readLine();
         String[] inputList = input.split(",");
-        String inputCustomer = inputList[0];
-        String inputStore = inputList[1];
-        String inputCalendar = inputList[2];
-        String inputStart = inputList[3];
-        String inputBooking = inputList[4];
-        String updateStatement = String.format("UPDATE appointments SET isApproved = 1, isRequest = 0, timeStamp = " +
-            "strftime('s', now) WHERE (customerEmail = '%s' AND storeName = '%s' AND calendarName = '%s' AND " +
-            "startTime = '%s' and booking = '%s'", inputCustomer, inputStore, inputCalendar, inputStart,
-            inputBooking);
+        String operation = inputList[0];
+        String inputCustomer = inputList[1];
+        String inputStore = inputList[2];
+        String inputCalendar = inputList[3];
+        String inputStart = inputList[4];
+        String inputBooking = inputList[5];
+        String updateStatement = "";
+        if (operation.equals("confirm")) {
+            updateStatement = String.format("UPDATE appointments SET isApproved = 1, isRequest = 0, timeStamp = strftime('%%Y-%%m-%%d %%H:%%M:%%S', 'now') " +
+                            "WHERE (customerEmail = '%s' AND storeName = '%s' AND calendarName = '%s' AND startTime = '%s' AND booking = '%s')",
+                    inputCustomer, inputStore, inputCalendar, inputStart, inputBooking);
+
+        } else {
+            updateStatement = String.format("UPDATE appointments SET isApproved = 0, isRequest = 0, timeStamp = " +
+                            "strftime('%%Y-%%m-%%d %%H:%%M:%%S', 'now') " +
+                            "WHERE (customerEmail = '%s' AND storeName = '%s' AND calendarName = '%s' AND startTime = '%s' AND booking = '%s')",
+                    inputCustomer, inputStore, inputCalendar, inputStart, inputBooking);
+
+        }
+
         int changes = statement.executeUpdate(updateStatement);
         return String.valueOf(changes);
     }
@@ -680,20 +695,20 @@ public class ServerThread extends Thread {
             "calendarName = '%s')", inputStore, inputCalendar);
         int deleteFromCalendar = statement.executeUpdate(deleteCalendarStatement);
         int result = 0;
-        if (deleteFromCalendar == 1 && result == 0) {
+        if (deleteFromCalendar != 0 && result == 0) {
             result = 1;
         }
         String deleteAppointmentStatement = String.format("DELETE FROM appointments WHERE (storeName = '%s' AND " +
             "calendarName = '%s')", inputStore, inputCalendar);
         int deleteFromAppointment = statement.executeUpdate(deleteAppointmentStatement);
-        if (deleteFromAppointment == 1 && result == 0) {
+        if (deleteFromAppointment != 0 && result == 0) {
             result = 1;
         }
 
         String deleteWindowStatement = String.format("DELETE FROM windows WHERE (storeName = '%s' AND " +
             "calendarName = '%s')", inputStore, inputCalendar);
         int deleteFromWindow = statement.executeUpdate(deleteWindowStatement);
-        if (deleteFromWindow == 1 && result == 0) {
+        if (deleteFromWindow != 0 && result == 0) {
             result = 1;
         }
         return result;
