@@ -1,3 +1,4 @@
+import java.awt.event.TextEvent;
 import java.io.*;
 import java.net.Socket;
 import java.sql.*;
@@ -581,9 +582,19 @@ public class ServerThread extends Thread {
         String inputCalendar = inputList[1];
         String inputDescription = inputList[2];
 
-        String calendarUpdateStatement = String.format("INSERT INTO calendars (storeName, calendarName, " +
-            "calendarDescription) VALUES ('%s','%s','%s')", inputStore, inputCalendar, inputDescription);
-        return statement.executeUpdate(calendarUpdateStatement);
+        String existQueryStatement = String.format("SELECT COUNT(calendarName) AS count FROM stores WHERE (storeName " +
+            " = '%s' AND calendarName = '%s'", inputStore, inputCalendar);
+        ResultSet existQuery = statement.executeQuery(existQueryStatement);
+        existQuery.next();
+        int existing = existQuery.getInt("count");
+        if (existing < 1) {
+            String calendarUpdateStatement = String.format("INSERT INTO calendars (storeName, calendarName, " +
+                "calendarDescription) VALUES ('%s','%s','%s')", inputStore, inputCalendar, inputDescription);
+            return statement.executeUpdate(calendarUpdateStatement);
+        } else {
+            return 0;
+        }
+
     }
 
     //works with a little sql tweak

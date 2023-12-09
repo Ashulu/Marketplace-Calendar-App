@@ -403,7 +403,7 @@ public class Client extends JComponent implements Runnable {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String command = String.format("%s,%s",storeName.getSelectedItem(), calendarName.getSelectedItem());
-                pw.write(command);
+                pw.println(command);
                 pw.flush();
             }
         });
@@ -436,7 +436,7 @@ public class Client extends JComponent implements Runnable {
                         maxAttendees[chooseWindow.getSelectedIndex()],
                         Integer.parseInt(currentBookings[chooseWindow.getSelectedIndex()]) +
                                 Integer.parseInt(bookings.getText()));
-                pw.write(command);
+                pw.println(command);
                 pw.flush();
             }
         });
@@ -455,7 +455,7 @@ public class Client extends JComponent implements Runnable {
     }
 
     private void c2(BufferedReader br, PrintWriter pw) throws IOException {
-        pw.write("cancelRequest");
+        pw.println("cancelRequest");
         pw.flush();
 
         JButton refresh = new JButton("Refresh");
@@ -497,7 +497,7 @@ public class Client extends JComponent implements Runnable {
             public void actionPerformed(ActionEvent e) {
                 String[] choice = requests[appointment.getSelectedIndex()].split(",");
                 String command = String.format("%s,%s,%s", choice[0], choice[1], choice[2]);
-                pw.write(command);
+                pw.println(command);
                 pw.flush();
             }
         });
@@ -519,7 +519,7 @@ public class Client extends JComponent implements Runnable {
     }
 
     private void c3(BufferedReader br, PrintWriter pw) throws IOException {
-        pw.write("viewApproved");
+        pw.println("viewApproved");
         pw.flush();
 
         JButton refresh = new JButton("Refresh");
