@@ -64,6 +64,7 @@ public class TestClient {
         }
 
         //        4. create calendar * 2 for store1;
+        writer.println("createCalendar");
 
         //        5. edit calendar1 - name
         //        6. edit calendar2 - description
