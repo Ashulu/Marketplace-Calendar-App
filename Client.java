@@ -937,7 +937,7 @@ public class Client extends JComponent implements Runnable {
         ActionListener actionListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String command = String.format("s2,%s,%s,%s",storeName.getText(),calendarName.getText(),
+                String command = String.format("%s,%s,%s",storeName.getText(),calendarName.getText(),
                         calendarDescription.getText());
                 pw.write(command);
                 pw.println();
@@ -963,6 +963,8 @@ public class Client extends JComponent implements Runnable {
         };
         create.addActionListener(actionListener);
         sellerSub.add(storeName);
+        sellerSub.add(calendarName);
+        sellerSub.add(calendarDescription);
         sellerSub.add(create);
         frame.pack();
     }
@@ -997,74 +999,109 @@ public class Client extends JComponent implements Runnable {
         String[] options = { "Edit Name", "Edit Description", "Add Window", "Delete Window" };
 
         JComboBox<String> edit = new JComboBox<String>(options);
-        JTextField result = new JTextField();
-        result.setVisible(false);
-        sellerSub.add(result);
+
         sellerSub.add(edit);
         JButton select = new JButton("Select");
+        sellerSub.add(select);
         select.addActionListener(ex -> {
             sellerSub.remove(back);
+            sellerSub.remove(edit);
+            sellerSub.remove(select);
+            frame.pack();
             String temp = null;
             try {
                 temp = br.readLine();
+                System.out.println("calendars read");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            String[] calendars = temp.substring(1, temp.length() - 1).split("],\\[");
-            JComboBox<String> selection = new JComboBox<String>(calendars);
-            sellerSub.add(selection);
-            String[] temp2 = ((String)selection.getSelectedItem()).split(", ");
-            String storeName = temp2[0];
-            String calendarName = temp2[1];
+
             switch (edit.getSelectedIndex()) {
                 case 0 -> {
                     pw.write("editCalendarName");
+                    System.out.println("selection made");
                     pw.println();
-
                     pw.flush();
                     JButton submit = new JButton("Edit");
-                    sellerSub.add(edit);
-                    sellerSub.add(result);
+                    String[] calendars = temp.substring(1, temp.length() - 1).split("],\\[");
+                    JComboBox<String> selection = new JComboBox<String>(calendars);
+                    sellerSub.add(selection);
                     sellerSub.add(submit);
                     JTextField newName = new JTextField("New Name");
                     sellerSub.add(newName);
                     submit.addActionListener(e -> {
-                        String command = String.format("%s,%s,%s",storeName,
-                                calendarName,newName.getText());
+
+                        String[] temp2 = ((String)selection.getSelectedItem()).split(", ");
+                        String storeName = temp2[0];
+                        String calendarName = temp2[1];
+                        String command = String.format("%s,%s,%s",storeName,calendarName,newName.getText());
                         pw.write(command);
                         pw.println();
-
+                        System.out.println(command);
                         pw.flush();
-
+                        int response;
+                        try {
+                            response = Integer.parseInt(br.readLine());
+                        } catch (IOException exc) {
+                            throw new RuntimeException(exc);
+                        }
+                        if (response == 0) {
+                            JOptionPane.showMessageDialog(null, "Edit failed.",
+                                    "Seller Client", JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Edit successful!",
+                                    "Seller Client", JOptionPane.INFORMATION_MESSAGE);
+                        }
                         frame.remove(sellerSub);
                         frame.add(sellerMain, BorderLayout.CENTER);
                         frame.pack();
                     });
+                    System.out.println("made it to the end");
+                    frame.pack();
                 }
                 case 1 -> {
-                    pw.write("editCalendarName");
+                    pw.write("editCalendarDescription");
                     pw.println();
 
                     pw.flush();
                     frame.add(sellerSub);
                     JButton submit = new JButton("Edit");
+
+                    String[] calendars = temp.substring(1, temp.length() - 1).split("],\\[");
+                    JComboBox<String> selection = new JComboBox<String>(calendars);
+                    sellerSub.add(selection);
                     sellerSub.add(edit);
-                    sellerSub.add(result);
                     sellerSub.add(submit);
                     JTextField calendarDescription = new JTextField("New Description");
                     sellerSub.add(calendarDescription);
                     submit.addActionListener(e -> {
+                        String[] temp2 = ((String)selection.getSelectedItem()).split(", ");
+                        String storeName = temp2[0];
+                        String calendarName = temp2[1];
                         String command = String.format("%s,%s,%s",storeName,
                                 calendarName,calendarDescription.getText());
                         pw.write(command);
                         pw.println();
 
                         pw.flush();
-
+                        int response;
+                        try {
+                            response = Integer.parseInt(br.readLine());
+                        } catch (IOException exc) {
+                            throw new RuntimeException(exc);
+                        }
+                        if (response == 0) {
+                            JOptionPane.showMessageDialog(null, "Edit failed.",
+                                    "Seller Client", JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Edit successful!",
+                                    "Seller Client", JOptionPane.INFORMATION_MESSAGE);
+                        }
                         frame.remove(sellerSub);
                         frame.add(sellerMain, BorderLayout.CENTER);
                         frame.pack();
                     });
+
                 }
                 case 2 -> {
                     pw.write("editCalendarAddWindow");
@@ -1073,8 +1110,10 @@ public class Client extends JComponent implements Runnable {
                     pw.flush();
                     frame.add(sellerSub);
                     JButton submit = new JButton("Add");
+                    String[] calendars = temp.substring(1, temp.length() - 1).split("],\\[");
+                    JComboBox<String> selection = new JComboBox<String>(calendars);
+                    sellerSub.add(selection);
                     sellerSub.add(edit);
-                    sellerSub.add(result);
                     sellerSub.add(submit);
 
                     JTextField start = new JTextField("0900");
@@ -1086,75 +1125,102 @@ public class Client extends JComponent implements Runnable {
                     sellerSub.add(capacity);
                     sellerSub.add(desc);
                     submit.addActionListener(e -> {
+                        String[] temp2 = ((String)selection.getSelectedItem()).split(", ");
+                        String storeName = temp2[0];
+                        String calendarName = temp2[1];
                         String command = String.format("%s,%s,%s,%s,%s,%s",storeName,
-                                calendarName,start.getText(),end.getText(),
-                                capacity.getText(),desc.getText());
+                                calendarName,desc.getText(),start.getText(),end.getText(),
+                                capacity.getText());
                         pw.write(command);
 
                         pw.println();
 
                         pw.flush();
-
+                        int response;
+                        try {
+                            response = Integer.parseInt(br.readLine());
+                        } catch (IOException exc) {
+                            throw new RuntimeException(exc);
+                        }
+                        if (response == 0) {
+                            JOptionPane.showMessageDialog(null, "Edit failed.",
+                                    "Seller Client", JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Edit successful!",
+                                    "Seller Client", JOptionPane.INFORMATION_MESSAGE);
+                        }
                         frame.remove(sellerSub);
                         frame.add(sellerMain, BorderLayout.CENTER);
                         frame.pack();
                     });
+
                     frame.pack();
                 }
                 case 3 -> {
                     pw.write("editCalendarRemoveWindow");
                     pw.println();
-
+                    System.out.println("entered remove window");
                     pw.flush();
-                    String command = String.format("%s,%s", storeName,
-                            calendarName);
-                    pw.write(command);
-                    String[] windows;
-
-                    try {
-                        String temp3 = br.readLine();
-                        windows = temp3.substring(1, temp3.length() - 1).split("],\\[");
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    JComboBox<String> winOp = new JComboBox<String>(windows);
-                    sellerSub.add(winOp);
-                    frame.add(sellerSub);
-                    JButton submit = new JButton("Delete");
-                    sellerSub.add(edit);
-                    sellerSub.add(result);
-                    sellerSub.add(submit);
-                    JTextField end = new JTextField("1700");
-                    sellerSub.add(end);
-                    submit.addActionListener(e -> {
-                        String[] temp4 = ((String)winOp.getSelectedItem()).split(",");
-                        String command2 = String.format("%s", temp4[4]);
-                        pw.write(command2);
+                    String[] calendars = temp.substring(1, temp.length() - 1).split("],\\[");
+                    JComboBox<String> selection = new JComboBox<String>(calendars);
+                    sellerSub.add(selection);
+                    JButton calChoice = new JButton("Select");
+                    sellerSub.add(calChoice);
+                    calChoice.addActionListener(e -> {
+                        String[] temp2 = ((String)selection.getSelectedItem()).split(", ");
+                        String storeName = temp2[0];
+                        String calendarName = temp2[1];
+                        String command = String.format("%s,%s", storeName,
+                                calendarName);
+                        System.out.println("sent command for associated windows");
+                        pw.write(command);
                         pw.println();
-
                         pw.flush();
-                        result.setVisible(true);
-                        frame.remove(sellerSub);
-                        frame.add(sellerMain, BorderLayout.CENTER);
+                        String[] windows;
+                        try {
+                            String temp3 = br.readLine();
+                            System.out.println("found windows");
+                            windows = temp3.substring(1, temp3.length() - 1).split("],\\[");
+                        } catch (IOException exc) {
+                            throw new RuntimeException(exc);
+                        }
+                        JComboBox<String> winOp = new JComboBox<String>(windows);
+                        sellerSub.add(winOp);
+                        frame.add(sellerSub);
+                        JButton submit = new JButton("Delete");
+                        sellerSub.add(edit);
+                        sellerSub.add(submit);
+                        submit.addActionListener(a -> {
+
+                            String[] temp4 = ((String)winOp.getSelectedItem()).split(", ");
+                            String command2 = String.format("%s",temp4[1]);
+                            pw.write(command2);
+                            pw.println();
+                            System.out.println(command2);
+                            System.out.println("sent window");
+                            pw.flush();
+                            int response;
+                            try {
+                                response = Integer.parseInt(br.readLine());
+                                System.out.println("result received");
+                            } catch (IOException exc) {
+                                throw new RuntimeException(exc);
+                            }
+                            if (response == 0) {
+                                JOptionPane.showMessageDialog(null, "Edit failed.",
+                                        "Seller Client", JOptionPane.ERROR_MESSAGE);
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Edit successful!",
+                                        "Seller Client", JOptionPane.INFORMATION_MESSAGE);
+                            }
+                            frame.remove(sellerSub);
+                            frame.add(sellerMain, BorderLayout.CENTER);
+                            frame.pack();
+                        });
                         frame.pack();
                     });
-                    frame.pack();
                 }
             }
-            int response;
-            try {
-                response = Integer.parseInt(br.readLine());
-            } catch (IOException exc) {
-                throw new RuntimeException(exc);
-            }
-            if (response == 0) {
-                JOptionPane.showMessageDialog(null, "Edit failed.",
-                        "Seller Client", JOptionPane.ERROR_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(null, "Edit successful!",
-                        "Seller Client", JOptionPane.INFORMATION_MESSAGE);
-            }
-            result.setVisible(true);
         });
     }
 
@@ -1162,10 +1228,14 @@ public class Client extends JComponent implements Runnable {
     private void s5(BufferedReader br, PrintWriter pw) throws IOException {
         pw.write("deleteCalendar");
         pw.println();
-
         pw.flush();
-
+        //ok have a dropdown here
+        String calendarNames = br.readLine();
+        String[] calSel = calendarNames.substring(1, calendarNames.length()-1).split("],\\[");
+        JComboBox<String> calNames = new JComboBox<String>(calSel);
         frame.add(sellerSub);
+        sellerSub.add(calNames);
+
         sellerBack(sellerSub);
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
@@ -1177,40 +1247,39 @@ public class Client extends JComponent implements Runnable {
             }
         });
         sellerSub.add(refresh);
-        JTextField storeName = new JTextField("Example Store", 10);
-        JTextField calendarName = new JTextField("Example Calendar", 10);
         JTextField result = new JTextField();
         result.setVisible(false);
         JButton delete = new JButton("Delete");
         delete.addActionListener(e -> {
-            String command = String.format("%s,%s",storeName.getText(),calendarName.getText());
+            String select = (String)calNames.getSelectedItem();
+            String[] temp = select.split(", ");
+            String command = String.format("%s,%s",temp[0],temp[1]);
             pw.write(command);
             pw.println();
-
             pw.flush();
+            int response;
+            try {
+                response = Integer.parseInt(br.readLine());
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            if (response == 0) {
+                JOptionPane.showMessageDialog(null, "Failed to delete.",
+                        "Seller Client", JOptionPane.ERROR_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Deletion successful!",
+                        "Seller Client", JOptionPane.INFORMATION_MESSAGE);
+            }
             frame.remove(sellerSub);
             frame.add(sellerMain, BorderLayout.CENTER);
             frame.pack();
         });
-        sellerSub.add(storeName);
-        sellerSub.add(calendarName);
+
         sellerSub.add(delete);
         sellerSub.add(result);
-        int response;
-        try {
-            response = Integer.parseInt(br.readLine());
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-        if (response == 0) {
-            JOptionPane.showMessageDialog(null, "Failed to delete.",
-                    "Seller Client", JOptionPane.ERROR_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(null, "Deletion successful!",
-                    "Seller Client", JOptionPane.INFORMATION_MESSAGE);
-        }
-        result.setVisible(true);
         frame.pack();
+
+        result.setVisible(true);
     }
 
     //6 "Show Statistics"
