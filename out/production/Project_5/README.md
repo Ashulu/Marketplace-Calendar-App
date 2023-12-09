@@ -80,8 +80,8 @@ return options:
 SELECT calendarName, calendarDescription from calendars  
 *store all calendarNames in the server, then iterate through*  
 [calendarName, calendarDescription] * number of calendars  
-SELECT appointmentTitle, startTime, endTime, maxAttendees, currentBookings WHERE calendarName == iteration(i)  
-[appointmentTitle, startTime, endTime, maxAttendees, currentBookings] * number of calendars
+SELECT calendarName, appointmentTitle, startTime, endTime, maxAttendees, currentBookings WHERE calendarName == iteration(i)  
+[calendarName, appointmentTitle, startTime, endTime, maxAttendees, currentBookings] * number of windows
 
 variables needed:
 none
@@ -202,7 +202,10 @@ customerEmail, storeName, calendarName, startTime, booking
 
 
 if approved:
-UPDATE appointments SET isApproved = 1, isRequest = 0, 
+UPDATE appointments SET isApproved = 1, isRequest = 0,
+
+return:
+1 if correct, 0 if not
 
 
 -------------------------------------------------------------------------------------------------------------
@@ -219,7 +222,6 @@ return:
 
 variables needed:
 1. storeName, calendarName, calendarDescription
-2. startTime, endTime, maxAttendees * number of windows
 
 return:
 0 or 1
@@ -245,20 +247,21 @@ return
 2. 1 or 0
 
 -------------------------------------------------------------------------------------------------------------
-**editCalendarAddWindow
+**editCalendarAddWindow**
 
 variables needed:
-storeName, calendarName, startTime, endTime, maxAttendees
+storeName, calendarName, appointmentTitle, startTime, endTime, maxAttendees
 
 return
 1. list of store and calendar
 2. 1 or 0
 
 -------------------------------------------------------------------------------------------------------------
-**editCalendarRemoveWindow
+**editCalendarRemoveWindow**
 
 variables needed:
-storeName, calendarName, startTime, endTime
+1. storeName, calendarName
+2. endTime
 
 return:
 1. list of store and calendar
@@ -281,7 +284,7 @@ input:
 
 output:
 1. list of stores
-2. most popular window of the store
+2. most popular window of the store startTime,endTime
 3. arraylist of [customerName, numOfApproved]
 
 -------------------------------------------------------------------------------------------------------------
@@ -300,6 +303,9 @@ output:
 
 variablesNeeded:
 storeName, fileName
+
+output:
+list of stores
 
 -------------------------------------------------------------------------------------------------------------
 **exportApprovedRequests**
