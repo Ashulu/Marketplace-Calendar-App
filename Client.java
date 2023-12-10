@@ -502,6 +502,9 @@ public class Client extends JComponent implements Runnable {
             JComboBox<String> choices = new JComboBox<>(arrChoices);
             requestSub.add(choices);
 
+            JTextField bookingInfo = new JTextField("How many people are attenting this event");
+            requestSub.add(bookingInfo);
+
             JButton selection = new JButton("Select");
             requestSub.add(selection);
 
@@ -510,9 +513,9 @@ public class Client extends JComponent implements Runnable {
                 public void actionPerformed(ActionEvent e) {
                     try {
                         String choice = (String) choices.getSelectedItem();
-                        String[] split1 = choice.split(" - ");
-                        String[] split2 = split1[1].split(": ");
-                        pw.println(String.format("%s,%s,%s", split1[0], split1[1], split2[1]));
+                        String[] split1 = choice.split(" , ");
+                        String[] split2 = split1[0].split(" - ");
+                        pw.println(String.format("%s,%s,%s", split2[0], split2[1], bookingInfo.getText()));
                         pw.flush();
 
                         int result = Integer.parseInt(br.readLine());
