@@ -3,6 +3,7 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.Customizer;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.net.Socket;
@@ -26,6 +27,7 @@ public class Client extends JComponent implements Runnable {
     JPanel sellerSub;
     JPanel customerMain;
     JPanel customerSub;
+    JPanel requestSub;
     JButton login;
     JButton createAccount;
     JPanel jPanel;
@@ -393,14 +395,12 @@ public class Client extends JComponent implements Runnable {
             JLabel welcome = new JLabel("Select which store and calendar you would like to request");
             customerSub.add(welcome);
 
-            String[] storesAndCalendars = allInfo.split("],\\[");
+            String[] storesAndCalendars = allInfo.substring(1, allInfo.length() - 1).split("],\\[");
             int len = storesAndCalendars.length;
-            storesAndCalendars[0] = storesAndCalendars[0].substring(1);
-            storesAndCalendars[len-1] = storesAndCalendars[len-1].substring(0, storesAndCalendars[len-1].length() - 1);
 
             ArrayList<String> listChoice = new ArrayList<>();
             for (int i = 0; i < len; i++) {
-                String[] splitted = storesAndCalendars[i].split(",");
+                String[] splitted = storesAndCalendars[i].split(", ");
                 listChoice.add(splitted[0] + " : " + splitted[1]);
             }
 
@@ -411,82 +411,144 @@ public class Client extends JComponent implements Runnable {
             JButton selection = new JButton("Select");
             customerSub.add(selection);
 
+            JButton refresh = new JButton("Refresh");
+            customerSub.add(refresh);
+            refresh.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        frame.remove(customerSub);
+                        customerSub = new JPanel();
+                        customerSub.setBounds(0, 0, 30, frame.getHeight());
+                        customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
+                        pw.println("break");
+                        pw.flush();
+                        c1(br, pw);
+                        frame.add(customerSub);
+                        frame.pack();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+
+            customerBackBreak(customerSub, pw);
             selection.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
                         String choice = (String) choices.getSelectedItem();
+                        System.out.println(choice);
+
                         String[] splitted = choice.split(" : ");
+                        System.out.println(String.format("%s,%s", splitted[0], splitted[1]));
                         pw.println(String.format("%s,%s", splitted[0], splitted[1]));
                         pw.flush();
 
+                        System.out.println("before");
                         String windows = br.readLine();
-                        if (windows.length() > 0) {
-                            String[] windowSplit = windows.split("],\\[");
-                            int len = windowSplit.length;
-                            windowSplit[0] = windowSplit[0].substring(1);
-                            windowSplit[len - 1] = windowSplit[len - 1].substring(0, windowSplit[len - 1].length() - 1);
+                        System.out.println("after");
+                        System.out.println("windows: " + windows);
 
-                            ArrayList<String> listChoice = new ArrayList<>();
-                            for (int i = 0; i < len; i++) {
-                                String[] windowSplitted = windowSplit[i].split(",");
-                                listChoice.add(String.format("%s - %s, Current booking: %s",windowSplitted[0],
-                                        windowSplitted[1], windowSplitted[3]));
-                            }
-
-                            String[] arrChoices = listChoice.toArray(new String[listChoice.size()]);
-                            JComboBox<String> choices = new JComboBox<>(arrChoices);
-                            customerSub.add(choices);
-
-                            JButton selection = new JButton("Select");
-                            customerSub.add(selection);
-
-                            selection.addActionListener(new ActionListener() {
-                                @Override
-                                public void actionPerformed(ActionEvent e) {
-                                    try {
-                                        String choice = (String) choices.getSelectedItem();
-                                        String[] split1 = choice.split(" - ");
-                                        String[] split2 = split1[1].split(": ");
-                                        pw.println(String.format("%s,%s,%s", split1[0], split1[1], split2[1]));
-                                        pw.flush();
-
-                                        int result = Integer.parseInt(br.readLine());
-                                        switch (result) {
-                                            case 1:
-                                                JOptionPane.showMessageDialog(frame.getContentPane(),
-                                                        "Request made!");
-                                                break;
-                                            case 0:
-                                                JOptionPane.showMessageDialog(frame.getContentPane(),
-                                                        "This window has reached capacity.");
-                                                break;
-                                        }
-
-                                    } catch (Exception ex) {
-                                        ex.printStackTrace();
-                                    }
-                                }
-                            });
-                        } else {
-                            pw.print("break");
-                            pw.flush();
-                            frame.remove(customerSub);
-                            frame.add(customerMain, BorderLayout.CENTER);
-                            frame.pack();
-                        }
+                        requestSub = new JPanel();
+                        requestSub.setBounds(0, 0, 30, frame.getHeight());
+                        requestSub.setLayout(new BoxLayout(requestSub, BoxLayout.Y_AXIS));
+                        requestSub(br, pw, windows);
+                        frame.remove(customerSub);
+                        frame.add(requestSub);
+                        frame.pack();
                     } catch (Exception ex){
                         ex.printStackTrace();
                     }
                 }
             });
-            customerBackBreak(customerSub, pw);
         } else {
-            pw.println("break");
-            pw.flush();
-            frame.remove(customerSub);
-            frame.add(customerMain, BorderLayout.CENTER);
-            frame.pack();
+            try {
+                JOptionPane.showMessageDialog(frame.getContentPane(), "No Windows made");
+                pw.print("break");
+                pw.flush();
+                customerMain = new JPanel();
+                customerMain.setBounds(0, 0, 30, frame.getHeight());
+                customerMain.setLayout(new BoxLayout(customerMain, BoxLayout.Y_AXIS));
+                customer(br, pw);
+                frame.remove(requestSub);
+                frame.add(customerMain, BorderLayout.CENTER);
+                frame.pack();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void requestSub(BufferedReader br, PrintWriter pw, String windows) {
+        System.out.println("reaches");
+        if (windows.length() > 0) {
+            JLabel welcome = new JLabel("Select which windows you want");
+            requestSub.add(welcome);
+
+            String[] windowSplit = windows.split("],\\[");
+            int len = windowSplit.length;
+            windowSplit[0] = windowSplit[0].substring(1);
+            windowSplit[len - 1] = windowSplit[len - 1].substring(0, windowSplit[len - 1].length() - 1);
+
+            ArrayList<String> listChoice = new ArrayList<>();
+            for (int i = 0; i < len; i++) {
+                String[] windowSplitted = windowSplit[i].split(",");
+                listChoice.add(String.format("%s - %s, Current booking: %s",windowSplitted[0],
+                        windowSplitted[1], windowSplitted[3]));
+            }
+
+            String[] arrChoices = listChoice.toArray(new String[listChoice.size()]);
+            JComboBox<String> choices = new JComboBox<>(arrChoices);
+            requestSub.add(choices);
+
+            JButton selection = new JButton("Select");
+            requestSub.add(selection);
+
+            selection.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        String choice = (String) choices.getSelectedItem();
+                        String[] split1 = choice.split(" - ");
+                        String[] split2 = split1[1].split(": ");
+                        pw.println(String.format("%s,%s,%s", split1[0], split1[1], split2[1]));
+                        pw.flush();
+
+                        int result = Integer.parseInt(br.readLine());
+                        switch (result) {
+                            case 1:
+                                JOptionPane.showMessageDialog(frame.getContentPane(),
+                                        "Request made!");
+                                break;
+                            case 0:
+                                JOptionPane.showMessageDialog(frame.getContentPane(),
+                                        "This window has reached capacity.");
+                                break;
+                        }
+
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+
+            customerBackBreak(requestSub, pw);
+        } else {
+            try {
+                JOptionPane.showMessageDialog(frame.getContentPane(), "No Windows made");
+                pw.print("break");
+                pw.flush();
+                customerMain = new JPanel();
+                customerMain.setBounds(0, 0, 30, frame.getHeight());
+                customerMain.setLayout(new BoxLayout(customerMain, BoxLayout.Y_AXIS));
+                customer(br, pw);
+                frame.remove(requestSub);
+                frame.add(customerMain, BorderLayout.CENTER);
+                frame.pack();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1523,6 +1585,7 @@ public class Client extends JComponent implements Runnable {
     }
     private void sellerBack(JPanel panel, PrintWriter pw) {
         JButton back = new JButton("Back");
+        panel.add(back);
         back.addActionListener(e -> {
             pw.write("break");
             frame.remove(panel);
@@ -1534,6 +1597,7 @@ public class Client extends JComponent implements Runnable {
 
     private void customerBack(JPanel panel) {
         JButton back = new JButton("Back");
+        panel.add(back);
         back.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -1546,6 +1610,7 @@ public class Client extends JComponent implements Runnable {
 
     private void customerBackBreak(JPanel panel, PrintWriter pw) {
         JButton back = new JButton("Back");
+        panel.add(back);
         back.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
