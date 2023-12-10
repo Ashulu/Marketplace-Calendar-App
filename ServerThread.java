@@ -339,7 +339,7 @@ public class ServerThread extends Thread {
             windowQueryResult.add(windowArray);
         }
         String secondOutput = arraylistToString(windowQueryResult);
-        System.out.println("sending windows: ");
+        System.out.println("sending windows: " + secondOutput);
         writer.write(secondOutput);
         writer.println();
         writer.flush();
@@ -353,7 +353,7 @@ public class ServerThread extends Thread {
         String[] secondInputList = secondInput.split(",");
         String inputStartTime = secondInputList[0];
         String inputEndTime = secondInputList[1];
-        int inputBooking = Integer.parseInt(secondInputList[3]);
+        int inputBooking = Integer.parseInt(secondInputList[2]);
         String bookingQueryStatement = String.format("SELECT maxAttendees, currentBookings FROM windows WHERE " +
             "(storeName = '%s' AND calendarName = '%s' AND startTime = '%s' AND endTime = '%s'", inputStore,
             inputCalendar, inputStartTime, inputEndTime);
