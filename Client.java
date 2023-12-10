@@ -1290,7 +1290,8 @@ public class Client extends JComponent implements Runnable {
         pw.println();
 
         pw.flush();
-        String[] stores = br.readLine().split(",");
+        String temp = br.readLine();
+        String[] stores = temp.substring(1, temp.length() - 1).split(",");
         JComboBox<String> storeOptions = new JComboBox<String>(stores);
         sellerSub.add(storeOptions);
         frame.add(sellerSub);
