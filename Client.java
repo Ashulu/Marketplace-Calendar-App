@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -383,153 +385,105 @@ public class Client extends JComponent implements Runnable {
     }
 
     private void c1(BufferedReader br, PrintWriter pw) throws IOException {
-        System.out.println("before");
         pw.println("requestAppointment");
         pw.flush();
 
-        System.out.println("after");
-        //creation of appointment
+        String allInfo = br.readLine();
+        if (allInfo.length() > 0) {
+            JLabel welcome = new JLabel("Select which store and calendar you would like to request");
+            customerSub.add(welcome);
 
-        String storeData = br.readLine();
-        System.out.println(storeData);
-        if (storeData.length() > 0) {
-            JButton refresh = new JButton("Refresh");
-            refresh.addActionListener(e -> {
-                try {
-                    frame.remove(customerSub);
-                    customerSub = new JPanel();
-                    customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
-                    pw.println("break");
-                    c1(br,pw);
-                    frame.add(customerSub, BorderLayout.CENTER);
-                    frame.pack();
+            String[] storesAndCalendars = allInfo.split("],\\[");
+            int len = storesAndCalendars.length;
+            storesAndCalendars[0] = storesAndCalendars[0].substring(1);
+            storesAndCalendars[len-1] = storesAndCalendars[len-1].substring(0, storesAndCalendars[len-1].length() - 1);
 
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            });
-            customerSub.add(refresh);
-
-            String[] calendars = storeData.substring(1, storeData.length() - 1).split("],\\[");
-            ArrayList<String> stores = new ArrayList<String>();
-            ArrayList<String[]> calNames = new ArrayList<String[]>();
-            for (int i = 0; i < calendars.length; i++) {
-                String[] calInfo = calendars[i].split(",");
-                String storeStr = calInfo[0] + ": " + calInfo[1];
-            }
-            /*
-            for (int j = 0; j < stores.size(); j++) {
-                ArrayList<String> storeCalendars = new ArrayList<String>();
-                for (int k = 0; k < calendars.length; k++) {
-                    String[] calInfo = calendars[k].split(",");
-                    if (calendars[k].equals(stores.get(j))) {
-                        storeCalendars.add(calInfo[1]);
-                    }
-                }
-                String[] storeCals = new String[storeCalendars.size()];
-                storeCals = storeCalendars.toArray(storeCals);
-                calNames.add(storeCals);
-            }
-            */
-            String[] storeChoices = new String[stores.size()];
-            storeChoices = stores.toArray(storeChoices);
-            final String[] allStores = storeChoices;
-
-            JComboBox<String> storeName = new JComboBox<String>(allStores);
-            customerSub.add(storeName);
-
-            for (int i = 0; i < allStores.length; i++) {
-                System.out.println(allStores[i]);
-            }
-            /*
-            for (int i = 0; i < allCalendars.length; i++) {
-                for (int j = 0; j < allCalendars[i].length; j++) {
-                    System.out.println(allCalendars[i][j]);
-                }
+            ArrayList<String> listChoice = new ArrayList<>();
+            for (int i = 0; i < len; i++) {
+                String[] splitted = storesAndCalendars[i].split(",");
+                listChoice.add(splitted[0] + " : " + splitted[1]);
             }
 
-            JButton select = new JButton();
-            customerSub.add(select);
+            String[] arrChoices = listChoice.toArray(new String[listChoice.size()]);
+            JComboBox<String> choices = new JComboBox<>(arrChoices);
+            customerSub.add(choices);
 
-            JComboBox<String> calendarName = new JComboBox<String>(allCalendars[storeName.getSelectedIndex()]);
-            customerSub.add(calendarName);
-            */
-            JButton enter = new JButton("Enter");
-            enter.addActionListener(new ActionListener() {
+            JButton selection = new JButton("Select");
+            customerSub.add(selection);
+
+            selection.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    String store = (String) storeName.getSelectedItem();
-                    store = store.split(":")[0];
-                    String calendarName = store.split(":")[1].substring(1);
-                    String command = String.format("%s,%s", store, calendarName);
-                    pw.println(command);
-                    pw.flush();
+                    try {
+                        String choice = (String) choices.getSelectedItem();
+                        String[] splitted = choice.split(" : ");
+                        pw.println(String.format("%s,%s", splitted[0], splitted[1]));
+                        pw.flush();
+
+                        String windows = br.readLine();
+                        if (windows.length() > 0) {
+                            String[] windowSplit = windows.split("],\\[");
+                            int len = windowSplit.length;
+                            windowSplit[0] = windowSplit[0].substring(1);
+                            windowSplit[len - 1] = windowSplit[len - 1].substring(0, windowSplit[len - 1].length() - 1);
+
+                            ArrayList<String> listChoice = new ArrayList<>();
+                            for (int i = 0; i < len; i++) {
+                                String[] windowSplitted = windowSplit[i].split(",");
+                                listChoice.add(String.format("%s - %s, Current booking: %s",windowSplitted[0],
+                                        windowSplitted[1], windowSplitted[3]));
+                            }
+
+                            String[] arrChoices = listChoice.toArray(new String[listChoice.size()]);
+                            JComboBox<String> choices = new JComboBox<>(arrChoices);
+                            customerSub.add(choices);
+
+                            JButton selection = new JButton("Select");
+                            customerSub.add(selection);
+
+                            selection.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    try {
+                                        String choice = (String) choices.getSelectedItem();
+                                        String[] split1 = choice.split(" - ");
+                                        String[] split2 = split1[1].split(": ");
+                                        pw.println(String.format("%s,%s,%s", split1[0], split1[1], split2[1]));
+                                        pw.flush();
+
+                                        int result = Integer.parseInt(br.readLine());
+                                        switch (result) {
+                                            case 1:
+                                                JOptionPane.showMessageDialog(frame.getContentPane(),
+                                                        "Request made!");
+                                                break;
+                                            case 0:
+                                                JOptionPane.showMessageDialog(frame.getContentPane(),
+                                                        "This window has reached capacity.");
+                                                break;
+                                        }
+
+                                    } catch (Exception ex) {
+                                        ex.printStackTrace();
+                                    }
+                                }
+                            });
+                        } else {
+                            pw.print("break");
+                            pw.flush();
+                            frame.remove(customerSub);
+                            frame.add(customerMain, BorderLayout.CENTER);
+                            frame.pack();
+                        }
+                    } catch (Exception ex){
+                        ex.printStackTrace();
+                    }
                 }
             });
-            customerSub.add(enter);
-
-            String windows = br.readLine();
-            System.out.println(windows);
-            if (windows.length() > 0) {
-                String[] appointmentWindows = windows.substring(1, windows.length() - 1).split("],\\[");
-                String[] appointments = new String[appointmentWindows.length];
-                String[] maxAttendees = new String[appointmentWindows.length];
-                String[] currentBookings = new String[appointmentWindows.length];
-                for (int i = 0; i < appointmentWindows.length; i++) {
-                    String[] data = appointmentWindows[i].split(",");
-                    appointments[i] = String.format("%s - %s", data[0], data[1]);
-                    maxAttendees[i] = data[2];
-                    currentBookings[i] = data[3];
-                }
-
-                JComboBox<String> chooseWindow = new JComboBox<String>(appointments);
-                customerSub.add(chooseWindow);
-                JTextField bookings = new JTextField("Enter number of bookings", 10);
-                customerSub.add(bookings);
-                JButton create = new JButton("Create");
-                create.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        String store = (String) storeName.getSelectedItem();
-                        String calendarName = store.split(":")[1].substring(1);
-                        String command = String.format("%s,%s,%s,%s",
-                                String.valueOf(chooseWindow.getSelectedItem()).split(" - ")[0],
-                                calendarName,
-                                maxAttendees[chooseWindow.getSelectedIndex()],
-                                Integer.parseInt(currentBookings[chooseWindow.getSelectedIndex()]) +
-                                        Integer.parseInt(bookings.getText()));
-                        pw.println(command);
-                        pw.flush();
-                    }
-                });
-            } else {
-                JOptionPane.showMessageDialog(frame.getContentPane(), "Now windows made yet.");
-                pw.println("break");
-                pw.flush();
-                frame.remove(customerSub);
-                frame.add(customerMain, BorderLayout.CENTER);
-                frame.pack();
-            }
-
-            JTextField result = new JTextField(10);
-            int response = br.read();
-            if (response == 0) {
-                result.setText("Unable to create appointment.");
-            } else {
-                result.setText("Creation successful!");
-            }
-            customerSub.add(result);
-            result.setVisible(true);
-
             customerBackBreak(customerSub, pw);
         } else {
-            JOptionPane.showMessageDialog(frame.getContentPane(), "No stores made yet");
             pw.println("break");
             pw.flush();
-            customerMain = new JPanel();
-            customerMain.setBounds(0, 0, 30, frame.getHeight());
-            customerMain.setLayout(new BoxLayout(customerMain, BoxLayout.Y_AXIS));
-            customer(br, pw);
             frame.remove(customerSub);
             frame.add(customerMain, BorderLayout.CENTER);
             frame.pack();
@@ -746,7 +700,7 @@ public class Client extends JComponent implements Runnable {
         String[] split = stats.split("],\\[");
         if (split.length > 0) {
             split[0] = split[0].substring(2);
-            split[split.length - 1] = split[split.length - 1].substring(2);
+            split[split.length - 1] = split[split.length - 1].substring(0, split[split.length - 1].length() - 1);
 
             for (int i = 0; i < split.length; i++) {
                 StringBuilder line = new StringBuilder();
