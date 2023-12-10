@@ -39,7 +39,7 @@ public class ServerThread extends Thread {
         }
 
         String clientAction = null;
-
+        String forStats = null;
         while (true) {
             try {
                 statement = connection.createStatement();
@@ -86,10 +86,7 @@ public class ServerThread extends Thread {
                         writer.flush();
                         break;
                     case "approveRequest":
-                        String approvedNumber = approveRequest(reader, statement, writer);
-                        writer.write(approvedNumber);
-                        writer.println();
-                        writer.flush();
+                        approveRequest(reader, statement, writer);
                         break;
                     case "createStore":
                         int updated = createStore(reader, statement);
@@ -111,29 +108,30 @@ public class ServerThread extends Thread {
 
                         String editChoice = reader.readLine();
                         System.out.println("selection received");
-                        switch (editChoice) {
-                            case "editCalendarName":
-                                int editName = editCalendarName(reader, statement);
-                                writer.write(String.valueOf(editName));
-                                writer.println();
-                                writer.flush();
-                                break;
-                            case "editCalendarDescription":
-                                int editDescription = editCalendarDescription(reader, statement);
-                                writer.write(String.valueOf(editDescription));
-                                writer.println();
-                                writer.flush();
-                                break;
-                            case "editCalendarAddWindow":
-                                writer.write(String.valueOf(editCalendarAddWindow(reader, statement)));
-                                writer.println();
-                                writer.flush();
-                                break;
-                            case "editCalendarRemoveWindow":
-                                writer.write(String.valueOf(editCalendarRemoveWindow(reader, statement, writer)));
-                                writer.println();
-                                writer.flush();
-                                break;
+                        String input = reader.readLine();
+                        if (!input.equals("break")) {
+                            switch (editChoice) {
+                                case "editCalendarName":
+                                    int editName = editCalendarName(input, statement);
+                                    writer.write(String.valueOf(editName));
+                                    writer.println();
+                                    writer.flush();
+                                    break;
+                                case "editCalendarDescription":
+                                    int editDescription = editCalendarDescription(input, statement);
+                                    writer.write(String.valueOf(editDescription));
+                                    writer.println();
+                                    writer.flush();
+                                    break;
+                                case "editCalendarAddWindow":
+                                    writer.write(String.valueOf(editCalendarAddWindow(input, statement)));
+                                    writer.println();
+                                    writer.flush();
+                                    break;
+                                case "editCalendarRemoveWindow":
+                                    editCalendarRemoveWindow(input, reader, statement, writer);
+                                    break;
+                            }
                         }
                         break;
 
@@ -148,11 +146,14 @@ public class ServerThread extends Thread {
                         writer.flush();
                         System.out.println("sent result of delete");
                         break;
-                    case "statisticsSeller":
-                        statisticsSeller(reader, statement, writer);
-                        break;
+                    case "showStores":
+                        showStores(statement, writer);
+                        forStats = reader.readLine();
+                        if(!forStats.equals("break")) {
+                            statisticsSeller(forStats, statement, writer);
+                        }
                     case "statisticsSellerOrdered":
-                        statisticsSellerOrdered(reader, statement, writer);
+                        statisticsSellerOrdered(forStats, statement, writer);
                         break;
                     case "importCalendar":
                         importCalendar(reader, statement, writer);
@@ -306,6 +307,9 @@ public class ServerThread extends Thread {
         writer.flush();
 
         String firstInput = reader.readLine();
+        if (firstInput.equals("break")) {
+            return;
+        }
         String[] firstInputList = firstInput.split(",");
         String inputStore = firstInputList[0];
         String inputCalendar = firstInputList[1];
@@ -328,6 +332,9 @@ public class ServerThread extends Thread {
         writer.flush();
 
         String secondInput = reader.readLine();
+        if (secondInput.equals("break")) {
+            return;
+        }
         String thirdOutput;
         String[] secondInputList = secondInput.split(",");
         String inputStartTime = secondInputList[0];
@@ -356,6 +363,7 @@ public class ServerThread extends Thread {
         writer.write(thirdOutput);
         writer.println();
         writer.flush();
+        reader.readLine();
     }
 
     public String arraylistToString(ArrayList<String[]> arrayList) {
@@ -403,6 +411,7 @@ public class ServerThread extends Thread {
         writer.write(String.valueOf(count));
         writer.println();
         writer.flush();
+        reader.readLine();
     }
 
     public String viewApproved(Statement statement) throws SQLException {
@@ -508,7 +517,7 @@ public class ServerThread extends Thread {
     }
 
     //can approve and deny requests - i don't know what happens if no requests
-    public String approveRequest(BufferedReader reader, Statement statement, PrintWriter writer) throws SQLException,
+    public void approveRequest(BufferedReader reader, Statement statement, PrintWriter writer) throws SQLException,
         IOException {
         ArrayList<String[]> requests = new ArrayList<>();
         String requestsQueryStatement = String.format("SELECT customerEmail, storeName, calendarName, startTime, " +
@@ -529,6 +538,9 @@ public class ServerThread extends Thread {
         writer.flush();
 
         String input = reader.readLine();
+        if (input.equals("break")) {
+            return;
+        }
         String[] inputList = input.split(",");
         String operation = inputList[0];
         String inputCustomer = inputList[1];
@@ -536,7 +548,7 @@ public class ServerThread extends Thread {
         String inputCalendar = inputList[3];
         String inputStart = inputList[4];
         String inputBooking = inputList[5];
-        String updateStatement = "";
+        String updateStatement;
         if (operation.equals("confirm")) {
             updateStatement = String.format("UPDATE appointments SET isApproved = 1, isRequest = 0, timeStamp = strftime('%%Y-%%m-%%d %%H:%%M:%%S', 'now') " +
                             "WHERE (customerEmail = '%s' AND storeName = '%s' AND calendarName = '%s' AND startTime = '%s' AND booking = '%s')",
@@ -551,7 +563,9 @@ public class ServerThread extends Thread {
         }
 
         int changes = statement.executeUpdate(updateStatement);
-        return String.valueOf(changes);
+        writer.write(String.valueOf(changes));
+        writer.println();
+        writer.flush();
     }
 
     //works after adjustment here
@@ -598,8 +612,7 @@ public class ServerThread extends Thread {
     }
 
     //works with a little sql tweak
-    public int editCalendarName(BufferedReader reader, Statement statement) throws IOException, SQLException {
-        String input = reader.readLine();
+    public int editCalendarName(String input, Statement statement) throws IOException, SQLException {
         String[] inputList = input.split(",");
         String inputStore = inputList[0];
         String inputOld = inputList[1];
@@ -611,8 +624,7 @@ public class ServerThread extends Thread {
     }
 
     //works with a little sql tweak
-    public int editCalendarDescription(BufferedReader reader, Statement statement) throws IOException, SQLException {
-        String input = reader.readLine();
+    public int editCalendarDescription(String input, Statement statement) throws IOException, SQLException {
         String[] inputList = input.split(",");
         String inputStore = inputList[0];
         String inputCalendar = inputList[1];
@@ -624,8 +636,7 @@ public class ServerThread extends Thread {
     }
 
     //works well
-    public int editCalendarAddWindow(BufferedReader reader, Statement statement) throws IOException, SQLException {
-        String input = reader.readLine();
+    public int editCalendarAddWindow(String input, Statement statement) throws IOException, SQLException {
         String[] inputList = input.split(",");
         String inputStore = inputList[0];
         String inputCalendar = inputList[1];
@@ -663,9 +674,8 @@ public class ServerThread extends Thread {
 
     }
 
-    public int editCalendarRemoveWindow(BufferedReader reader, Statement statement, PrintWriter writer) throws
-        IOException, SQLException {
-        String input = reader.readLine();
+    public void editCalendarRemoveWindow(String input, BufferedReader reader, Statement statement, PrintWriter writer)
+        throws IOException, SQLException {
         System.out.println("select calendar");
         String[] inputList = input.split(",");
         String inputStore = inputList[0];
@@ -688,10 +698,13 @@ public class ServerThread extends Thread {
         System.out.println("sent windows");
 
         String secondInput = reader.readLine();
+        if (secondInput.equals("break")) {
+            return;
+        }
         System.out.println("received window");
         String deleteStatement = String.format("DELETE FROM windows WHERE (storeName = '%s' AND calendarName " +
             "= '%s' AND endTime = '%s')", inputStore, inputCalendar, secondInput);
-        return statement.executeUpdate(deleteStatement);
+        writer.write(String.valueOf(statement.executeUpdate(deleteStatement)));
     }
 
     //changed so that ANY deletion returns true
@@ -738,8 +751,7 @@ public class ServerThread extends Thread {
         return arraylistToString(calendars);
     }
 
-    public void statisticsSeller(BufferedReader reader, Statement statement, PrintWriter writer) throws IOException,
-        SQLException {
+    public void showStores(Statement statement, PrintWriter writer) throws SQLException {
         ArrayList<String> stores = new ArrayList<>();
         String storeQueryStatement = String.format("SELECT * FROM stores WHERE sellerEmail = '%s'", clientEmail);
         ResultSet storeQuery = statement.executeQuery(storeQueryStatement);
@@ -749,8 +761,11 @@ public class ServerThread extends Thread {
         writer.write(stores.toString());
         writer.println();
         writer.flush();
+    }
 
-        String inputStore = reader.readLine();
+    public void statisticsSeller(String inputStore, Statement statement, PrintWriter writer) throws IOException,
+        SQLException {
+
         String popularWindowQueryStatement = String.format("SELECT startTime, endTime, MAX(currentBookings) AS " +
             "windowCustomers FROM windows WHERE storeName = '%s' GROUP BY storeName", inputStore);
         ResultSet popularWindowQuery = statement.executeQuery(popularWindowQueryStatement);
@@ -758,7 +773,7 @@ public class ServerThread extends Thread {
         String popularStart = popularWindowQuery.getString("startTime");
         String popularEnd = popularWindowQuery.getString("endTime");
         writer.write(popularStart + "," + popularEnd);
-
+        writer.println();
 
         ArrayList<String[]> customers = new ArrayList<>();
         String customerQueryStatement = String.format("SELECT customerEmail, SUM(isApproved) AS numOfApproved FROM " +
@@ -775,19 +790,8 @@ public class ServerThread extends Thread {
         writer.flush();
     }
 
-    public void statisticsSellerOrdered(BufferedReader reader, Statement statement, PrintWriter writer) throws
+    public void statisticsSellerOrdered(String inputStore, Statement statement, PrintWriter writer) throws
         SQLException, IOException {
-        ArrayList<String> stores = new ArrayList<>();
-        String storeQueryStatement = String.format("SELECT * FROM stores WHERE sellerEmail = '%s'", clientEmail);
-        ResultSet storeQuery = statement.executeQuery(storeQueryStatement);
-        while (storeQuery.next()) {
-            stores.add(storeQuery.getString("storeName"));
-        }
-        writer.write(stores.toString());
-        writer.println();
-        writer.flush();
-
-        String inputStore = reader.readLine();
         String popularWindowQueryStatement = String.format("SELECT startTime, endTime, MAX(currentBookings) AS " +
             "windowCustomers FROM windows WHERE storeName = '%s' GROUP BY storeName", inputStore);
         ResultSet popularWindowQuery = statement.executeQuery(popularWindowQueryStatement);
@@ -795,7 +799,6 @@ public class ServerThread extends Thread {
         String popularStart = popularWindowQuery.getString("startTime");
         String popularEnd = popularWindowQuery.getString("endTime");
         writer.write(popularStart + "," + popularEnd);
-
 
         ArrayList<String[]> customers = new ArrayList<>();
         String customerQueryStatement = String.format("SELECT customerEmail, SUM(isApproved) AS numOfApproved FROM " +

@@ -48,9 +48,9 @@ public class TestClient {
         writer.flush();
         String storeOneCreation = reader.readLine();
         if (storeOneCreation.equals("1")) {
-            System.out.println("Store created");
+            System.out.println("StoreOne created");
         } else {
-            System.out.println("Store creation failed");
+            System.out.println("StoreOne creation failed");
         }
         writer.println("createStore");
         writer.flush();
@@ -58,13 +58,18 @@ public class TestClient {
         writer.flush();
         String storeTwoCreation = reader.readLine();
         if (storeTwoCreation.equals("1")) {
-            System.out.println("Store created");
+            System.out.println("StoreTwo created");
         } else {
-            System.out.println("Store creation failed");
+            System.out.println("StoreTwo creation failed");
         }
 
         //        4. create calendar * 2 for store1;
         writer.println("createCalendar");
+        writer.flush();
+        writer.println("storeOne,calendarOne,testing purposes");
+        writer.flush();
+        String calendarOneCreation = reader.readLine();
+
 
         //        5. edit calendar1 - name
         //        6. edit calendar2 - description
