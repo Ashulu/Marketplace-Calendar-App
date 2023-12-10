@@ -479,6 +479,8 @@ public class Client extends JComponent implements Runnable {
             }
             customerSub.add(result);
             result.setVisible(true);
+
+            customerBackBreak(customerSub, pw);
         } else {
             JOptionPane.showMessageDialog(frame.getContentPane(), "No stores made yet");
             pw.println("break");
@@ -487,7 +489,6 @@ public class Client extends JComponent implements Runnable {
             frame.add(customerMain, BorderLayout.CENTER);
             frame.pack();
         }
-        customerBackBreak(customerSub, pw);
     }
 
     private void c2(BufferedReader br, PrintWriter pw) throws IOException {
@@ -540,6 +541,20 @@ public class Client extends JComponent implements Runnable {
                 }
             });
             customerSub.add(delete);
+
+            JTextField success = new JTextField();
+            customerSub.add(success);
+
+            int response = br.read();
+            if (response == 0) {
+                success.setText("Unable to delete appointment.");
+            } else {
+                success.setText("Deletion successful!");
+            }
+
+            success.setVisible(true);
+
+            customerBackBreak(customerSub, pw);
         } else {
             JOptionPane.showMessageDialog(frame.getContentPane(), "No requests made");
             pw.println("break");
@@ -548,19 +563,6 @@ public class Client extends JComponent implements Runnable {
             frame.add(customerMain, BorderLayout.CENTER);
             frame.pack();
         }
-
-        JTextField success = new JTextField();
-        customerSub.add(success);
-
-        int response = br.read();
-        if (response == 0) {
-            success.setText("Unable to delete appointment.");
-        } else {
-            success.setText("Deletion successful!");
-        }
-
-        success.setVisible(true);
-        customerBackBreak(customerSub, pw);
 
     }
 
