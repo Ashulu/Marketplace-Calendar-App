@@ -824,7 +824,7 @@ public class Client extends JComponent implements Runnable {
         pw.println();
 
         pw.flush();
-        sellerBack(sellerSub);
+        sellerBack(sellerSub, pw);
 
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
@@ -866,7 +866,7 @@ public class Client extends JComponent implements Runnable {
 
         pw.flush();
 
-        sellerBack(sellerSub);
+        sellerBack(sellerSub, pw);
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
@@ -949,7 +949,7 @@ public class Client extends JComponent implements Runnable {
         pw.println();
         pw.flush();
         frame.add(sellerSub);
-        sellerBack(sellerSub);
+        sellerBack(sellerSub, pw);
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
@@ -1001,7 +1001,7 @@ public class Client extends JComponent implements Runnable {
 
         pw.flush();
         frame.add(sellerSub);
-        sellerBack(sellerSub);
+        sellerBack(sellerSub, pw);
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
@@ -1319,7 +1319,7 @@ public class Client extends JComponent implements Runnable {
         frame.add(sellerSub);
         sellerSub.add(calNames);
 
-        sellerBack(sellerSub);
+        sellerBack(sellerSub, pw);
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
@@ -1367,36 +1367,88 @@ public class Client extends JComponent implements Runnable {
 
     //6 "Show Statistics"
     private void s6(BufferedReader br, PrintWriter pw) throws IOException {
-        pw.write("statisticsSeller");
+        pw.write("showStores");
         pw.println();
-
+        System.out.println("entered clientside");
         pw.flush();
         String temp = br.readLine();
         String[] stores = temp.substring(1, temp.length() - 1).split(",");
         JComboBox<String> storeOptions = new JComboBox<String>(stores);
         sellerSub.add(storeOptions);
         frame.add(sellerSub);
-        sellerBack(sellerSub);
+        sellerBack(sellerSub, pw);
         JTextArea result = new JTextArea(3,20);
         sellerSub.add(result);
         String[] sortOp = new String[] { "Most Popular Window",
                 "Customer Appointments"};
         JComboBox<String> sortOptions = new JComboBox<String>(sortOp);
+        sortOptions.setVisible(false);
         sellerSub.add(sortOptions);
         JTextField tempWind = new JTextField();
         JTextField tempCust = new JTextField();
+        JTextField tempBool = new JTextField();
         JButton confirm = new JButton("Confirm");
         confirm.addActionListener(e -> {
+            sortOptions.setVisible(true);
             pw.write((String)storeOptions.getSelectedItem());
+            System.out.println("selected store");
             pw.println();
             pw.flush();
             try {
-                tempWind.setText(br.readLine());
-                tempCust.setText(br.readLine());
+                String tempWind2 = br.readLine();
+                String tempCust2 = br.readLine();
+                tempWind2 = tempWind2.substring(1, tempWind2.length() - 1);
+                tempCust2 = tempCust2.substring(1, tempCust2.length() - 1);
+                tempWind2 = tempWind2.replace("],\\[", "\n");
+                tempCust2 = tempCust2.replace("],\\[", "\n");
+                tempWind.setText(tempWind2);
+                tempCust.setText(tempCust2);
+
+                System.out.println("store stats unsorted received");
                 confirm.setVisible(false);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
+            JButton display = new JButton("Display");
+            display.addActionListener(ex -> {
+                switch (sortOptions.getSelectedIndex()) {
+                    case 0 -> {
+                        result.setText(tempWind.getText());
+                    }
+                    case 1 -> {
+                        result.setText(tempCust.getText());
+                    }
+                }
+
+            });
+            sellerSub.add(display);
+            JButton sort = new JButton("Sort");
+            sort.addActionListener(ex -> {
+                pw.write("statisticsSellerOrdered");
+                pw.println();
+                System.out.println("ask for ordered");
+                pw.flush();
+                try {
+                    if (tempBool.getText().isEmpty()) {
+                        tempBool.setText("has text here");
+                        pw.write((String) storeOptions.getSelectedItem());
+                        pw.println();
+                        pw.flush();
+                        String tempWind2 = br.readLine();
+                        String tempCust2 = br.readLine();
+                        tempWind2 = tempWind2.substring(1, tempWind2.length() - 1);
+                        tempCust2 = tempCust2.substring(1, tempCust2.length() - 1);
+                        tempWind2 = tempWind2.replace("],\\[", "\n");
+                        tempCust2 = tempCust2.replace("],\\[", "\n");
+                        tempWind.setText(tempWind2);
+                        tempCust.setText(tempCust2);
+                        System.out.println("received ordered");
+                    }
+                } catch (IOException exc) {
+                    throw new RuntimeException(exc);
+                }
+            });
+            sellerSub.add(sort);
         });
 
         JButton refresh = new JButton("Refresh");
@@ -1408,45 +1460,8 @@ public class Client extends JComponent implements Runnable {
                 ex.printStackTrace();
             }
         });
-        JButton display = new JButton("Display");
-        display.addActionListener(e -> {
 
-            switch (sortOptions.getSelectedIndex()) {
-                case 0 -> {
-                     result.setText(tempWind.getText());
-                }
-                case 1 -> {
-                    result.setText(tempCust.getText());
-                }
-            }
-        });
-
-        JButton sort = new JButton("Sort");
-        sort.addActionListener(e -> {
-            pw.write("statisticsSellerOrdered");
-            pw.println();
-            pw.flush();
-            try {
-                br.readLine();
-                pw.write((String)storeOptions.getSelectedItem());
-                pw.println();
-                pw.flush();
-                tempWind.setText(br.readLine());
-                tempCust.setText(br.readLine());
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-            switch (sortOptions.getSelectedIndex()) {
-                case 0 -> {
-                    result.setText(tempWind.getText());
-                }
-                case 1 -> {
-                    result.setText(tempCust.getText());
-                }
-            }
-        });
-        sellerSub.add(display);
-        sellerSub.add(display);
+        sellerSub.add(confirm);
         sellerSub.add(refresh);
         frame.pack();
     }
@@ -1459,7 +1474,7 @@ public class Client extends JComponent implements Runnable {
         pw.flush();
 
         frame.add(sellerSub);
-        sellerBack(sellerSub);
+        sellerBack(sellerSub, pw);
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
@@ -1476,14 +1491,12 @@ public class Client extends JComponent implements Runnable {
         result.setVisible(false);
         JButton imp = new JButton("Import");
         imp.addActionListener(e -> {
-            String command = String.format("s7,%s,%s",storeName.getText(),fileName.getText());
+            String command = String.format("%s,%s",storeName.getText(),fileName.getText());
             pw.write(command);
             pw.println();
 
             pw.flush();
-            frame.remove(sellerSub);
-            frame.add(sellerMain, BorderLayout.CENTER);
-            frame.pack();
+
             int response;
             try {
                 response = Integer.parseInt(br.readLine());
@@ -1498,6 +1511,9 @@ public class Client extends JComponent implements Runnable {
                         "Seller Client", JOptionPane.INFORMATION_MESSAGE);
             }
             result.setVisible(true);
+            frame.remove(sellerSub);
+            frame.add(sellerMain, BorderLayout.CENTER);
+            frame.pack();
         });
         sellerSub.add(storeName);
         sellerSub.add(fileName);
@@ -1505,9 +1521,10 @@ public class Client extends JComponent implements Runnable {
         sellerSub.add(result);
         frame.pack();
     }
-    private void sellerBack(JPanel panel) {
+    private void sellerBack(JPanel panel, PrintWriter pw) {
         JButton back = new JButton("Back");
         back.addActionListener(e -> {
+            pw.write("break");
             frame.remove(panel);
             frame.add(sellerMain, BorderLayout.CENTER);
             frame.pack();
