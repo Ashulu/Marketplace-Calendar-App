@@ -421,7 +421,7 @@ public class ServerThread extends Thread {
         String inputCalendar = inputList[1];
         String inputStartTime = inputList[2];
         String deleteStatement = String.format("DELETE FROM appointments WHERE (storeName = '%s' AND calendarName =" +
-            " '%s' AND startTime = '%s'", inputStore, inputCalendar, inputStartTime);
+            " '%s' AND startTime = '%s')", inputStore, inputCalendar, inputStartTime);
         int count = statement.executeUpdate(deleteStatement);
         writer.write(String.valueOf(count));
         writer.println();
@@ -493,7 +493,8 @@ public class ServerThread extends Thread {
 
         ArrayList<String[]> stats = new ArrayList<>();
         ResultSet statsQuery = statement.executeQuery("SELECT storeName, startTime, endTime, SUM(currentBookings) " +
-            "AS totalCustomers, MAX(currentBookings) AS windowCustomers FROM windows GROUP BY storeName ORDER BY totalCustomers DESC");
+            "AS totalCustomers, MAX(currentBookings) AS windowCustomers FROM windows GROUP BY storeName ORDER BY " +
+            "totalCustomers DESC");
         while (statsQuery.next()) {
             String[] statsArray = new String[5];
             statsArray[0] = statsQuery.getString("storeName");
@@ -565,17 +566,18 @@ public class ServerThread extends Thread {
         String inputBooking = inputList[5];
         String updateStatement;
         if (operation.equals("confirm")) {
-            updateStatement = String.format("UPDATE appointments SET isApproved = 1, isRequest = 0, timeStamp = strftime('%%Y-%%m-%%d %%H:%%M:%%S', 'now') " +
-                            "WHERE (customerEmail = '%s' AND storeName = '%s' AND calendarName = '%s' AND startTime = '%s' AND booking = '%s')",
-                    inputCustomer, inputStore, inputCalendar, inputStart, inputBooking);
+            updateStatement = String.format("UPDATE appointments SET isApproved = 1, isRequest = 0, timeStamp = " +
+                "strftime('%%Y-%%m-%%d %%H:%%M:%%S', 'now') WHERE (customerEmail = '%s' AND storeName = '%s' AND " +
+                "calendarName = '%s' AND startTime = '%s' AND booking = '%s')", inputCustomer, inputStore,
+                inputCalendar, inputStart, inputBooking);
             String updateWindowStatement = String.format("UPDATE windows SET currentBooking = currentBooking + %s " +
                 "WHERE storeName = '%s' AND calendarName = '%s' AND startTime = '%s'", inputBooking);
             statement.executeUpdate(updateWindowStatement);
         } else {
             updateStatement = String.format("UPDATE appointments SET isApproved = 0, isRequest = 0, timeStamp = " +
-                            "strftime('%%Y-%%m-%%d %%H:%%M:%%S', 'now') " +
-                            "WHERE (customerEmail = '%s' AND storeName = '%s' AND calendarName = '%s' AND startTime = '%s' AND booking = '%s')",
-                    inputCustomer, inputStore, inputCalendar, inputStart, inputBooking);
+                "strftime('%%Y-%%m-%%d %%H:%%M:%%S', 'now') WHERE (customerEmail = '%s' AND storeName = '%s' AND " +
+                "calendarName = '%s' AND startTime = '%s' AND booking = '%s')", inputCustomer, inputStore,
+                inputCalendar, inputStart, inputBooking);
 
         }
 
@@ -871,7 +873,7 @@ public class ServerThread extends Thread {
         while (fileReader.readLine() != null) {
             String insertWindowStatement = String.format("INSERT INTO windows (storeName, calendarName, " +
                 "appointmentTitle, startTime, endTime, maxAttendees, currentBookings) VALUES ('%s', '%s', '%s', '%s'," +
-                " '%s', '%s', 0", storeName, importCalendar, windowList[0], windowList[1], windowList[2],
+                " '%s', '%s', 0)", storeName, importCalendar, windowList[0], windowList[1], windowList[2],
                 windowList[3], windowList[4]);
             statement.executeUpdate(insertWindowStatement);
         }
