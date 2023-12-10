@@ -30,7 +30,6 @@ public class Client extends JComponent implements Runnable {
     JPanel requestSub;
     JButton login;
     JButton createAccount;
-    JPanel jPanel;
     JFrame frame;
     static BufferedReader reader;
     static PrintWriter writer;
@@ -269,6 +268,7 @@ public class Client extends JComponent implements Runnable {
                         case 5 -> {
                             frame.remove(customerMain);
                             frame.add(loginPanel, BorderLayout.CENTER);
+                            frame.repaint();
                             frame.pack();
                             return;
                         }
@@ -279,6 +279,7 @@ public class Client extends JComponent implements Runnable {
                     }
                     frame.remove(customerMain);
                     frame.add(customerSub);
+                    frame.repaint();
                     frame.pack();
                 } catch (Exception a) {
                     a.printStackTrace();
@@ -425,6 +426,7 @@ public class Client extends JComponent implements Runnable {
                         pw.flush();
                         c1(br, pw);
                         frame.add(customerSub);
+                        frame.repaint();
                         frame.pack();
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -456,6 +458,7 @@ public class Client extends JComponent implements Runnable {
                         requestSub(br, pw, windows);
                         frame.remove(customerSub);
                         frame.add(requestSub);
+                        frame.repaint();
                         frame.pack();
                     } catch (Exception ex){
                         ex.printStackTrace();
@@ -473,6 +476,7 @@ public class Client extends JComponent implements Runnable {
                 customer(br, pw);
                 frame.remove(requestSub);
                 frame.add(customerMain, BorderLayout.CENTER);
+                frame.repaint();
                 frame.pack();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -550,6 +554,7 @@ public class Client extends JComponent implements Runnable {
                 customer(br, pw);
                 frame.remove(requestSub);
                 frame.add(customerMain, BorderLayout.CENTER);
+                frame.repaint();
                 frame.pack();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -562,16 +567,17 @@ public class Client extends JComponent implements Runnable {
         pw.flush();
 
         String clientRequests = br.readLine();
+        System.out.println("requests: " + clientRequests);
         if (clientRequests.length() > 0) {
             JButton refresh = new JButton("Refresh");
             refresh.addActionListener(e -> {
                 try {
-                    frame.remove(jPanel);
-                    jPanel = new JPanel();
-                    jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
+                    frame.remove(customerSub);
+                    customerSub = new JPanel();
+                    customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
                     pw.println("break");
                     c2(br,pw);
-                    frame.add(jPanel, BorderLayout.CENTER);
+                    frame.add(customerSub, BorderLayout.CENTER);
                     frame.pack();
 
                 } catch (IOException ex) {
@@ -647,11 +653,11 @@ public class Client extends JComponent implements Runnable {
             JButton refresh = new JButton("Refresh");
             refresh.addActionListener(e -> {
                 try {
-                    frame.remove(jPanel);
-                    jPanel = new JPanel();
-                    jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
+                    frame.remove(customerSub);
+                    customerSub = new JPanel();
+                    customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
                     c3(br,pw);
-                    frame.add(jPanel, BorderLayout.CENTER);
+                    frame.add(customerSub, BorderLayout.CENTER);
                     frame.pack();
 
                 } catch (IOException ex) {
