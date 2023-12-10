@@ -5,6 +5,15 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ * ServerThread.java
+ *
+ * description
+ *
+ * @author Ashish Chenna, L12
+ *
+ * @version date
+ */
 public class ServerThread extends Thread {
 
     private static String clientEmail = null;
