@@ -430,7 +430,7 @@ public class ServerThread extends Thread {
         ArrayList<String[]> approved = new ArrayList<>();
         String approvedQueryStatement = String.format("SELECT storeName, calendarName, startTime, endTime, booking, " +
             "datetime(timeStamp, 'unixepoch') as timeStamp FROM appointments WHERE (customerEmail = '%s' AND " +
-            "isApproved = 1", clientEmail);
+            "isApproved = 1)", clientEmail);
         ResultSet approvedQuery = statement.executeQuery(approvedQueryStatement);
         while (approvedQuery.next()) {
             String[] approvedAppointment = new String[6];
