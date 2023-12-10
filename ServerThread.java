@@ -319,14 +319,15 @@ public class ServerThread extends Thread {
         writer.flush();
 
         String firstInput = reader.readLine();
+        System.out.println(firstInput);
         if (firstInput.equals("break")) {
             return;
         }
-        String[] firstInputList = firstInput.split(",");
+        String[] firstInputList = firstInput.split(", ");
         String inputStore = firstInputList[0];
         String inputCalendar = firstInputList[1];
         String windowQueryStatement = String.format("SELECT startTime, endTime, maxAttendees, currentBookings FROM " +
-            "windows WHERE (storeName = '%s' AND calendarName = '%s' AND currentBookings < maxAttendees",
+            "windows WHERE (storeName = '%s' AND calendarName = '%s' AND currentBookings < maxAttendees)",
             inputStore, inputCalendar);
         ResultSet windowQuery = statement.executeQuery(windowQueryStatement);
         ArrayList<String[]> windowQueryResult = new ArrayList<>();
