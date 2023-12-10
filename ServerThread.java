@@ -326,7 +326,7 @@ public class ServerThread extends Thread {
         String inputStore = firstInputList[0];
         String inputCalendar = firstInputList[1];
         String windowQueryStatement = String.format("SELECT startTime, endTime, maxAttendees, currentBookings FROM " +
-            "windows WHERE (storeName = '%s' AND calendarName = '%s' AND currentBookings < maxAttendees",
+            "windows WHERE (storeName = '%s' AND calendarName = '%s' AND currentBookings < maxAttendees)",
             inputStore, inputCalendar);
         ResultSet windowQuery = statement.executeQuery(windowQueryStatement);
         ArrayList<String[]> windowQueryResult = new ArrayList<>();
