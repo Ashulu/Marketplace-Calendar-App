@@ -53,6 +53,7 @@ public class ServerThread extends Thread {
             try {
                 statement = connection.createStatement();
                 clientAction = reader.readLine();
+                System.out.println("Action received: " + clientAction);
 
                 switch (clientAction) {
                     case "login":
@@ -365,16 +366,16 @@ public class ServerThread extends Thread {
         }
 
         String bookingQueryStatement = String.format("SELECT maxAttendees, currentBookings FROM windows WHERE " +
-            "(storeName = '%s' AND calendarName = '%s' AND startTime = '%s' AND endTime = '%s'", inputStore,
+            "(storeName = '%s' AND calendarName = '%s' AND startTime = '%s' AND endTime = '%s')", inputStore,
             inputCalendar, inputStartTime, inputEndTime);
         ResultSet bookingQuery = statement.executeQuery(bookingQueryStatement);
         bookingQuery.next();
         if (bookingQuery.getInt("maxAttendees") >= (bookingQuery.getInt("currentBookings") + inputBooking)) {
-            String sellerQueryStatement = String.format("SELECT sellerName FROM stores WHERE storeName = '%s'",
+            String sellerQueryStatement = String.format("SELECT sellerEmail FROM stores WHERE storeName = '%s'",
                 inputStore);
             ResultSet sellerQuery = statement.executeQuery(sellerQueryStatement);
             sellerQuery.next();
-            String sellerEmail = sellerQuery.getString("sellerName");
+            String sellerEmail = sellerQuery.getString("sellerEmail");
             String updateStatement = String.format("INSERT INTO appointments (customerEmail, sellerEmail, storeName, " +
                 "calendarName, startTime, endTime, booking, isApproved, isRequest, timeStamp) VALUES ('%s', '%s', " +
                 "'%s', '%s', '%s', '%s', '%s', 0, 1, strftime('%%Y-%%m-%%d %%H:%%M:%%S', 'now'))", clientEmail, sellerEmail, inputStore,
@@ -423,8 +424,10 @@ public class ServerThread extends Thread {
         writer.write(firstOutput);
         writer.println();
         writer.flush();
+        System.out.println("send to client:" + firstOutput);
 
         String input = reader.readLine();
+        System.out.println("received from client: " + input);
         if (input.equals("break")) {
             return;
         }
