@@ -565,7 +565,9 @@ public class ServerThread extends Thread {
             updateStatement = String.format("UPDATE appointments SET isApproved = 1, isRequest = 0, timeStamp = strftime('%%Y-%%m-%%d %%H:%%M:%%S', 'now') " +
                             "WHERE (customerEmail = '%s' AND storeName = '%s' AND calendarName = '%s' AND startTime = '%s' AND booking = '%s')",
                     inputCustomer, inputStore, inputCalendar, inputStart, inputBooking);
-
+            String updateWindowStatement = String.format("UPDATE windows SET currentBooking = currentBooking + %s " +
+                "WHERE storeName = '%s' AND calendarName = '%s' AND startTime = '%s'", inputBooking);
+            statement.executeUpdate(updateWindowStatement);
         } else {
             updateStatement = String.format("UPDATE appointments SET isApproved = 0, isRequest = 0, timeStamp = " +
                             "strftime('%%Y-%%m-%%d %%H:%%M:%%S', 'now') " +
