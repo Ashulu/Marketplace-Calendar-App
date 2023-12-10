@@ -360,10 +360,10 @@ public class Client extends JComponent implements Runnable {
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
-
                 frame.remove(customerSub);
                 customerSub = new JPanel();
                 customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
+                pw.println("break");
                 c1(br,pw);
                 frame.add(customerSub, BorderLayout.CENTER);
                 frame.pack();
@@ -481,7 +481,8 @@ public class Client extends JComponent implements Runnable {
                 frame.remove(jPanel);
                 jPanel = new JPanel();
                 jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
-                c1(br,pw);
+                pw.println("break");
+                c2(br,pw);
                 frame.add(jPanel, BorderLayout.CENTER);
                 frame.pack();
 
@@ -549,7 +550,7 @@ public class Client extends JComponent implements Runnable {
                 frame.remove(jPanel);
                 jPanel = new JPanel();
                 jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
-                c1(br,pw);
+                c3(br,pw);
                 frame.add(jPanel, BorderLayout.CENTER);
                 frame.pack();
 
@@ -632,7 +633,7 @@ public class Client extends JComponent implements Runnable {
                     frame.remove(customerSub);
                     customerSub = new JPanel();
                     customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
-                    c3(br, pw);
+                    c4(br, pw);
                     frame.add(customerSub);
                     frame.pack();
                 } catch (IOException ex) {
