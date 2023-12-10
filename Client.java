@@ -7,6 +7,15 @@ import java.net.Socket;
 import java.nio.Buffer;
 import java.util.ArrayList;
 
+/**
+ * Client.java
+ *
+ * This class is the main GUI for our program, reading and writing to the server to decide what to display
+ *
+ * @author Gunyoung Park, Ashish Chenna, Ian Lam, Sanjana Gadaginmath
+ *
+ * @version date
+ */
 public class Client extends JComponent implements Runnable {
 
     JPanel loginPanel;
@@ -34,10 +43,12 @@ public class Client extends JComponent implements Runnable {
     }
 
     public static void main(String[] args) {
-        String host = JOptionPane.showInputDialog(null, "Enter the IP you want to connect to:", "Calendar System",
-                JOptionPane.QUESTION_MESSAGE);
+        String host = JOptionPane.showInputDialog(null, "Enter the IP you want to connect to:",
+                "Calendar System", JOptionPane.QUESTION_MESSAGE);
+        int port = Integer.parseInt(JOptionPane.showInputDialog(null,
+                "Enter the port number you want to connect to", "Calendar System", JOptionPane.QUESTION_MESSAGE));
         try {
-            Socket socket = new Socket(host,5555);
+            Socket socket = new Socket(host,port);
             JOptionPane.showMessageDialog(null, "Client connected");
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new PrintWriter(socket.getOutputStream());
@@ -82,7 +93,8 @@ public class Client extends JComponent implements Runnable {
                 } else {
                     try {
 
-                        pw.println(String.format("%s,%s,%s", types.getSelectedItem(), userField.getText(), passField.getText()));
+                        pw.println(String.format("%s,%s,%s", types.getSelectedItem(), userField.getText(),
+                                passField.getText()));
                         pw.flush();
 
                         int check = Integer.parseInt(br.readLine());
@@ -98,7 +110,7 @@ public class Client extends JComponent implements Runnable {
                             frame.add(loginPanel, BorderLayout.CENTER);
                             frame.pack();
                         } else {
-                            JOptionPane.showMessageDialog(frame.getContentPane(), "An error occured!");
+                            JOptionPane.showMessageDialog(frame.getContentPane(), "An error occurred!");
                         }
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -189,8 +201,10 @@ public class Client extends JComponent implements Runnable {
                                 frame.add(sellerMain, BorderLayout.CENTER);
                                 frame.pack();
                             }
-                            case 0 -> JOptionPane.showMessageDialog(frame.getContentPane(), "Password is wrong!");
-                            case -1 -> JOptionPane.showMessageDialog(frame.getContentPane(), "Account not made yet!");
+                            case 0 -> JOptionPane.showMessageDialog(frame.getContentPane(),
+                                    "Password is wrong!");
+                            case -1 -> JOptionPane.showMessageDialog(frame.getContentPane(),
+                                    "Account not made yet!");
                         }
                     } catch (IOException a) {
                         System.out.println("This is the reason");
@@ -210,7 +224,6 @@ public class Client extends JComponent implements Runnable {
         customerMain.add(welcome);
 
         String[] customerOp = new String[]{
-                // TODO: Add view calendars option
                 "View Calendars",
                 "Request an appointment",
                 "Cancel an appointment",
@@ -324,22 +337,24 @@ public class Client extends JComponent implements Runnable {
                     customerSub.remove(displayWindows);
                     String choice = cals[calendarChoices.getSelectedIndex()];
                     if (windows.length() > 0) {
-                        String[] appointmentWindowsData = windows.substring(1, windows.length() - 1).split("],\\[");
+                        String[] appointmentWindowsData = windows.substring(1,
+                                windows.length() - 1).split("],\\[");
                         String result = "";
                         for (int i = 0; i < appointmentWindowsData.length; i++) {
                             String[] data = appointmentWindowsData[i].split(",");
                             if (data[0].equals(choice)) {
-                                String windowData = String.format("Appointment Title: %s \nTime: %s - %s \nMaximum Attendees: %s \nCurrent Bookings: %s \n",
+                                String windowData = String.format("Appointment Title: %s \nTime: %s - %s " +
+                                                "\nMaximum Attendees: %s \nCurrent Bookings: %s \n",
                                         data[1], data[2], data[3], data[4], data[5]);
                                 result += windowData;
                             }
                         }
                         if (result.isEmpty()) {
-                            displayWindows.setText("Calendar Description: " + calInfo[calendarChoices.getSelectedIndex()] +
-                                    "\n\nNo appointments were found!");
+                            displayWindows.setText("Calendar Description: " +
+                                    calInfo[calendarChoices.getSelectedIndex()] + "\n\nNo appointments were found!");
                         } else {
-                            displayWindows.setText("Calendar Description: " + calInfo[calendarChoices.getSelectedIndex()] +
-                                    "\n\n" + result);
+                            displayWindows.setText("Calendar Description: " +
+                                    calInfo[calendarChoices.getSelectedIndex()] + "\n\n" + result);
                         }
                         customerSub.add(displayWindows);
                     } else {
@@ -423,7 +438,8 @@ public class Client extends JComponent implements Runnable {
             enter.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    String command = String.format("%s,%s", storeName.getSelectedItem(), calendarName.getSelectedItem());
+                    String command = String.format("%s,%s", storeName.getSelectedItem(),
+                            calendarName.getSelectedItem());
                     pw.println(command);
                     pw.flush();
                 }
