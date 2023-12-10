@@ -274,7 +274,7 @@ public class ServerThread extends Thread {
         }
         for (int i = 0; i < calendarNames.size(); i++) {
             String query = String.format("SELECT calendarName, appointmentTitle, startTime, endTime, maxAttendees, " +
-                "currentBookings WHERE calendarName = '%s'", calendarNames.get(i)[0]);
+                "currentBookings FROM windows WHERE calendarName = '%s'", calendarNames.get(i)[0]);
             ResultSet windowResult = statement.executeQuery(query);
             while (windowResult.next()) {
                 String[] windowArray = new String[6];

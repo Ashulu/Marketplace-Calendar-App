@@ -285,7 +285,7 @@ public class Client extends JComponent implements Runnable {
 
 
     private void c0(BufferedReader br, PrintWriter pw) throws IOException {
-        pw.println("viewCalendars");
+        pw.println("viewCalendar");
         pw.flush();
 
         JButton refresh = new JButton("Refresh");
