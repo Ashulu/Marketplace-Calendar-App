@@ -339,12 +339,14 @@ public class ServerThread extends Thread {
             windowQueryResult.add(windowArray);
         }
         String secondOutput = arraylistToString(windowQueryResult);
+        System.out.println("sending windows: ");
         writer.write(secondOutput);
         writer.println();
         writer.flush();
 
         String secondInput = reader.readLine();
         if (secondInput.equals("break")) {
+            System.out.println("broken here");
             return;
         }
         String thirdOutput;
