@@ -494,7 +494,7 @@ public class Client extends JComponent implements Runnable {
             ArrayList<String> listChoice = new ArrayList<>();
             for (int i = 0; i < len; i++) {
                 String[] windowSplitted = windowSplit[i].split(",");
-                listChoice.add(String.format("%s - %s, Current booking: %s",windowSplitted[0],
+                listChoice.add(String.format("%s -%s, Current booking: %s",windowSplitted[0],
                         windowSplitted[1], windowSplitted[3]));
             }
 
@@ -513,12 +513,14 @@ public class Client extends JComponent implements Runnable {
                 public void actionPerformed(ActionEvent e) {
                     try {
                         String choice = (String) choices.getSelectedItem();
-                        String[] split1 = choice.split(" , ");
+                        String[] split1 = choice.split(",");
                         String[] split2 = split1[0].split(" - ");
                         pw.println(String.format("%s,%s,%s", split2[0], split2[1], bookingInfo.getText()));
                         pw.flush();
-
+                        System.out.println("before");
                         int result = Integer.parseInt(br.readLine());
+                        //doesn't reach this print
+                        System.out.println("result: " + result);
                         switch (result) {
                             case 1:
                                 JOptionPane.showMessageDialog(frame.getContentPane(),
