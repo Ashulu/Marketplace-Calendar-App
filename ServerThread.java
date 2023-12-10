@@ -176,7 +176,10 @@ public class ServerThread extends Thread {
                         System.out.println("closing");
                         socket.close();
                         return;
-
+                    //if by chance a break makes it out
+                    //i can't be bothered to check everything ;)
+                    case "break":
+                        break;
                 }
 
             } catch (IOException e) {
@@ -777,15 +780,18 @@ public class ServerThread extends Thread {
 
     public void statisticsSeller(String inputStore, Statement statement, PrintWriter writer) throws IOException,
         SQLException {
-
-        String popularWindowQueryStatement = String.format("SELECT startTime, endTime, MAX(currentBookings) AS " +
-            "windowCustomers FROM windows WHERE storeName = '%s' GROUP BY storeName", inputStore);
+        System.out.println("entered seller");
+        String popularWindowQueryStatement = String.format("SELECT appointmentTitle, startTime, endTime, " +
+                "MAX(currentBookings) AS windowCustomers FROM windows WHERE storeName = '%s' GROUP BY storeName",
+                inputStore);
         ResultSet popularWindowQuery = statement.executeQuery(popularWindowQueryStatement);
         popularWindowQuery.next();
+        String title = popularWindowQuery.getString("appointmentTitle");
         String popularStart = popularWindowQuery.getString("startTime");
         String popularEnd = popularWindowQuery.getString("endTime");
-        writer.write(popularStart + "," + popularEnd);
+        writer.write(title + "," + popularStart + "," + popularEnd);
         writer.println();
+        writer.flush();
 
         ArrayList<String[]> customers = new ArrayList<>();
         String customerQueryStatement = String.format("SELECT customerEmail, SUM(isApproved) AS numOfApproved FROM " +
@@ -800,18 +806,22 @@ public class ServerThread extends Thread {
         writer.write(arraylistToString(customers));
         writer.println();
         writer.flush();
+        System.out.println("printed both successfully");
     }
 
     public void statisticsSellerOrdered(String inputStore, Statement statement, PrintWriter writer) throws
         SQLException, IOException {
-        String popularWindowQueryStatement = String.format("SELECT startTime, endTime, MAX(currentBookings) AS " +
-            "windowCustomers FROM windows WHERE storeName = '%s' GROUP BY storeName", inputStore);
+        String popularWindowQueryStatement = String.format("SELECT appointmentTitle, startTime, endTime, MAX" +
+                "(currentBookings) AS windowCustomers FROM windows WHERE storeName = '%s' GROUP BY storeName",
+                inputStore);
         ResultSet popularWindowQuery = statement.executeQuery(popularWindowQueryStatement);
         popularWindowQuery.next();
+        String title = popularWindowQuery.getString("appointmentTitle");
         String popularStart = popularWindowQuery.getString("startTime");
         String popularEnd = popularWindowQuery.getString("endTime");
-        writer.write(popularStart + "," + popularEnd);
-
+        writer.write(title + "," + popularStart + "," + popularEnd);
+        writer.println();
+        writer.flush();
         ArrayList<String[]> customers = new ArrayList<>();
         String customerQueryStatement = String.format("SELECT customerEmail, SUM(isApproved) AS numOfApproved FROM " +
             "appointments WHERE storeName = '%s' GROUP BY customerEmail ORDER BY numOfApproved DESC", inputStore);
