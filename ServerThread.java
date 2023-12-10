@@ -345,6 +345,7 @@ public class ServerThread extends Thread {
         writer.flush();
 
         String secondInput = reader.readLine();
+        System.out.println("windows and booking information: " + secondInput);
         if (secondInput.equals("break")) {
             System.out.println("broken here");
             return;
@@ -353,7 +354,16 @@ public class ServerThread extends Thread {
         String[] secondInputList = secondInput.split(",");
         String inputStartTime = secondInputList[0];
         String inputEndTime = secondInputList[1];
-        int inputBooking = Integer.parseInt(secondInputList[2]);
+        int inputBooking;
+        try {
+            inputBooking = Integer.parseInt(secondInputList[2]);
+        } catch (Exception e) {
+            writer.write("0");
+            writer.println();
+            writer.flush();
+            return;
+        }
+
         String bookingQueryStatement = String.format("SELECT maxAttendees, currentBookings FROM windows WHERE " +
             "(storeName = '%s' AND calendarName = '%s' AND startTime = '%s' AND endTime = '%s'", inputStore,
             inputCalendar, inputStartTime, inputEndTime);
