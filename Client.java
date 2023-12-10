@@ -363,7 +363,8 @@ public class Client extends JComponent implements Runnable {
                 ex.printStackTrace();
             }
         });
-         customerSub.add(refresh);
+        customerSub.add(refresh);
+
 
         //creation of appointment
 
@@ -451,7 +452,7 @@ public class Client extends JComponent implements Runnable {
 
         customerSub.add(result);
         result.setVisible(true);
-        customerBack(customerSub);
+        customerBackBreak(customerSub, pw);
     }
 
     private void c2(BufferedReader br, PrintWriter pw) throws IOException {
@@ -514,7 +515,7 @@ public class Client extends JComponent implements Runnable {
         }
 
         success.setVisible(true);
-        customerBack(customerSub);
+        customerBackBreak(customerSub, pw);
 
     }
 
@@ -1438,6 +1439,20 @@ public class Client extends JComponent implements Runnable {
         back.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                frame.remove(panel);
+                frame.add(customerMain, BorderLayout.CENTER);
+                frame.pack();
+            }
+        });
+    }
+
+    private void customerBackBreak(JPanel panel, PrintWriter pw) {
+        JButton back = new JButton("Back");
+        back.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pw.println("break");
+                pw.flush();
                 frame.remove(panel);
                 frame.add(customerMain, BorderLayout.CENTER);
                 frame.pack();
