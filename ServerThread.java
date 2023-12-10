@@ -410,6 +410,9 @@ public class ServerThread extends Thread {
         writer.flush();
 
         String input = reader.readLine();
+        if (input.equals("break")) {
+            return;
+        }
         String[] inputList = input.split(",");
         String inputStore = inputList[0];
         String inputCalendar = inputList[1];
