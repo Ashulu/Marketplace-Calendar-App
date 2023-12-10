@@ -288,22 +288,6 @@ public class Client extends JComponent implements Runnable {
         pw.println("viewCalendars");
         pw.flush();
 
-        JButton refresh = new JButton("Refresh");
-        refresh.addActionListener(e -> {
-            try {
-                frame.remove(customerSub);
-                customerSub = new JPanel();
-                customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
-                c0(br,pw);
-                frame.add(customerSub, BorderLayout.CENTER);
-                frame.pack();
-
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        });
-        customerSub.add(refresh);
-
         //get all store names from server and print out in dropdown to user
         //once user selects, get all calendars from that specific store and print out
         // user should be able to select based on a dropdown
@@ -312,6 +296,21 @@ public class Client extends JComponent implements Runnable {
 
         String calendarNames = br.readLine();
         if (calendarNames.length() > 0) {
+            JButton refresh = new JButton("Refresh");
+            refresh.addActionListener(e -> {
+                try {
+                    frame.remove(customerSub);
+                    customerSub = new JPanel();
+                    customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
+                    c0(br,pw);
+                    frame.add(customerSub, BorderLayout.CENTER);
+                    frame.pack();
+
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            });
+            customerSub.add(refresh);
 
             String[] strCalChoices = calendarNames.substring(1, calendarNames.length() - 1).split("],\\[");
             ArrayList<String> calNames = new ArrayList<String>();
@@ -372,6 +371,10 @@ public class Client extends JComponent implements Runnable {
             JOptionPane.showMessageDialog(frame.getContentPane(), "No calendars created");
             pw.println("break");
             pw.flush();
+            customerMain = new JPanel();
+            customerMain.setBounds(0, 0, 30, frame.getHeight());
+            customerMain.setLayout(new BoxLayout(customerMain, BoxLayout.Y_AXIS));
+            customer(br, pw);
             frame.remove(customerSub);
             frame.add(customerMain, BorderLayout.CENTER);
             frame.pack();
@@ -380,37 +383,41 @@ public class Client extends JComponent implements Runnable {
     }
 
     private void c1(BufferedReader br, PrintWriter pw) throws IOException {
+        System.out.println("before");
         pw.println("requestAppointment");
         pw.flush();
-        JButton refresh = new JButton("Refresh");
-        refresh.addActionListener(e -> {
-            try {
-                frame.remove(customerSub);
-                customerSub = new JPanel();
-                customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
-                pw.println("break");
-                c1(br,pw);
-                frame.add(customerSub, BorderLayout.CENTER);
-                frame.pack();
 
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        });
-        customerSub.add(refresh);
-
-
+        System.out.println("after");
         //creation of appointment
 
         String storeData = br.readLine();
+        System.out.println(storeData);
         if (storeData.length() > 0) {
+            JButton refresh = new JButton("Refresh");
+            refresh.addActionListener(e -> {
+                try {
+                    frame.remove(customerSub);
+                    customerSub = new JPanel();
+                    customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
+                    pw.println("break");
+                    c1(br,pw);
+                    frame.add(customerSub, BorderLayout.CENTER);
+                    frame.pack();
+
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            });
+            customerSub.add(refresh);
+
             String[] calendars = storeData.substring(1, storeData.length() - 1).split("],\\[");
             ArrayList<String> stores = new ArrayList<String>();
             ArrayList<String[]> calNames = new ArrayList<String[]>();
             for (int i = 0; i < calendars.length; i++) {
                 String[] calInfo = calendars[i].split(",");
-                stores.add(calInfo[0]);
+                String storeStr = calInfo[0] + ": " + calInfo[1];
             }
+            /*
             for (int j = 0; j < stores.size(); j++) {
                 ArrayList<String> storeCalendars = new ArrayList<String>();
                 for (int k = 0; k < calendars.length; k++) {
@@ -423,23 +430,38 @@ public class Client extends JComponent implements Runnable {
                 storeCals = storeCalendars.toArray(storeCals);
                 calNames.add(storeCals);
             }
+            */
             String[] storeChoices = new String[stores.size()];
             storeChoices = stores.toArray(storeChoices);
             final String[] allStores = storeChoices;
-            final String[][] allCalendars = calNames.toArray(new String[calNames.size()][]);
-
 
             JComboBox<String> storeName = new JComboBox<String>(allStores);
             customerSub.add(storeName);
+
+            for (int i = 0; i < allStores.length; i++) {
+                System.out.println(allStores[i]);
+            }
+            /*
+            for (int i = 0; i < allCalendars.length; i++) {
+                for (int j = 0; j < allCalendars[i].length; j++) {
+                    System.out.println(allCalendars[i][j]);
+                }
+            }
+
+            JButton select = new JButton();
+            customerSub.add(select);
+
             JComboBox<String> calendarName = new JComboBox<String>(allCalendars[storeName.getSelectedIndex()]);
             customerSub.add(calendarName);
-
+            */
             JButton enter = new JButton("Enter");
             enter.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    String command = String.format("%s,%s", storeName.getSelectedItem(),
-                            calendarName.getSelectedItem());
+                    String store = (String) storeName.getSelectedItem();
+                    store = store.split(":")[0];
+                    String calendarName = store.split(":")[1].substring(1);
+                    String command = String.format("%s,%s", store, calendarName);
                     pw.println(command);
                     pw.flush();
                 }
@@ -447,6 +469,7 @@ public class Client extends JComponent implements Runnable {
             customerSub.add(enter);
 
             String windows = br.readLine();
+            System.out.println(windows);
             if (windows.length() > 0) {
                 String[] appointmentWindows = windows.substring(1, windows.length() - 1).split("],\\[");
                 String[] appointments = new String[appointmentWindows.length];
@@ -467,9 +490,11 @@ public class Client extends JComponent implements Runnable {
                 create.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                        String store = (String) storeName.getSelectedItem();
+                        String calendarName = store.split(":")[1].substring(1);
                         String command = String.format("%s,%s,%s,%s",
                                 String.valueOf(chooseWindow.getSelectedItem()).split(" - ")[0],
-                                String.valueOf(calendarName.getSelectedItem()).split(" - ")[1],
+                                calendarName,
                                 maxAttendees[chooseWindow.getSelectedIndex()],
                                 Integer.parseInt(currentBookings[chooseWindow.getSelectedIndex()]) +
                                         Integer.parseInt(bookings.getText()));
@@ -501,6 +526,10 @@ public class Client extends JComponent implements Runnable {
             JOptionPane.showMessageDialog(frame.getContentPane(), "No stores made yet");
             pw.println("break");
             pw.flush();
+            customerMain = new JPanel();
+            customerMain.setBounds(0, 0, 30, frame.getHeight());
+            customerMain.setLayout(new BoxLayout(customerMain, BoxLayout.Y_AXIS));
+            customer(br, pw);
             frame.remove(customerSub);
             frame.add(customerMain, BorderLayout.CENTER);
             frame.pack();
@@ -511,25 +540,25 @@ public class Client extends JComponent implements Runnable {
         pw.println("cancelRequest");
         pw.flush();
 
-        JButton refresh = new JButton("Refresh");
-        refresh.addActionListener(e -> {
-            try {
-                frame.remove(jPanel);
-                jPanel = new JPanel();
-                jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
-                pw.println("break");
-                c2(br,pw);
-                frame.add(jPanel, BorderLayout.CENTER);
-                frame.pack();
-
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        });
-        customerSub.add(refresh);
-
         String clientRequests = br.readLine();
         if (clientRequests.length() > 0) {
+            JButton refresh = new JButton("Refresh");
+            refresh.addActionListener(e -> {
+                try {
+                    frame.remove(jPanel);
+                    jPanel = new JPanel();
+                    jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
+                    pw.println("break");
+                    c2(br,pw);
+                    frame.add(jPanel, BorderLayout.CENTER);
+                    frame.pack();
+
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            });
+            customerSub.add(refresh);
+
             String[] requests = clientRequests.substring(1, clientRequests.length() - 1).split("],\\[");
             String result = "";
             for (int i = 0; i < requests.length; i++) {
@@ -575,6 +604,10 @@ public class Client extends JComponent implements Runnable {
             JOptionPane.showMessageDialog(frame.getContentPane(), "No requests made");
             pw.println("break");
             pw.flush();
+            customerMain = new JPanel();
+            customerMain.setBounds(0, 0, 30, frame.getHeight());
+            customerMain.setLayout(new BoxLayout(customerMain, BoxLayout.Y_AXIS));
+            customer(br, pw);
             frame.remove(customerSub);
             frame.add(customerMain, BorderLayout.CENTER);
             frame.pack();
@@ -586,26 +619,26 @@ public class Client extends JComponent implements Runnable {
         pw.println("viewApproved");
         pw.flush();
 
-        JButton refresh = new JButton("Refresh");
-        refresh.addActionListener(e -> {
-            try {
-                frame.remove(jPanel);
-                jPanel = new JPanel();
-                jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
-                c3(br,pw);
-                frame.add(jPanel, BorderLayout.CENTER);
-                frame.pack();
-
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        });
-        customerSub.add(refresh);
-
 
         // code to view approved appointments
         String data = br.readLine();
         if (data.length() > 0) {
+            JButton refresh = new JButton("Refresh");
+            refresh.addActionListener(e -> {
+                try {
+                    frame.remove(jPanel);
+                    jPanel = new JPanel();
+                    jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
+                    c3(br,pw);
+                    frame.add(jPanel, BorderLayout.CENTER);
+                    frame.pack();
+
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            });
+            customerSub.add(refresh);
+
             String[] appointments = data.substring(1, data.length() - 1).split("],\\[");
             String result = "";
             for (int i = 0; i < appointments.length; i++) {
@@ -622,6 +655,10 @@ public class Client extends JComponent implements Runnable {
             JOptionPane.showMessageDialog(frame.getContentPane(), "No appointments made");
             pw.println("break");
             pw.flush();
+            customerMain = new JPanel();
+            customerMain.setBounds(0, 0, 30, frame.getHeight());
+            customerMain.setLayout(new BoxLayout(customerMain, BoxLayout.Y_AXIS));
+            customer(br, pw);
             frame.remove(customerSub);
             frame.add(customerMain, BorderLayout.CENTER);
             frame.pack();
@@ -689,8 +726,16 @@ public class Client extends JComponent implements Runnable {
             }
         });
 
-
-        customerBack(customerSub);
+        JButton back = new JButton();
+        customerSub.add(back);
+        back.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.remove(customerSub);
+                frame.add(customerMain, BorderLayout.CENTER);
+                frame.pack();
+            }
+        });
 
     }  
 
@@ -718,6 +763,7 @@ public class Client extends JComponent implements Runnable {
             JOptionPane.showMessageDialog(frame.getContentPane(), "No statistics to be shown");
             pw.println("break");
             pw.flush();
+
             frame.remove(customerSub);
             frame.add(customerMain, BorderLayout.CENTER);
             frame.pack();
