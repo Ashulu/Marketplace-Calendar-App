@@ -344,12 +344,22 @@ public class Client extends JComponent implements Runnable {
                         customerSub.add(displayWindows);
                     } else {
                         JOptionPane.showMessageDialog(frame.getContentPane(), "No windows made.");
+                        pw.println("break");
+                        pw.flush();
+                        frame.remove(customerSub);
+                        frame.add(customerMain, BorderLayout.CENTER);
+                        frame.pack();
                     }
                 }
             });
             customerSub.add(enter);
         } else {
             JOptionPane.showMessageDialog(frame.getContentPane(), "No calendars created");
+            pw.println("break");
+            pw.flush();
+            frame.remove(customerSub);
+            frame.add(customerMain, BorderLayout.CENTER);
+            frame.pack();
         }
         customerBack(customerSub);
     }
@@ -441,7 +451,6 @@ public class Client extends JComponent implements Runnable {
                 create.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-
                         String command = String.format("%s,%s,%s,%s",
                                 String.valueOf(chooseWindow.getSelectedItem()).split(" - ")[0],
                                 String.valueOf(calendarName.getSelectedItem()).split(" - ")[1],
@@ -454,6 +463,11 @@ public class Client extends JComponent implements Runnable {
                 });
             } else {
                 JOptionPane.showMessageDialog(frame.getContentPane(), "Now windows made yet.");
+                pw.println("break");
+                pw.flush();
+                frame.remove(customerSub);
+                frame.add(customerMain, BorderLayout.CENTER);
+                frame.pack();
             }
 
             JTextField result = new JTextField(10);
@@ -467,6 +481,11 @@ public class Client extends JComponent implements Runnable {
             result.setVisible(true);
         } else {
             JOptionPane.showMessageDialog(frame.getContentPane(), "No stores made yet");
+            pw.println("break");
+            pw.flush();
+            frame.remove(customerSub);
+            frame.add(customerMain, BorderLayout.CENTER);
+            frame.pack();
         }
         customerBackBreak(customerSub, pw);
     }
@@ -523,6 +542,11 @@ public class Client extends JComponent implements Runnable {
             customerSub.add(delete);
         } else {
             JOptionPane.showMessageDialog(frame.getContentPane(), "No requests made");
+            pw.println("break");
+            pw.flush();
+            frame.remove(customerSub);
+            frame.add(customerMain, BorderLayout.CENTER);
+            frame.pack();
         }
 
         JTextField success = new JTextField();
@@ -578,6 +602,11 @@ public class Client extends JComponent implements Runnable {
             displayAppointments.setVisible(true);
         } else {
             JOptionPane.showMessageDialog(frame.getContentPane(), "No appointments made");
+            pw.println("break");
+            pw.flush();
+            frame.remove(customerSub);
+            frame.add(customerMain, BorderLayout.CENTER);
+            frame.pack();
         }
         customerBack(customerSub);
     }
@@ -601,7 +630,7 @@ public class Client extends JComponent implements Runnable {
 
                 try {
 
-                    showStats(br);
+                    showStats(br, pw);
 
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
@@ -616,7 +645,7 @@ public class Client extends JComponent implements Runnable {
                 pw.flush();
 
                 try {
-                    showStats(br);
+                    showStats(br, pw);
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -648,7 +677,7 @@ public class Client extends JComponent implements Runnable {
     }  
 
     //shows the stats for customers, regardless of whether its sorted or not
-    public void showStats(BufferedReader br) throws IOException{
+    public void showStats(BufferedReader br, PrintWriter pw) throws IOException{
         String storeString = br.readLine();
         String stats = br.readLine();
         String[] split = stats.split("],\\[");
@@ -669,6 +698,11 @@ public class Client extends JComponent implements Runnable {
             }
         } else {
             JOptionPane.showMessageDialog(frame.getContentPane(), "No statistics to be shown");
+            pw.println("break");
+            pw.flush();
+            frame.remove(customerSub);
+            frame.add(customerMain, BorderLayout.CENTER);
+            frame.pack();
         }
     }
 
