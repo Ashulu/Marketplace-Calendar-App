@@ -95,6 +95,7 @@ public class ServerThread extends Thread {
                         writer.flush();
                         break;
                     case "approveRequest":
+                        System.out.println("entered statement");
                         approveRequest(reader, statement, writer);
                         break;
                     case "createStore":
@@ -537,6 +538,7 @@ public class ServerThread extends Thread {
     //can approve and deny requests - i don't know what happens if no requests
     public void approveRequest(BufferedReader reader, Statement statement, PrintWriter writer) throws SQLException,
         IOException {
+        System.out.println("entered method");
         ArrayList<String[]> requests = new ArrayList<>();
         String requestsQueryStatement = String.format("SELECT customerEmail, storeName, calendarName, startTime, " +
             "endTime, booking FROM appointments WHERE (sellerEmail = '%s' AND isApproved = 0)", clientEmail);
@@ -556,6 +558,7 @@ public class ServerThread extends Thread {
         writer.flush();
 
         String input = reader.readLine();
+        System.out.println("input = " + input);
         if (input.equals("break")) {
             return;
         }
@@ -572,14 +575,19 @@ public class ServerThread extends Thread {
                 "strftime('%%Y-%%m-%%d %%H:%%M:%%S', 'now') WHERE (customerEmail = '%s' AND storeName = '%s' AND " +
                 "calendarName = '%s' AND startTime = '%s' AND booking = '%s')", inputCustomer, inputStore,
                 inputCalendar, inputStart, inputBooking);
-            String updateWindowStatement = String.format("UPDATE windows SET currentBooking = currentBooking + %s " +
-                "WHERE storeName = '%s' AND calendarName = '%s' AND startTime = '%s'", inputBooking);
+            String updateWindowStatement = String.format("UPDATE windows SET currentBookings = currentBookings + %s " +
+                "WHERE storeName = '%s' AND calendarName = '%s' AND startTime = '%s'", inputBooking, inputStore,
+                    inputCalendar, inputStart);
+            System.out.println("input both successful");
+            statement.executeUpdate(updateStatement);
             statement.executeUpdate(updateWindowStatement);
         } else {
             updateStatement = String.format("UPDATE appointments SET isApproved = 0, isRequest = 0, timeStamp = " +
                 "strftime('%%Y-%%m-%%d %%H:%%M:%%S', 'now') WHERE (customerEmail = '%s' AND storeName = '%s' AND " +
                 "calendarName = '%s' AND startTime = '%s' AND booking = '%s')", inputCustomer, inputStore,
                 inputCalendar, inputStart, inputBooking);
+            System.out.println("reject successful");
+            statement.executeUpdate(updateStatement);
 
         }
 

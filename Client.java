@@ -200,6 +200,7 @@ public class Client extends JComponent implements Runnable {
                                 sellerMain = new JPanel();
                                 sellerMain.setBounds(0, 0, 30, frame.getHeight());
                                 sellerMain.setLayout(new BoxLayout(sellerMain, BoxLayout.Y_AXIS));
+                                sellerMain.setPreferredSize(new Dimension(500, 500));
                                 seller(reader, writer);
                                 frame.remove(loginPanel);
                                 frame.add(sellerMain, BorderLayout.CENTER);
@@ -820,6 +821,7 @@ public class Client extends JComponent implements Runnable {
                     sellerSub = new JPanel();
                     sellerSub.setBounds(0, 0, 30, frame.getHeight());
                     sellerSub.setLayout(new BoxLayout(sellerSub, BoxLayout.Y_AXIS));
+                    sellerSub.setPreferredSize(new Dimension(500,500));
                     switch (sellerOptions.getSelectedIndex()) {
                         case 0 -> {
 
@@ -885,6 +887,7 @@ public class Client extends JComponent implements Runnable {
     }
     //0 "View Approved Appointments"
     private void s0(BufferedReader br, PrintWriter pw) throws IOException {
+        sellerSub.setPreferredSize(new Dimension(500, 500));
         pw.write("showApproved");
         pw.println();
 
@@ -897,6 +900,9 @@ public class Client extends JComponent implements Runnable {
                 frame.remove(sellerSub);
                 sellerSub = new JPanel();
                 sellerSub.setLayout(new BoxLayout(sellerSub, BoxLayout.Y_AXIS));
+                pw.write("break");
+                pw.println();
+                pw.flush();
                 s0(br,pw);
                 frame.add(sellerSub, BorderLayout.CENTER);
                 frame.pack();
@@ -911,7 +917,8 @@ public class Client extends JComponent implements Runnable {
         //add processing a little later
         String approved = br.readLine();
         String result = "";
-
+        System.out.println("read line");
+        System.out.println(approved);
         if (approved.isEmpty()) {
             result = "No approved appointments.";
         } else {
@@ -919,10 +926,10 @@ public class Client extends JComponent implements Runnable {
             for (int i = 0; i < appoints.length; i++) {
                 result += appoints[i] + "\n";
             }
+            appointments.setText(result);
         }
         sellerSub.add(appointments);
-
-        appointments.setText(result);
+        frame.pack();
     }
     //1 "Appointment Requests"
     private void s1(BufferedReader br, PrintWriter pw) throws IOException {
@@ -938,6 +945,9 @@ public class Client extends JComponent implements Runnable {
                 frame.remove(sellerSub);
                 sellerSub = new JPanel();
                 sellerSub.setLayout(new BoxLayout(sellerSub, BoxLayout.Y_AXIS));
+                pw.write("break");
+                pw.println();
+                pw.flush();
                 s1(br,pw);
                 frame.add(sellerSub, BorderLayout.CENTER);
                 frame.pack();
@@ -1019,7 +1029,10 @@ public class Client extends JComponent implements Runnable {
         refresh.addActionListener(e -> {
             try {
                 frame.remove(sellerSub);
-                s0(br,pw);
+                pw.write("break");
+                pw.println();
+                pw.flush();
+                s2(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -1071,6 +1084,9 @@ public class Client extends JComponent implements Runnable {
         refresh.addActionListener(e -> {
             try {
                 frame.remove(sellerSub);
+                pw.write("break");
+                pw.println();
+                pw.flush();
                 s3(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -1138,6 +1154,9 @@ public class Client extends JComponent implements Runnable {
         refresh.addActionListener(e -> {
             try {
                 frame.remove(sellerSub);
+                pw.write("break");
+                pw.println();
+                pw.flush();
                 s4(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -1389,6 +1408,9 @@ public class Client extends JComponent implements Runnable {
         refresh.addActionListener(e -> {
             try {
                 frame.remove(sellerSub);
+                pw.write("break");
+                pw.println();
+                pw.flush();
                 s5(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -1425,6 +1447,7 @@ public class Client extends JComponent implements Runnable {
 
         sellerSub.add(delete);
         sellerSub.add(result);
+        frame.setSize(500,500);
         frame.pack();
 
         result.setVisible(true);
@@ -1520,6 +1543,9 @@ public class Client extends JComponent implements Runnable {
         refresh.addActionListener(e -> {
             try {
                 frame.remove(sellerSub);
+                pw.write("break");
+                pw.println();
+                pw.flush();
                 s6(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -1544,6 +1570,9 @@ public class Client extends JComponent implements Runnable {
         refresh.addActionListener(e -> {
             try {
                 frame.remove(sellerSub);
+                pw.write("break");
+                pw.println();
+                pw.flush();
                 s7(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -1588,10 +1617,13 @@ public class Client extends JComponent implements Runnable {
     }
     private void sellerBack(JPanel panel, PrintWriter pw) {
         JButton back = new JButton("Back");
-        panel.add(back);
+
         back.addActionListener(e -> {
             pw.write("break");
+            pw.println();
+            pw.flush();
             frame.remove(panel);
+            frame.repaint();
             frame.add(sellerMain, BorderLayout.CENTER);
             frame.pack();
         });
