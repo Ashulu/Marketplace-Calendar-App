@@ -637,9 +637,7 @@ public class Client extends JComponent implements Runnable {
             customerMain.setLayout(new BoxLayout(customerMain, BoxLayout.Y_AXIS));
             customer(br, pw);
             frame.remove(customerSub);
-            System.out.println("removed customerSub");
             frame.add(customerMain, BorderLayout.CENTER);
-            System.out.println("added customerMain");
             frame.pack();
         }
     }
