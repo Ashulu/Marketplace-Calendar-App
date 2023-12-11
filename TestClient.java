@@ -11,13 +11,20 @@ public class TestClient {
         System.out.println("Enter server port number");
         String port =scan.nextLine();
 
-        Socket socket = new Socket(ip, Integer.parseInt(port));
+        Socket socket = null;
+        try {
+            socket = new Socket(ip, Integer.parseInt(port));
+            System.out.println("Connected to Server");
+        } catch (Exception e) {
+            System.out.println("Connection to Server failed");
+        }
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         PrintWriter writer = new PrintWriter(socket.getOutputStream());
 
         //TODO:
         //        1. create seller
+        System.out.println("Testing seller account creation:");
         writer.println("createAccount");
         writer.flush();
         writer.println("seller,seller@test.com,testpassword");
@@ -30,6 +37,7 @@ public class TestClient {
         }
 
         //        2. login seller
+        System.out.println("Testing log in as seller:");
         writer.println("login");
         writer.flush();
         writer.println("seller@test.com,testpassword");
@@ -42,6 +50,7 @@ public class TestClient {
         }
 
         //        3. create store * 2
+        System.out.println("Testing store creation:");
         writer.println("createStore");
         writer.flush();
         writer.println("storeOne");
@@ -64,6 +73,7 @@ public class TestClient {
         }
 
         //        4. create calendar * 2 for store1;
+        System.out.println("Testing calendar creation:");
         writer.println("createCalendar");
         writer.flush();
         writer.println("storeOne,calendarOne,testing purposes");
@@ -72,7 +82,7 @@ public class TestClient {
         if (calendarOneCreation.equals("1")) {
             System.out.println("CalendarOne created");
         } else {
-            System.out.println("CalendarOne creation failed.");
+            System.out.println("CalendarOne creation failed");
         }
         writer.println("createCalendar");
         writer.flush();
@@ -82,10 +92,21 @@ public class TestClient {
         if (calendarTwoCreation.equals("1")) {
             System.out.println("CalendarTwo created");
         } else {
-            System.out.println("CalendarTwo creation failed.");
+            System.out.println("CalendarTwo creation failed");
         }
 
         //        5. edit calendar1 - name
+        System.out.println("testing calendar name change:");
+        writer.println("editCalendarName");
+        writer.flush();
+        writer.println("storeOne,calendarOne,newCalendarOne");
+        writer.flush();
+        String calendarOneNameChange = reader.readLine();
+        if (calendarOneNameChange.equals("1")) {
+            System.out.println("CalendarOne name changed");
+        } else {
+            System.out.println("CalendarOne name change failed");
+        }
 
         //        6. edit calendar2 - description
         //        7. create window * 2 for calendar1
