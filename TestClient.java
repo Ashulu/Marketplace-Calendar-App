@@ -11,13 +11,20 @@ public class TestClient {
         System.out.println("Enter server port number");
         String port =scan.nextLine();
 
-        Socket socket = new Socket(ip, Integer.parseInt(port));
+        Socket socket = null;
+        try {
+            socket = new Socket(ip, Integer.parseInt(port));
+            System.out.println("Connected to Server");
+        } catch (Exception e) {
+            System.out.println("Connection to Server failed");
+        }
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         PrintWriter writer = new PrintWriter(socket.getOutputStream());
 
         //TODO:
         //        1. create seller
+        System.out.println("Testing seller account creation:");
         writer.println("createAccount");
         writer.flush();
         writer.println("seller,seller@test.com,testpassword");
@@ -30,6 +37,7 @@ public class TestClient {
         }
 
         //        2. login seller
+        System.out.println("Testing log in as seller:");
         writer.println("login");
         writer.flush();
         writer.println("seller@test.com,testpassword");
@@ -42,6 +50,7 @@ public class TestClient {
         }
 
         //        3. create store * 2
+        System.out.println("Testing store creation:");
         writer.println("createStore");
         writer.flush();
         writer.println("storeOne");
@@ -64,6 +73,7 @@ public class TestClient {
         }
 
         //        4. create calendar * 2 for store1;
+        System.out.println("Testing calendar creation:");
         writer.println("createCalendar");
         writer.flush();
         writer.println("storeOne,calendarOne,testing purposes");
@@ -72,7 +82,7 @@ public class TestClient {
         if (calendarOneCreation.equals("1")) {
             System.out.println("CalendarOne created");
         } else {
-            System.out.println("CalendarOne creation failed.");
+            System.out.println("CalendarOne creation failed");
         }
         writer.println("createCalendar");
         writer.flush();
@@ -82,15 +92,109 @@ public class TestClient {
         if (calendarTwoCreation.equals("1")) {
             System.out.println("CalendarTwo created");
         } else {
-            System.out.println("CalendarTwo creation failed.");
+            System.out.println("CalendarTwo creation failed");
         }
 
         //        5. edit calendar1 - name
+        System.out.println("Testing calendar name change:");
+        writer.println("editCalendar");
+        writer.flush();
+        writer.println("editCalendarName");
+        writer.flush();
+        writer.println("storeOne,calendarOne,newCalendarOne");
+        writer.flush();
+        String calendarOneNameChange = reader.readLine();
+        if (calendarOneNameChange.equals("1")) {
+            System.out.println("CalendarOne name changed");
+        } else {
+            System.out.println("CalendarOne name change failed");
+        }
 
         //        6. edit calendar2 - description
+        System.out.println("Testing calendar description change:");
+        writer.println("editCalendar");
+        writer.flush();
+        writer.println("editCalendarDescription");
+        writer.flush();
+        writer.println("storeOne,calendarTwo,Check for edit");
+        writer.flush();
+        String descriptionEdit = reader.readLine();
+        if (descriptionEdit.equals("1")) {
+            System.out.println("Description of calendarTwo changed");
+        } else {
+            System.out.println("Description change failed");
+        }
+
         //        7. create window * 2 for calendar1
-        //        8. delete calendar1 for store1
+        System.out.println("Testing adding windows for newCalendarOne");
+        writer.println("editCalendar");
+        writer.flush();
+        writer.println("editCalendarAddWindow");
+        writer.flush();
+        writer.println("storeOne,newCalendarOne,windowOne,1100,1200,10");
+        writer.flush();
+        String addingWindowOne = reader.readLine();
+        if (addingWindowOne.equals("1")) {
+            System.out.println("WindowOne addition successful");
+        } else {
+            System.out.println("WindowOne addition failed");
+        }
+        writer.println("editCalendar");
+        writer.flush();
+        writer.println("editCalendarAddWindow");
+        writer.flush();
+        writer.println("storeOne,newCalendarOne,windowTwo,1300,1400,20");
+        writer.flush();
+        String addingWindowTwo = reader.readLine();
+        if (addingWindowTwo.equals("1")) {
+            System.out.println("WindowTwo addition successful");
+        } else {
+            System.out.println("WindowTwo addition failed");
+        }
+
+        //        8. remove window1 for calendar1
+        System.out.println("Testing deleting calendar");
+        writer.println("editCalendar");
+        writer.flush();
+        writer.println("editCalendarRemoveWindow");
+        writer.flush();
+        writer.println("storeOne,newCalendarOne");
+        writer.flush();
+        reader.readLine();
+        writer.println("1400");
+        String deletingWindow = reader.readLine();
+        if (deletingWindow.equals("1")) {
+            System.out.println("Removing window Successful");
+        } else {
+            System.out.println("Removing window failed");
+        }
+
+        //        8.5 remove calendar2;
+        System.out.println("Testing removing calendar");
+        writer.println("deleteCalendar");
+        writer.flush();
+        writer.println("storeOne,calendarTwo");
+        String removeCalendar = reader.readLine();
+        if (removeCalendar.equals("1")) {
+            System.out.println("Removing calendar successful");
+        } else {
+            System.out.println("Removing calendar failed");
+        }
+
         //        9. import calendar for store2;
+        System.out.println("Testing importing calendar");
+        writer.println("importCalendar");
+        writer.flush();
+        reader.readLine();
+        writer.println("storeTwo,import.csv");
+        writer.flush();
+        String importResult = reader.readLine();
+        if (importResult.equals("1")) {
+            System.out.println("Import Successful");
+        } else {
+            System.out.println("Import failed");
+        }
+        
         //        10. create client1
         //        11. login client1
         //        12. viewCalendar
