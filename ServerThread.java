@@ -171,7 +171,14 @@ public class ServerThread extends Thread {
                     case "exportApprovedRequests":
                         String fileName = reader.readLine();
                         String approvedRequests = viewApproved(statement);
-                        exportCalendar(approvedRequests, fileName);
+                        try {
+                            exportCalendar(approvedRequests, fileName);
+                            writer.println("1");
+                            writer.flush();
+                        } catch (Exception e) {
+                            writer.println("0");
+                            writer.flush();
+                        }
                         break;
                     case "quit":
                         System.out.println("closing");
