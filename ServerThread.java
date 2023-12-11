@@ -607,7 +607,6 @@ public class ServerThread extends Thread {
             SQLException {
         String input = reader.readLine();
         if (input.equals("break")) {
-
             return 0;
         }
         System.out.println(input);
@@ -761,7 +760,6 @@ public class ServerThread extends Thread {
             SQLException {
         String input = reader.readLine();
         if (input.equals("break")) {
-
             return 0;
         }
         String[] inputList = input.split(",");
@@ -893,7 +891,6 @@ public class ServerThread extends Thread {
         String input = reader.readLine();
         System.out.println(input);
         if (input.equals("break")) {
-
             return;
         }
         String[] inputList = input.split(",");
@@ -905,21 +902,31 @@ public class ServerThread extends Thread {
         String importDescription = fileReader.readLine();
         String insertCalendarStatement = String.format("INSERT INTO calendars (storeName, calendarName, " +
             "calendarDescription) VALUES ('%s', '%s', '%s')", storeName, importCalendar, importDescription);
-        statement.executeUpdate(insertCalendarStatement);
-        System.out.println(insertCalendarStatement);
+        int calendarUpdate = statement.executeUpdate(insertCalendarStatement);
 
         String window = fileReader.readLine();
-        String[] windowList = window.split(",");
+        boolean windowUpdateError = false;
         while (window != null) {
+            String[] windowList = window.split(",");
             String insertWindowStatement = String.format("INSERT INTO windows (storeName, calendarName, " +
                 "appointmentTitle, startTime, endTime, maxAttendees, currentBookings) VALUES ('%s', '%s', '%s', '%s'," +
                 " '%s', '%s', 0)", storeName, importCalendar, windowList[0], windowList[1], windowList[2],
                 windowList[3], windowList[4]);
-            statement.executeUpdate(insertWindowStatement);
-            window = fileReader.readLine();
-            if (window != null) {
-                windowList = window.split(",");
+            int windowUpdate = statement.executeUpdate(insertWindowStatement);
+            if (windowUpdate == 0) {
+                windowUpdateError = true;
             }
+            window = fileReader.readLine();
+        }
+
+        if ((calendarUpdate != 0) && (!windowUpdateError)) {
+            writer.write("1");
+            writer.println();
+            writer.flush();
+        } else {
+            writer.write("0");
+            writer.println();
+            writer.flush();
         }
         fileReader.close();
     }
