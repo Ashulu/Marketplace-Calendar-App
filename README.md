@@ -32,6 +32,7 @@ CS180 project 5
 3. **MAKE SURE TO DOWNLOAD THE JAR FILES ARE DOWNLOADED**
 4. Add the jar files by going to settings, project structure, modules, and click the Plus and add your JAR files. (this might have to be done more than once if you get an error that says there is an issue with the sql drivers)
 5. Run the Server class first, then run the Client class
+6. If buttons ever don't show up, expand the frame
 
 ## Database Structure
 
