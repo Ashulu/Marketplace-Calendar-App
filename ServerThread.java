@@ -570,9 +570,6 @@ public class ServerThread extends Thread {
 
         String input = reader.readLine();
         if (input.equals("break")) {
-            writer.write("break");
-            writer.println();
-            writer.flush();
             return;
         }
         String[] inputList = input.split(",");
@@ -610,9 +607,7 @@ public class ServerThread extends Thread {
             SQLException {
         String input = reader.readLine();
         if (input.equals("break")) {
-            writer.write("break");
-            writer.println();
-            writer.flush();
+
             return 0;
         }
         System.out.println(input);
@@ -637,9 +632,6 @@ public class ServerThread extends Thread {
             SQLException {
         String input = reader.readLine();
         if (input.equals("break")) {
-            writer.write("break");
-            writer.println();
-            writer.flush();
             return 0;
         }
         String[] inputList = input.split(",");
@@ -647,11 +639,13 @@ public class ServerThread extends Thread {
         String inputCalendar = inputList[1];
         String inputDescription = inputList[2];
 
-        String existQueryStatement = String.format("SELECT COUNT(calendarName) AS count FROM stores WHERE (storeName " +
-            " = '%s' AND calendarName = '%s'", inputStore, inputCalendar);
+        String existQueryStatement = String.format("SELECT COUNT(calendarName) AS count FROM calendars WHERE " +
+                "(storeName = '%s' AND calendarName = '%s')", inputStore, inputCalendar);
         ResultSet existQuery = statement.executeQuery(existQueryStatement);
         existQuery.next();
         int existing = existQuery.getInt("count");
+        System.out.println(existQueryStatement);
+        System.out.println(existing);
         if (existing < 1) {
             String calendarUpdateStatement = String.format("INSERT INTO calendars (storeName, calendarName, " +
                 "calendarDescription) VALUES ('%s','%s','%s')", inputStore, inputCalendar, inputDescription);
@@ -750,15 +744,15 @@ public class ServerThread extends Thread {
 
         String secondInput = reader.readLine();
         if (secondInput.equals("break")) {
-            writer.write("break");
-            writer.println();
-            writer.flush();
+
             return;
         }
         System.out.println("received window");
         String deleteStatement = String.format("DELETE FROM windows WHERE (storeName = '%s' AND calendarName " +
             "= '%s' AND endTime = '%s')", inputStore, inputCalendar, secondInput);
         writer.write(String.valueOf(statement.executeUpdate(deleteStatement)));
+        writer.println();
+        writer.flush();
     }
 
     //changed so that ANY deletion returns true
@@ -767,9 +761,7 @@ public class ServerThread extends Thread {
             SQLException {
         String input = reader.readLine();
         if (input.equals("break")) {
-            writer.write("break");
-            writer.println();
-            writer.flush();
+
             return 0;
         }
         String[] inputList = input.split(",");
@@ -899,10 +891,9 @@ public class ServerThread extends Thread {
         writer.flush();
 
         String input = reader.readLine();
+        System.out.println(input);
         if (input.equals("break")) {
-            writer.write("break");
-            writer.println();
-            writer.flush();
+
             return;
         }
         String[] inputList = input.split(",");
@@ -915,15 +906,20 @@ public class ServerThread extends Thread {
         String insertCalendarStatement = String.format("INSERT INTO calendars (storeName, calendarName, " +
             "calendarDescription) VALUES ('%s', '%s', '%s')", storeName, importCalendar, importDescription);
         statement.executeUpdate(insertCalendarStatement);
+        System.out.println(insertCalendarStatement);
 
         String window = fileReader.readLine();
         String[] windowList = window.split(",");
-        while (fileReader.readLine() != null) {
+        while (window != null) {
             String insertWindowStatement = String.format("INSERT INTO windows (storeName, calendarName, " +
                 "appointmentTitle, startTime, endTime, maxAttendees, currentBookings) VALUES ('%s', '%s', '%s', '%s'," +
                 " '%s', '%s', 0)", storeName, importCalendar, windowList[0], windowList[1], windowList[2],
                 windowList[3], windowList[4]);
             statement.executeUpdate(insertWindowStatement);
+            window = fileReader.readLine();
+            if (window != null) {
+                windowList = window.split(",");
+            }
         }
         fileReader.close();
     }
