@@ -301,12 +301,12 @@ public class ServerThread extends Thread {
             }
         }
 
-        String firstOutput = arraylistToString(windowArrayList);
+        String firstOutput = arraylistToString(calendarNames);
         writer.write(firstOutput);
         writer.println();
         writer.flush();
 
-        String secondOutput = arraylistToString(calendarNames);
+        String secondOutput = arraylistToString(windowArrayList);
         writer.write(secondOutput);
         writer.println();
         writer.flush();
@@ -387,7 +387,7 @@ public class ServerThread extends Thread {
             String sellerEmail = sellerQuery.getString("sellerEmail");
             String updateStatement = String.format("INSERT INTO appointments (customerEmail, sellerEmail, storeName, " +
                 "calendarName, startTime, endTime, booking, isApproved, isRequest, timeStamp) VALUES ('%s', '%s', " +
-                "'%s', '%s', '%s', '%s', '%s', 0, 1, strftime('%%Y-%%m-%%d %%H:%%M:%%S', 'now'))", clientEmail, sellerEmail, inputStore,
+                "'%s', '%s', '%s', '%s', '%s', 0, 1, strftime('%%s', 'now'))", clientEmail, sellerEmail, inputStore,
                 inputCalendar, inputStartTime, inputEndTime, inputBooking);
             int updates = statement.executeUpdate(updateStatement);
             thirdOutput = String.valueOf(updates);
@@ -591,21 +591,23 @@ public class ServerThread extends Thread {
         String updateStatement;
         if (operation.equals("confirm")) {
             updateStatement = String.format("UPDATE appointments SET isApproved = 1, isRequest = 0, timeStamp = " +
-                "strftime('%%Y-%%m-%%d %%H:%%M:%%S', 'now') WHERE (customerEmail = '%s' AND storeName = '%s' AND " +
-                "calendarName = '%s' AND startTime = '%s' AND booking = '%s')", inputCustomer, inputStore,
+                "strftime('%%s', 'now') WHERE (customerEmail == '%s' AND storeName == '%s' AND " +
+                "calendarName == '%s' AND startTime == '%s' AND booking == %s)", inputCustomer, inputStore,
                 inputCalendar, inputStart, inputBooking);
-            String updateWindowStatement = String.format("UPDATE windows SET currentBooking = currentBooking + %s " +
-                "WHERE storeName = '%s' AND calendarName = '%s' AND startTime = '%s'", inputBooking);
+            String updateWindowStatement = String.format("UPDATE windows SET currentBookings = currentBookings + %s " +
+                "WHERE storeName = '%s' AND calendarName = '%s' AND startTime = '%s'", inputBooking, inputStore,
+                inputCalendar, inputStart);
             statement.executeUpdate(updateWindowStatement);
         } else {
             updateStatement = String.format("UPDATE appointments SET isApproved = 0, isRequest = 0, timeStamp = " +
-                "strftime('%%Y-%%m-%%d %%H:%%M:%%S', 'now') WHERE (customerEmail = '%s' AND storeName = '%s' AND " +
-                "calendarName = '%s' AND startTime = '%s' AND booking = '%s')", inputCustomer, inputStore,
+                "strftime('%%s', 'now') WHERE (customerEmail = '%s' AND storeName = '%s' AND " +
+                "calendarName = '%s' AND startTime = '%s' AND booking = %s)", inputCustomer, inputStore,
                 inputCalendar, inputStart, inputBooking);
 
         }
 
         int changes = statement.executeUpdate(updateStatement);
+        System.out.println(changes);
         writer.write(String.valueOf(changes));
         writer.println();
         writer.flush();
