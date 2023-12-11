@@ -99,13 +99,13 @@ public class ServerThread extends Thread {
                         approveRequest(reader, statement, writer);
                         break;
                     case "createStore":
-                        int updated = createStore(reader, statement);
+                        int updated = createStore(reader, writer, statement);
                         writer.write(String.valueOf(updated));
                         writer.println();
                         writer.flush();
                         break;
                     case "createCalendar":
-                        int createdCalendar = createCalendar(reader, statement);
+                        int createdCalendar = createCalendar(reader, writer, statement);
                         writer.write(String.valueOf(createdCalendar));
                         writer.println();
                         writer.flush();
@@ -151,7 +151,7 @@ public class ServerThread extends Thread {
                         writer.flush();
                         System.out.println("sent calendars");
 
-                        writer.write(String.valueOf(deleteCalendar(reader, statement)));
+                        writer.write(String.valueOf(deleteCalendar(reader, writer, statement)));
                         writer.println();
                         writer.flush();
                         System.out.println("sent result of delete");
@@ -603,8 +603,13 @@ public class ServerThread extends Thread {
     }
 
     //works after adjustment here
-    public int createStore(BufferedReader reader, Statement statement) throws IOException, SQLException {
+    public int createStore(BufferedReader reader, PrintWriter writer, Statement statement) throws IOException,
+            SQLException {
         String input = reader.readLine();
+        if (input.equals("break")) {
+
+            return 0;
+        }
         System.out.println(input);
         String existQueryStatement = String.format("SELECT COUNT(storeName) AS count FROM stores WHERE storeName = " +
             "'%s'", input);
@@ -623,18 +628,24 @@ public class ServerThread extends Thread {
     }
 
     //allows for perfect dupes
-    public int createCalendar(BufferedReader reader, Statement statement) throws IOException, SQLException {
+    public int createCalendar(BufferedReader reader, PrintWriter writer, Statement statement) throws IOException,
+            SQLException {
         String input = reader.readLine();
+        if (input.equals("break")) {
+            return 0;
+        }
         String[] inputList = input.split(",");
         String inputStore = inputList[0];
         String inputCalendar = inputList[1];
         String inputDescription = inputList[2];
 
-        String existQueryStatement = String.format("SELECT COUNT(calendarName) AS count FROM stores WHERE (storeName " +
-            " = '%s' AND calendarName = '%s'", inputStore, inputCalendar);
+        String existQueryStatement = String.format("SELECT COUNT(calendarName) AS count FROM calendars WHERE " +
+                "(storeName = '%s' AND calendarName = '%s')", inputStore, inputCalendar);
         ResultSet existQuery = statement.executeQuery(existQueryStatement);
         existQuery.next();
         int existing = existQuery.getInt("count");
+        System.out.println(existQueryStatement);
+        System.out.println(existing);
         if (existing < 1) {
             String calendarUpdateStatement = String.format("INSERT INTO calendars (storeName, calendarName, " +
                 "calendarDescription) VALUES ('%s','%s','%s')", inputStore, inputCalendar, inputDescription);
@@ -733,18 +744,26 @@ public class ServerThread extends Thread {
 
         String secondInput = reader.readLine();
         if (secondInput.equals("break")) {
+
             return;
         }
         System.out.println("received window");
         String deleteStatement = String.format("DELETE FROM windows WHERE (storeName = '%s' AND calendarName " +
             "= '%s' AND endTime = '%s')", inputStore, inputCalendar, secondInput);
         writer.write(String.valueOf(statement.executeUpdate(deleteStatement)));
+        writer.println();
+        writer.flush();
     }
 
     //changed so that ANY deletion returns true
     //idk something is wrong with return values - it works tho
-    public int deleteCalendar(BufferedReader reader, Statement statement) throws IOException, SQLException {
+    public int deleteCalendar(BufferedReader reader, PrintWriter writer, Statement statement) throws IOException,
+            SQLException {
         String input = reader.readLine();
+        if (input.equals("break")) {
+
+            return 0;
+        }
         String[] inputList = input.split(",");
         String inputStore = inputList[0];
         String inputCalendar = inputList[1];
@@ -872,6 +891,11 @@ public class ServerThread extends Thread {
         writer.flush();
 
         String input = reader.readLine();
+        System.out.println(input);
+        if (input.equals("break")) {
+
+            return;
+        }
         String[] inputList = input.split(",");
         String storeName = inputList[0];
         String fileName = inputList[1];
@@ -882,15 +906,20 @@ public class ServerThread extends Thread {
         String insertCalendarStatement = String.format("INSERT INTO calendars (storeName, calendarName, " +
             "calendarDescription) VALUES ('%s', '%s', '%s')", storeName, importCalendar, importDescription);
         statement.executeUpdate(insertCalendarStatement);
+        System.out.println(insertCalendarStatement);
 
         String window = fileReader.readLine();
         String[] windowList = window.split(",");
-        while (fileReader.readLine() != null) {
+        while (window != null) {
             String insertWindowStatement = String.format("INSERT INTO windows (storeName, calendarName, " +
                 "appointmentTitle, startTime, endTime, maxAttendees, currentBookings) VALUES ('%s', '%s', '%s', '%s'," +
                 " '%s', '%s', 0)", storeName, importCalendar, windowList[0], windowList[1], windowList[2],
                 windowList[3], windowList[4]);
             statement.executeUpdate(insertWindowStatement);
+            window = fileReader.readLine();
+            if (window != null) {
+                windowList = window.split(",");
+            }
         }
         fileReader.close();
     }
