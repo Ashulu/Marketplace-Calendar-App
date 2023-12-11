@@ -69,9 +69,24 @@ public class TestClient {
         writer.println("storeOne,calendarOne,testing purposes");
         writer.flush();
         String calendarOneCreation = reader.readLine();
-
+        if (calendarOneCreation.equals("1")) {
+            System.out.println("CalendarOne created");
+        } else {
+            System.out.println("CalendarOne creation failed.");
+        }
+        writer.println("createCalendar");
+        writer.flush();
+        writer.println("storeOne,calendarTwo,duplicate test");
+        writer.flush();
+        String calendarTwoCreation = reader.readLine();
+        if (calendarTwoCreation.equals("1")) {
+            System.out.println("CalendarTwo created");
+        } else {
+            System.out.println("CalendarTwo creation failed.");
+        }
 
         //        5. edit calendar1 - name
+
         //        6. edit calendar2 - description
         //        7. create window * 2 for calendar1
         //        8. delete calendar1 for store1
