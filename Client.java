@@ -46,12 +46,12 @@ public class Client extends JComponent implements Runnable {
     }
 
     public static void main(String[] args) {
-//        String host = JOptionPane.showInputDialog(null, "Enter the IP you want to connect to:",
-//                "Calendar System", JOptionPane.QUESTION_MESSAGE);
-//        int port = Integer.parseInt(JOptionPane.showInputDialog(null,
-//                "Enter the port number you want to connect to", "Calendar System", JOptionPane.QUESTION_MESSAGE));
+        String host = JOptionPane.showInputDialog(null, "Enter the IP you want to connect to:",
+                "Calendar System", JOptionPane.QUESTION_MESSAGE);
+        int port = Integer.parseInt(JOptionPane.showInputDialog(null,
+                "Enter the port number you want to connect to", "Calendar System", JOptionPane.QUESTION_MESSAGE));
         try {
-            Socket socket = new Socket("localhost",5555);
+            Socket socket = new Socket(host,port);
             JOptionPane.showMessageDialog(null, "Client connected");
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new PrintWriter(socket.getOutputStream());
