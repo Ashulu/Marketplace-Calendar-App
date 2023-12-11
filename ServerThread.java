@@ -151,7 +151,9 @@ public class ServerThread extends Thread {
                         writer.flush();
                         System.out.println("sent calendars");
 
-                        writer.write(String.valueOf(deleteCalendar(reader, writer, statement)));
+                        String returning = String.valueOf(deleteCalendar(reader, writer, statement));
+                        System.out.println(returning);
+                        writer.write(returning);
                         writer.println();
                         writer.flush();
                         System.out.println("sent result of delete");
@@ -896,17 +898,19 @@ public class ServerThread extends Thread {
         writer.flush();
 
         String input = reader.readLine();
-        System.out.println(input);
         if (input.equals("break")) {
             return;
         }
         String[] inputList = input.split(",");
         String storeName = inputList[0];
         String fileName = inputList[1];
+        System.out.println(storeName + ", " + fileName);
 
         BufferedReader fileReader = new BufferedReader(new FileReader(fileName));
         String importCalendar = fileReader.readLine();
+        System.out.println(importCalendar);
         String importDescription = fileReader.readLine();
+        System.out.println(importDescription);
         String insertCalendarStatement = String.format("INSERT INTO calendars (storeName, calendarName, " +
             "calendarDescription) VALUES ('%s', '%s', '%s')", storeName, importCalendar, importDescription);
         int calendarUpdate = statement.executeUpdate(insertCalendarStatement);
@@ -914,6 +918,7 @@ public class ServerThread extends Thread {
         String window = fileReader.readLine();
         boolean windowUpdateError = false;
         while (window != null) {
+            System.out.println(window);
             String[] windowList = window.split(",");
             String insertWindowStatement = String.format("INSERT INTO windows (storeName, calendarName, " +
                 "appointmentTitle, startTime, endTime, maxAttendees, currentBookings) VALUES ('%s', '%s', '%s', '%s'," +

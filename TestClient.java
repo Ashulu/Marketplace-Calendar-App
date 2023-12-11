@@ -103,6 +103,7 @@ public class TestClient {
         writer.flush();
         writer.println("storeOne,calendarOne,newCalendarOne");
         writer.flush();
+        reader.readLine();
         String calendarOneNameChange = reader.readLine();
         if (calendarOneNameChange.equals("1")) {
             System.out.println("CalendarOne name changed");
@@ -118,6 +119,7 @@ public class TestClient {
         writer.flush();
         writer.println("storeOne,calendarTwo,Check for edit");
         writer.flush();
+        reader.readLine();
         String descriptionEdit = reader.readLine();
         if (descriptionEdit.equals("1")) {
             System.out.println("Description of calendarTwo changed");
@@ -133,6 +135,7 @@ public class TestClient {
         writer.flush();
         writer.println("storeOne,newCalendarOne,windowOne,1100,1200,10");
         writer.flush();
+        reader.readLine();
         String addingWindowOne = reader.readLine();
         if (addingWindowOne.equals("1")) {
             System.out.println("WindowOne addition successful");
@@ -145,6 +148,7 @@ public class TestClient {
         writer.flush();
         writer.println("storeOne,newCalendarOne,windowTwo,1300,1400,20");
         writer.flush();
+        reader.readLine();
         String addingWindowTwo = reader.readLine();
         if (addingWindowTwo.equals("1")) {
             System.out.println("WindowTwo addition successful");
@@ -153,7 +157,7 @@ public class TestClient {
         }
 
         //        8. remove window1 for calendar1
-        System.out.println("Testing deleting calendar");
+        System.out.println("Testing deleting window:");
         writer.println("editCalendar");
         writer.flush();
         writer.println("editCalendarRemoveWindow");
@@ -162,18 +166,22 @@ public class TestClient {
         writer.flush();
         reader.readLine();
         writer.println("1400");
+        writer.flush();
+        reader.readLine();
         String deletingWindow = reader.readLine();
         if (deletingWindow.equals("1")) {
-            System.out.println("Removing window Successful");
+            System.out.println("Removing window successful");
         } else {
             System.out.println("Removing window failed");
         }
 
         //        8.5 remove calendar2;
-        System.out.println("Testing removing calendar");
+        System.out.println("Testing removing calendar:");
         writer.println("deleteCalendar");
         writer.flush();
         writer.println("storeOne,calendarTwo");
+        writer.flush();
+        reader.readLine();
         String removeCalendar = reader.readLine();
         if (removeCalendar.equals("1")) {
             System.out.println("Removing calendar successful");
@@ -190,12 +198,24 @@ public class TestClient {
         writer.flush();
         String importResult = reader.readLine();
         if (importResult.equals("1")) {
-            System.out.println("Import Successful");
+            System.out.println("Import successful");
         } else {
             System.out.println("Import failed");
         }
         
         //        10. create client1
+        System.out.println("Testing customer account creation:");
+        writer.println("createAccount");
+        writer.flush();
+        writer.println("customer,customer@test.com,testpassword");
+        writer.flush();
+        String customerCreate = reader.readLine();
+        if (customerCreate.equals("1")) {
+            System.out.println("Creation successful");
+        } else {
+            System.out.println("Creation failed");
+        }
+
         //        11. login client1
         //        12. viewCalendar
         //        13. requestappointment1 for store1, calendar1, window 1
