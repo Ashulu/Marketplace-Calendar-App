@@ -1659,10 +1659,10 @@ public class Client extends JComponent implements Runnable {
 
 
 
-    public static int exit() {
+    public static void exit() {
         //send exit message here
         writer.write("quit");
         writer.flush();
-        return JFrame.DISPOSE_ON_CLOSE;
+        System.exit(1);
     }
 }
