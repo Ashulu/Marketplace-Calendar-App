@@ -25,6 +25,14 @@ CS180 project 5
   - Refer to the following [Article](https://stackoverflow.com/questions/5112607/how-to-include-libraries-in-java-without-using-an-ide).  
     `https://stackoverflow.com/questions/5112607/how-to-include-libraries-in-java-without-using-an-ide`
 
+## How to compile and run our program
+
+1. Download the zip file with all of our code
+2. Open in your preferred IDE (preferably Intellij for the SQL jar files)
+3. **MAKE SURE TO DOWNLOAD THE JAR FILES ARE DOWNLOADED**
+4. Add the jar files by going to settings, project structure, modules, and click the Plus and add your JAR files. (this might have to be done more than once if you get an error that says there is an issue with the sql drivers)
+5. Run the Server class first, then run the Client class
+
 ## Database Structure
 
 We used SQL to create our own .db file. Below are the tables and their respective columns in the database.
