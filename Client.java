@@ -1554,8 +1554,8 @@ public class Client extends JComponent implements Runnable {
                 System.out.println(tempCust2);
                 tempWind2 = tempWind2.substring(1, tempWind2.length() - 1);
                 tempCust2 = tempCust2.substring(1, tempCust2.length() - 1);
-                tempWind2 = tempWind2.replace("],\\[", "\n");
-                tempCust2 = tempCust2.replace("],\\[", "\n");
+                tempWind2 = tempWind2.replace("],[", " | ");
+                tempCust2 = tempCust2.replace("],[", " | ");
                 tempWind.setText(tempWind2);
                 tempCust.setText(tempCust2);
 
@@ -1568,9 +1568,11 @@ public class Client extends JComponent implements Runnable {
             display.addActionListener(ex -> {
                 switch (sortOptions.getSelectedIndex()) {
                     case 0 -> {
+                        result.setRows(5);
                         result.setText(tempWind.getText());
                     }
                     case 1 -> {
+                        result.setRows(5);
                         result.setText(tempCust.getText());
                     }
                 }
@@ -1596,8 +1598,8 @@ public class Client extends JComponent implements Runnable {
 
                         tempWind2 = tempWind2.substring(1, tempWind2.length() - 1);
                         tempCust2 = tempCust2.substring(1, tempCust2.length() - 1);
-                        tempWind2 = tempWind2.replace("],\\[", "\n");
-                        tempCust2 = tempCust2.replace("],\\[", "\n");
+                        tempWind2 = tempWind2.replace("],[", " | ");
+                        tempCust2 = tempCust2.replace("],[", " | ");
                         tempWind.setText(tempWind2);
                         tempCust.setText(tempCust2);
                         System.out.println("received ordered");
