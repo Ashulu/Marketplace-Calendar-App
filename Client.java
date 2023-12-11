@@ -804,6 +804,9 @@ public class Client extends JComponent implements Runnable {
 
     //Seller landing page
     private void seller(BufferedReader br, PrintWriter pw) throws IOException {
+        //frame.removeAll();
+        sellerMain = new JPanel();
+        frame.add(sellerMain);
         JLabel welcome = new JLabel("Hello Seller! \nPlease Select what you would like to do.");
         sellerMain.add(welcome);
 
@@ -814,7 +817,6 @@ public class Client extends JComponent implements Runnable {
                 "Show Statistics", "Import Calendar",
                 "Logout", "Quit"
         };
-//        frame.add(jPanel);
         JComboBox<String> sellerOptions = new JComboBox<>(selOp);
         sellerMain.add(sellerOptions);
 
@@ -890,6 +892,7 @@ public class Client extends JComponent implements Runnable {
                 }
             }
         });
+        frame.pack();
     }
     //0 "View Approved Appointments"
     private void s0(BufferedReader br, PrintWriter pw) throws IOException {
@@ -905,6 +908,9 @@ public class Client extends JComponent implements Runnable {
                 frame.remove(sellerSub);
                 sellerSub = new JPanel();
                 sellerSub.setLayout(new BoxLayout(sellerSub, BoxLayout.Y_AXIS));
+                pw.write("break");
+                pw.println();
+                pw.flush();
                 s0(br,pw);
                 frame.add(sellerSub, BorderLayout.CENTER);
                 frame.pack();
@@ -946,6 +952,9 @@ public class Client extends JComponent implements Runnable {
                 frame.remove(sellerSub);
                 sellerSub = new JPanel();
                 sellerSub.setLayout(new BoxLayout(sellerSub, BoxLayout.Y_AXIS));
+                pw.write("break");
+                pw.println();
+                pw.flush();
                 s1(br,pw);
                 frame.add(sellerSub, BorderLayout.CENTER);
                 frame.pack();
@@ -955,6 +964,10 @@ public class Client extends JComponent implements Runnable {
         });
         sellerSub.add(refresh);
         String temp = br.readLine();
+        if (temp.isEmpty()) {
+            JTextField result = new JTextField("No Appointment Requests.");
+
+        }
         String[] requests = temp.substring(1,temp.length() - 1).split("],\\[");
         JComboBox<String> appointments = new JComboBox<String>(requests);
         JButton confirm = new JButton("Confirm");
@@ -1027,7 +1040,10 @@ public class Client extends JComponent implements Runnable {
         refresh.addActionListener(e -> {
             try {
                 frame.remove(sellerSub);
-                s0(br,pw);
+                pw.write("break");
+                pw.println();
+                pw.flush();
+                s2(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -1079,6 +1095,9 @@ public class Client extends JComponent implements Runnable {
         refresh.addActionListener(e -> {
             try {
                 frame.remove(sellerSub);
+                pw.write("break");
+                pw.println();
+                pw.flush();
                 s3(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -1146,6 +1165,9 @@ public class Client extends JComponent implements Runnable {
         refresh.addActionListener(e -> {
             try {
                 frame.remove(sellerSub);
+                pw.write("break");
+                pw.println();
+                pw.flush();
                 s4(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -1397,6 +1419,9 @@ public class Client extends JComponent implements Runnable {
         refresh.addActionListener(e -> {
             try {
                 frame.remove(sellerSub);
+                pw.write("break");
+                pw.println();
+                pw.flush();
                 s5(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -1528,6 +1553,9 @@ public class Client extends JComponent implements Runnable {
         refresh.addActionListener(e -> {
             try {
                 frame.remove(sellerSub);
+                pw.write("break");
+                pw.println();
+                pw.flush();
                 s6(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -1552,6 +1580,9 @@ public class Client extends JComponent implements Runnable {
         refresh.addActionListener(e -> {
             try {
                 frame.remove(sellerSub);
+                pw.write("break");
+                pw.println();
+                pw.flush();
                 s7(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -1599,8 +1630,14 @@ public class Client extends JComponent implements Runnable {
         panel.add(back);
         back.addActionListener(e -> {
             pw.write("break");
+            pw.println();
+            pw.flush();
             frame.remove(panel);
-            frame.add(sellerMain, BorderLayout.CENTER);
+            try {
+                seller(reader,pw);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
             frame.pack();
         });
         panel.add(back);

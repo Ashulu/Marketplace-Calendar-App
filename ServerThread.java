@@ -99,13 +99,13 @@ public class ServerThread extends Thread {
                         approveRequest(reader, statement, writer);
                         break;
                     case "createStore":
-                        int updated = createStore(reader, statement);
+                        int updated = createStore(reader, writer, statement);
                         writer.write(String.valueOf(updated));
                         writer.println();
                         writer.flush();
                         break;
                     case "createCalendar":
-                        int createdCalendar = createCalendar(reader, statement);
+                        int createdCalendar = createCalendar(reader, writer, statement);
                         writer.write(String.valueOf(createdCalendar));
                         writer.println();
                         writer.flush();
@@ -151,7 +151,7 @@ public class ServerThread extends Thread {
                         writer.flush();
                         System.out.println("sent calendars");
 
-                        writer.write(String.valueOf(deleteCalendar(reader, statement)));
+                        writer.write(String.valueOf(deleteCalendar(reader, writer, statement)));
                         writer.println();
                         writer.flush();
                         System.out.println("sent result of delete");
@@ -570,6 +570,9 @@ public class ServerThread extends Thread {
 
         String input = reader.readLine();
         if (input.equals("break")) {
+            writer.write("break");
+            writer.println();
+            writer.flush();
             return;
         }
         String[] inputList = input.split(",");
@@ -603,8 +606,15 @@ public class ServerThread extends Thread {
     }
 
     //works after adjustment here
-    public int createStore(BufferedReader reader, Statement statement) throws IOException, SQLException {
+    public int createStore(BufferedReader reader, PrintWriter writer, Statement statement) throws IOException,
+            SQLException {
         String input = reader.readLine();
+        if (input.equals("break")) {
+            writer.write("break");
+            writer.println();
+            writer.flush();
+            return 0;
+        }
         System.out.println(input);
         String existQueryStatement = String.format("SELECT COUNT(storeName) AS count FROM stores WHERE storeName = " +
             "'%s'", input);
@@ -623,8 +633,15 @@ public class ServerThread extends Thread {
     }
 
     //allows for perfect dupes
-    public int createCalendar(BufferedReader reader, Statement statement) throws IOException, SQLException {
+    public int createCalendar(BufferedReader reader, PrintWriter writer, Statement statement) throws IOException,
+            SQLException {
         String input = reader.readLine();
+        if (input.equals("break")) {
+            writer.write("break");
+            writer.println();
+            writer.flush();
+            return 0;
+        }
         String[] inputList = input.split(",");
         String inputStore = inputList[0];
         String inputCalendar = inputList[1];
@@ -733,6 +750,9 @@ public class ServerThread extends Thread {
 
         String secondInput = reader.readLine();
         if (secondInput.equals("break")) {
+            writer.write("break");
+            writer.println();
+            writer.flush();
             return;
         }
         System.out.println("received window");
@@ -743,8 +763,15 @@ public class ServerThread extends Thread {
 
     //changed so that ANY deletion returns true
     //idk something is wrong with return values - it works tho
-    public int deleteCalendar(BufferedReader reader, Statement statement) throws IOException, SQLException {
+    public int deleteCalendar(BufferedReader reader, PrintWriter writer, Statement statement) throws IOException,
+            SQLException {
         String input = reader.readLine();
+        if (input.equals("break")) {
+            writer.write("break");
+            writer.println();
+            writer.flush();
+            return 0;
+        }
         String[] inputList = input.split(",");
         String inputStore = inputList[0];
         String inputCalendar = inputList[1];
@@ -872,6 +899,12 @@ public class ServerThread extends Thread {
         writer.flush();
 
         String input = reader.readLine();
+        if (input.equals("break")) {
+            writer.write("break");
+            writer.println();
+            writer.flush();
+            return;
+        }
         String[] inputList = input.split(",");
         String storeName = inputList[0];
         String fileName = inputList[1];
