@@ -46,12 +46,12 @@ public class Client extends JComponent implements Runnable {
     }
 
     public static void main(String[] args) {
-        String host = JOptionPane.showInputDialog(null, "Enter the IP you want to connect to:",
-                "Calendar System", JOptionPane.QUESTION_MESSAGE);
-        int port = Integer.parseInt(JOptionPane.showInputDialog(null,
-                "Enter the port number you want to connect to", "Calendar System", JOptionPane.QUESTION_MESSAGE));
+//        String host = JOptionPane.showInputDialog(null, "Enter the IP you want to connect to:",
+//                "Calendar System", JOptionPane.QUESTION_MESSAGE);
+//        int port = Integer.parseInt(JOptionPane.showInputDialog(null,
+//                "Enter the port number you want to connect to", "Calendar System", JOptionPane.QUESTION_MESSAGE));
         try {
-            Socket socket = new Socket(host,port);
+            Socket socket = new Socket("localhost",5555);
             JOptionPane.showMessageDialog(null, "Client connected");
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new PrintWriter(socket.getOutputStream());
@@ -279,8 +279,9 @@ public class Client extends JComponent implements Runnable {
                     }
                     frame.remove(customerMain);
                     frame.add(customerSub);
-                    frame.repaint();
+//                    frame.repaint();
                     frame.pack();
+                    frame.setVisible(true);
                 } catch (Exception a) {
                     a.printStackTrace();
                 }
@@ -310,6 +311,7 @@ public class Client extends JComponent implements Runnable {
                     c0(br,pw);
                     frame.add(customerSub, BorderLayout.CENTER);
                     frame.pack();
+                    frame.setVisible(true);
 
                 } catch (IOException ex) {
                     ex.printStackTrace();
@@ -361,6 +363,7 @@ public class Client extends JComponent implements Runnable {
                                     calInfo[calendarChoices.getSelectedIndex()] + "\n\n" + result);
                         }
                         customerSub.add(displayWindows);
+                        frame.pack();
                     } else {
                         JOptionPane.showMessageDialog(frame.getContentPane(), "No windows made.");
                         pw.println("break");
@@ -368,6 +371,7 @@ public class Client extends JComponent implements Runnable {
                         frame.remove(customerSub);
                         frame.add(customerMain, BorderLayout.CENTER);
                         frame.pack();
+                        frame.setVisible(true);
                     }
                 }
             });
@@ -377,12 +381,12 @@ public class Client extends JComponent implements Runnable {
             pw.println("break");
             pw.flush();
             customerMain = new JPanel();
-            customerMain.setBounds(0, 0, 30, frame.getHeight());
             customerMain.setLayout(new BoxLayout(customerMain, BoxLayout.Y_AXIS));
             customer(br, pw);
             frame.remove(customerSub);
             frame.add(customerMain, BorderLayout.CENTER);
             frame.pack();
+            frame.setVisible(true);
         }
         customerBack(customerSub);
     }
@@ -420,14 +424,14 @@ public class Client extends JComponent implements Runnable {
                     try {
                         frame.remove(customerSub);
                         customerSub = new JPanel();
-                        customerSub.setBounds(0, 0, 30, frame.getHeight());
+//                        customerSub.setBounds(0, 0, 30, frame.getHeight());
                         customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
                         pw.println("break");
                         pw.flush();
                         c1(br, pw);
                         frame.add(customerSub);
-                        frame.repaint();
                         frame.pack();
+                        frame.setVisible(true);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -453,13 +457,13 @@ public class Client extends JComponent implements Runnable {
                         System.out.println("windows: " + windows);
 
                         requestSub = new JPanel();
-                        requestSub.setBounds(0, 0, 30, frame.getHeight());
+//                        requestSub.setBounds(0, 0, 30, frame.getHeight());
                         requestSub.setLayout(new BoxLayout(requestSub, BoxLayout.Y_AXIS));
                         requestSub(br, pw, windows);
                         frame.remove(customerSub);
                         frame.add(requestSub);
-                        frame.repaint();
                         frame.pack();
+                        frame.setVisible(true);
                     } catch (Exception ex){
                         ex.printStackTrace();
                     }
@@ -471,13 +475,13 @@ public class Client extends JComponent implements Runnable {
                 pw.print("break");
                 pw.flush();
                 customerMain = new JPanel();
-                customerMain.setBounds(0, 0, 30, frame.getHeight());
+//                customerMain.setBounds(0, 0, 30, frame.getHeight());
                 customerMain.setLayout(new BoxLayout(customerMain, BoxLayout.Y_AXIS));
                 customer(br, pw);
                 frame.remove(requestSub);
                 frame.add(customerMain, BorderLayout.CENTER);
-                frame.repaint();
                 frame.pack();
+                frame.setVisible(true);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -543,19 +547,20 @@ public class Client extends JComponent implements Runnable {
             });
 
             customerBackBreak(requestSub, pw);
+            frame.pack();
         } else {
             try {
                 JOptionPane.showMessageDialog(frame.getContentPane(), "No Windows made");
                 pw.print("break");
                 pw.flush();
                 customerMain = new JPanel();
-                customerMain.setBounds(0, 0, 30, frame.getHeight());
+//                customerMain.setBounds(0, 0, 30, frame.getHeight());
                 customerMain.setLayout(new BoxLayout(customerMain, BoxLayout.Y_AXIS));
                 customer(br, pw);
                 frame.remove(requestSub);
                 frame.add(customerMain, BorderLayout.CENTER);
-                frame.repaint();
                 frame.pack();
+                frame.setVisible(true);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -579,7 +584,7 @@ public class Client extends JComponent implements Runnable {
                     c2(br,pw);
                     frame.add(customerSub, BorderLayout.CENTER);
                     frame.pack();
-
+                    frame.setVisible(true);
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -632,12 +637,13 @@ public class Client extends JComponent implements Runnable {
             pw.println("break");
             pw.flush();
             customerMain = new JPanel();
-            customerMain.setBounds(0, 0, 30, frame.getHeight());
+//            customerMain.setBounds(0, 0, 30, frame.getHeight());
             customerMain.setLayout(new BoxLayout(customerMain, BoxLayout.Y_AXIS));
             customer(br, pw);
             frame.remove(customerSub);
             frame.add(customerMain, BorderLayout.CENTER);
             frame.pack();
+            frame.setVisible(true);
         }
 
     }
@@ -645,7 +651,6 @@ public class Client extends JComponent implements Runnable {
     private void c3(BufferedReader br, PrintWriter pw) throws IOException {
         pw.println("viewApproved");
         pw.flush();
-
 
         // code to view approved appointments
         String data = br.readLine();
@@ -659,6 +664,7 @@ public class Client extends JComponent implements Runnable {
                     c3(br,pw);
                     frame.add(customerSub, BorderLayout.CENTER);
                     frame.pack();
+                    frame.setVisible(true);
 
                 } catch (IOException ex) {
                     ex.printStackTrace();
@@ -678,19 +684,21 @@ public class Client extends JComponent implements Runnable {
             displayAppointments.setText(result);
             customerSub.add(displayAppointments);
             displayAppointments.setVisible(true);
+            customerBack(customerSub);
         } else {
             JOptionPane.showMessageDialog(frame.getContentPane(), "No appointments made");
             pw.println("break");
             pw.flush();
             customerMain = new JPanel();
-            customerMain.setBounds(0, 0, 30, frame.getHeight());
+//            customerMain.setBounds(0, 0, 30, frame.getHeight());
             customerMain.setLayout(new BoxLayout(customerMain, BoxLayout.Y_AXIS));
             customer(br, pw);
             frame.remove(customerSub);
             frame.add(customerMain, BorderLayout.CENTER);
             frame.pack();
+            frame.setVisible(true);
         }
-        customerBack(customerSub);
+
     }
   
   
@@ -727,7 +735,9 @@ public class Client extends JComponent implements Runnable {
                 pw.flush();
 
                 try {
+
                     showStats(br, pw);
+
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -747,22 +757,14 @@ public class Client extends JComponent implements Runnable {
                     c4(br, pw);
                     frame.add(customerSub);
                     frame.pack();
+                    frame.setVisible(true);
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
             }
         });
 
-        JButton back = new JButton();
-        customerSub.add(back);
-        back.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.remove(customerSub);
-                frame.add(customerMain, BorderLayout.CENTER);
-                frame.pack();
-            }
-        });
+        customerBack(customerSub);
 
     }  
 
@@ -786,14 +788,15 @@ public class Client extends JComponent implements Runnable {
                 JLabel window = new JLabel(line.toString());
                 customerSub.add(window);
             }
+            frame.pack();
         } else {
             JOptionPane.showMessageDialog(frame.getContentPane(), "No statistics to be shown");
             pw.println("break");
             pw.flush();
-
             frame.remove(customerSub);
             frame.add(customerMain, BorderLayout.CENTER);
             frame.pack();
+            frame.setVisible(true);
         }
     }
 
