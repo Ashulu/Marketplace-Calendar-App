@@ -827,6 +827,9 @@ public class Client extends JComponent implements Runnable {
 
     //Seller landing page
     private void seller(BufferedReader br, PrintWriter pw) throws IOException {
+        //frame.removeAll();
+        sellerMain = new JPanel();
+        frame.add(sellerMain);
         JLabel welcome = new JLabel("Hello Seller! \nPlease Select what you would like to do.");
         sellerMain.add(welcome);
 
@@ -837,7 +840,6 @@ public class Client extends JComponent implements Runnable {
                 "Show Statistics", "Import Calendar",
                 "Logout", "Quit"
         };
-//        frame.add(jPanel);
         JComboBox<String> sellerOptions = new JComboBox<>(selOp);
         sellerMain.add(sellerOptions);
 
@@ -913,14 +915,17 @@ public class Client extends JComponent implements Runnable {
                 }
             }
         });
+        frame.pack();
     }
     //0 "View Approved Appointments"
     private void s0(BufferedReader br, PrintWriter pw) throws IOException {
         pw.write("showApproved");
         pw.println();
-
         pw.flush();
+
         sellerBack(sellerSub, pw);
+
+        JTextField stop = new JTextField();
 
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
@@ -928,10 +933,13 @@ public class Client extends JComponent implements Runnable {
                 frame.remove(sellerSub);
                 sellerSub = new JPanel();
                 sellerSub.setLayout(new BoxLayout(sellerSub, BoxLayout.Y_AXIS));
+                stop.setText("stop");
+                pw.write("break");
+                pw.println();
+                pw.flush();
                 s0(br,pw);
                 frame.add(sellerSub, BorderLayout.CENTER);
                 frame.pack();
-
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -961,6 +969,7 @@ public class Client extends JComponent implements Runnable {
         pw.println();
 
         pw.flush();
+        JTextField stop = new JTextField();
 
         sellerBack(sellerSub, pw);
         JButton refresh = new JButton("Refresh");
@@ -969,6 +978,12 @@ public class Client extends JComponent implements Runnable {
                 frame.remove(sellerSub);
                 sellerSub = new JPanel();
                 sellerSub.setLayout(new BoxLayout(sellerSub, BoxLayout.Y_AXIS));
+                stop.setText("stop");
+                pw.write("break");
+                pw.println();
+                pw.flush();
+                sellerSub = new JPanel();
+
                 s1(br,pw);
                 frame.add(sellerSub, BorderLayout.CENTER);
                 frame.pack();
@@ -977,66 +992,74 @@ public class Client extends JComponent implements Runnable {
             }
         });
         sellerSub.add(refresh);
+        if (!stop.getText().isEmpty()) {
+            return;
+        }
         String temp = br.readLine();
-        String[] requests = temp.substring(1,temp.length() - 1).split("],\\[");
-        JComboBox<String> appointments = new JComboBox<String>(requests);
-        JButton confirm = new JButton("Confirm");
-        confirm.addActionListener(e -> {
-            String[] temp2 = ((String)appointments.getSelectedItem()).split(", ");
-            String command = String.format("confirm,%s,%s,%s,%s,%s",
-                    temp2[0],temp2[1],temp2[2],temp2[3],temp2[5]);
-            pw.write(command);
-            pw.println();
-            System.out.println("wrote to confirm");
-            System.out.println(command);
-            pw.flush();
-            int response;
-            try {
-                response = Integer.parseInt(br.readLine());
-            } catch (IOException exc) {
-                throw new RuntimeException(exc);
-            }
-            if (response == 0) {
-                JOptionPane.showMessageDialog(null, "Operation failed.",
-                        "Seller Client", JOptionPane.ERROR_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(null, "Operation successful!",
-                        "Seller Client", JOptionPane.INFORMATION_MESSAGE);
-            }
-            frame.remove(sellerSub);
-            frame.add(sellerMain, BorderLayout.CENTER);
-            frame.pack();
-        });
-        JButton delete = new JButton("Delete");
-        delete.addActionListener(e -> {
-            String[] temp2 = ((String)appointments.getSelectedItem()).split(", ");
-            String command = String.format("delete,%s,%s,%s,%s,%s",
-                    temp2[0],temp2[1],temp2[2],temp2[3],temp2[5]);
-            pw.write(command);
-            pw.println();
-            System.out.println("wrote to reject");
-            System.out.println(command);
-            pw.flush();
-            int response;
-            try {
-                response = Integer.parseInt(br.readLine());
-            } catch (IOException exc) {
-                throw new RuntimeException(exc);
-            }
-            if (response == 0) {
-                JOptionPane.showMessageDialog(null, "Operation failed.",
-                        "Seller Client", JOptionPane.ERROR_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(null, "Operation successful!",
-                        "Seller Client", JOptionPane.INFORMATION_MESSAGE);
-            }
-            frame.remove(sellerSub);
-            frame.add(sellerMain, BorderLayout.CENTER);
-            frame.pack();
-        });
-        sellerSub.add(appointments);
-        sellerSub.add(confirm);
-        sellerSub.add(delete);
+        if (temp.isEmpty()) {
+            JTextField result = new JTextField("No Appointment Requests.");
+            sellerSub.add(result);
+        } else {
+            String[] requests = temp.substring(1, temp.length() - 1).split("],\\[");
+            JComboBox<String> appointments = new JComboBox<String>(requests);
+            JButton confirm = new JButton("Confirm");
+            confirm.addActionListener(e -> {
+                String[] temp2 = ((String) appointments.getSelectedItem()).split(", ");
+                String command = String.format("confirm,%s,%s,%s,%s,%s",
+                        temp2[0], temp2[1], temp2[2], temp2[3], temp2[5]);
+                pw.write(command);
+                pw.println();
+                System.out.println("wrote to confirm");
+                System.out.println(command);
+                pw.flush();
+                int response;
+                try {
+                    response = Integer.parseInt(br.readLine());
+                } catch (IOException exc) {
+                    throw new RuntimeException(exc);
+                }
+                if (response == 0) {
+                    JOptionPane.showMessageDialog(null, "Operation failed.",
+                            "Seller Client", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Operation successful!",
+                            "Seller Client", JOptionPane.INFORMATION_MESSAGE);
+                }
+                frame.remove(sellerSub);
+                frame.add(sellerMain, BorderLayout.CENTER);
+                frame.pack();
+            });
+            JButton delete = new JButton("Delete");
+            delete.addActionListener(e -> {
+                String[] temp2 = ((String) appointments.getSelectedItem()).split(", ");
+                String command = String.format("delete,%s,%s,%s,%s,%s",
+                        temp2[0], temp2[1], temp2[2], temp2[3], temp2[5]);
+                pw.write(command);
+                pw.println();
+                System.out.println("wrote to reject");
+                System.out.println(command);
+                pw.flush();
+                int response;
+                try {
+                    response = Integer.parseInt(br.readLine());
+                } catch (IOException exc) {
+                    throw new RuntimeException(exc);
+                }
+                if (response == 0) {
+                    JOptionPane.showMessageDialog(null, "Operation failed.",
+                            "Seller Client", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Operation successful!",
+                            "Seller Client", JOptionPane.INFORMATION_MESSAGE);
+                }
+                frame.remove(sellerSub);
+                frame.add(sellerMain, BorderLayout.CENTER);
+                frame.pack();
+            });
+            sellerSub.add(appointments);
+            sellerSub.add(confirm);
+            sellerSub.add(delete);
+        }
     }
 
     //2 "Create Store"
@@ -1044,21 +1067,26 @@ public class Client extends JComponent implements Runnable {
         pw.write("createStore");
         pw.println();
         pw.flush();
+        JTextField stop = new JTextField();
         frame.add(sellerSub);
         sellerBack(sellerSub, pw);
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
                 frame.remove(sellerSub);
-                s0(br,pw);
+                stop.setText("stop");
+                pw.write("break");
+                pw.println();
+                pw.flush();
+                sellerSub = new JPanel();
+
+                s2(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
         });
         sellerSub.add(refresh);
         JTextField storeName = new JTextField("Example Name", 10);
-        JTextField result = new JTextField();
-        result.setVisible(false);
         JButton create = new JButton("Create");
         create.addActionListener(e -> {
             String command = String.format("%s",storeName.getText());
@@ -1085,8 +1113,6 @@ public class Client extends JComponent implements Runnable {
         });
         sellerSub.add(storeName);
         sellerSub.add(create);
-        sellerSub.add(result);
-        result.setVisible(true);
         frame.pack();
     }
 
@@ -1096,12 +1122,19 @@ public class Client extends JComponent implements Runnable {
         pw.println();
 
         pw.flush();
+        JTextField stop = new JTextField();
         frame.add(sellerSub);
         sellerBack(sellerSub, pw);
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
                 frame.remove(sellerSub);
+                stop.setText("stop");
+                pw.write("break");
+                pw.println();
+                pw.flush();
+                sellerSub = new JPanel();
+
                 s3(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -1155,11 +1188,15 @@ public class Client extends JComponent implements Runnable {
         pw.println();
 
         pw.flush();
+        JTextField stop = new JTextField();
         frame.add(sellerSub);
         JButton back = new JButton("Back");
         back.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                pw.write("break");
+                pw.println();
+                pw.flush();
                 frame.remove(sellerSub);
                 frame.add(sellerMain, BorderLayout.CENTER);
                 frame.pack();
@@ -1169,6 +1206,11 @@ public class Client extends JComponent implements Runnable {
         refresh.addActionListener(e -> {
             try {
                 frame.remove(sellerSub);
+                stop.setText("stop");
+                pw.write("break");
+                pw.println();
+                pw.flush();
+                sellerSub = new JPanel();
                 s4(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -1189,6 +1231,9 @@ public class Client extends JComponent implements Runnable {
             frame.pack();
             String temp = null;
             try {
+                if (!stop.getText().isEmpty()) {
+                    return;
+                }
                 temp = br.readLine();
                 System.out.println("calendars read");
             } catch (IOException e) {
@@ -1358,6 +1403,12 @@ public class Client extends JComponent implements Runnable {
                         String[] windows;
                         try {
                             String temp3 = br.readLine();
+                            if (temp3.isEmpty()) {
+                                JOptionPane.showMessageDialog(null, "No windows.",
+                                        "Seller Client", JOptionPane.ERROR_MESSAGE);
+                                back.doClick();
+                                return;
+                            }
                             System.out.println("found windows");
                             windows = temp3.substring(1, temp3.length() - 1).split("],\\[");
                         } catch (IOException exc) {
@@ -1408,6 +1459,7 @@ public class Client extends JComponent implements Runnable {
         pw.write("deleteCalendar");
         pw.println();
         pw.flush();
+        JTextField stop = new JTextField();
         //ok have a dropdown here
         String calendarNames = br.readLine();
         String[] calSel = calendarNames.substring(1, calendarNames.length()-1).split("],\\[");
@@ -1420,14 +1472,20 @@ public class Client extends JComponent implements Runnable {
         refresh.addActionListener(e -> {
             try {
                 frame.remove(sellerSub);
+                stop.setText("stop");
+                pw.write("break");
+                pw.println();
+                pw.flush();
+                //consumes the result spat out
+                br.readLine();
+                sellerSub = new JPanel();
                 s5(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
         });
         sellerSub.add(refresh);
-        JTextField result = new JTextField();
-        result.setVisible(false);
+
         JButton delete = new JButton("Delete");
         delete.addActionListener(e -> {
             String select = (String)calNames.getSelectedItem();
@@ -1455,10 +1513,8 @@ public class Client extends JComponent implements Runnable {
         });
 
         sellerSub.add(delete);
-        sellerSub.add(result);
         frame.pack();
 
-        result.setVisible(true);
     }
 
     //6 "Show Statistics"
@@ -1467,6 +1523,7 @@ public class Client extends JComponent implements Runnable {
         pw.println();
         System.out.println("entered clientside");
         pw.flush();
+        JTextField stop = new JTextField();
         String temp = br.readLine();
         String[] stores = temp.substring(1, temp.length() - 1).split(",");
         JComboBox<String> storeOptions = new JComboBox<String>(stores);
@@ -1491,8 +1548,10 @@ public class Client extends JComponent implements Runnable {
             pw.println();
             pw.flush();
             try {
+
                 String tempWind2 = br.readLine();
                 String tempCust2 = br.readLine();
+                System.out.println(tempCust2);
                 tempWind2 = tempWind2.substring(1, tempWind2.length() - 1);
                 tempCust2 = tempCust2.substring(1, tempCust2.length() - 1);
                 tempWind2 = tempWind2.replace("],\\[", "\n");
@@ -1530,8 +1589,11 @@ public class Client extends JComponent implements Runnable {
                         pw.write((String) storeOptions.getSelectedItem());
                         pw.println();
                         pw.flush();
+
                         String tempWind2 = br.readLine();
                         String tempCust2 = br.readLine();
+                        System.out.println(tempCust2);
+
                         tempWind2 = tempWind2.substring(1, tempWind2.length() - 1);
                         tempCust2 = tempCust2.substring(1, tempCust2.length() - 1);
                         tempWind2 = tempWind2.replace("],\\[", "\n");
@@ -1551,6 +1613,11 @@ public class Client extends JComponent implements Runnable {
         refresh.addActionListener(e -> {
             try {
                 frame.remove(sellerSub);
+                stop.setText("stop");
+                pw.write("break");
+                pw.println();
+                pw.flush();
+                sellerSub = new JPanel();
                 s6(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -1568,53 +1635,48 @@ public class Client extends JComponent implements Runnable {
         pw.println();
 
         pw.flush();
-
+        JTextField stop = new JTextField();
         frame.add(sellerSub);
         sellerBack(sellerSub, pw);
+        String temp = br.readLine();
+        String[] stores = temp.substring(1, temp.length() - 1).split("],\\[");
+        JComboBox<String> storeOp = new JComboBox<String>(stores);
+        JButton confirm = new JButton("Confirm");
+        JTextField fileName = new JTextField("File Name");
+        sellerSub.add(storeOp);
+        sellerSub.add(fileName);
+
+        sellerSub.add(confirm);
+        confirm.addActionListener(e -> {
+            String[] temp2 = ((String)storeOp.getSelectedItem()).split(", ");
+            String command = String.format("%s,%s",temp2[1],fileName.getText());
+            pw.write(command);
+            pw.println();
+            pw.flush();
+            System.out.println(command);
+
+            frame.remove(sellerSub);
+            frame.add(sellerMain, BorderLayout.CENTER);
+
+            frame.pack();
+        });
         JButton refresh = new JButton("Refresh");
         refresh.addActionListener(e -> {
             try {
+                stop.setText("stop");
                 frame.remove(sellerSub);
+                pw.write("break");
+                pw.println();
+                pw.flush();
+                sellerSub = new JPanel();
+
                 s7(br,pw);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
         });
         sellerSub.add(refresh);
-        JTextField storeName = new JTextField("Example Store", 10);
-        JTextField fileName = new JTextField("File Name", 10);
-        JTextField result = new JTextField();
-        result.setVisible(false);
-        JButton imp = new JButton("Import");
-        imp.addActionListener(e -> {
-            String command = String.format("%s,%s",storeName.getText(),fileName.getText());
-            pw.write(command);
-            pw.println();
 
-            pw.flush();
-
-            int response;
-            try {
-                response = Integer.parseInt(br.readLine());
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-            if (response == 0) {
-                JOptionPane.showMessageDialog(null, "Failed to import.",
-                        "Seller Client", JOptionPane.ERROR_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(null, "Import successful!",
-                        "Seller Client", JOptionPane.INFORMATION_MESSAGE);
-            }
-            result.setVisible(true);
-            frame.remove(sellerSub);
-            frame.add(sellerMain, BorderLayout.CENTER);
-            frame.pack();
-        });
-        sellerSub.add(storeName);
-        sellerSub.add(fileName);
-        sellerSub.add(imp);
-        sellerSub.add(result);
         frame.pack();
     }
     private void sellerBack(JPanel panel, PrintWriter pw) {
@@ -1622,8 +1684,14 @@ public class Client extends JComponent implements Runnable {
         panel.add(back);
         back.addActionListener(e -> {
             pw.write("break");
+            pw.println();
+            pw.flush();
             frame.remove(panel);
-            frame.add(sellerMain, BorderLayout.CENTER);
+            try {
+                seller(reader,pw);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
             frame.pack();
         });
         panel.add(back);
@@ -1659,10 +1727,10 @@ public class Client extends JComponent implements Runnable {
 
 
 
-    public static int exit() {
+    public static void exit() {
         //send exit message here
         writer.write("quit");
         writer.flush();
-        return JFrame.DISPOSE_ON_CLOSE;
+        System.exit(1);
     }
 }
