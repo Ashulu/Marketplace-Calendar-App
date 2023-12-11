@@ -96,7 +96,7 @@ public class TestClient {
         }
 
         //        5. edit calendar1 - name
-        System.out.println("testing calendar name change:");
+        System.out.println("Testing calendar name change:");
         writer.println("editCalendarName");
         writer.flush();
         writer.println("storeOne,calendarOne,newCalendarOne");
@@ -109,7 +109,20 @@ public class TestClient {
         }
 
         //        6. edit calendar2 - description
+        System.out.println("Testing calendar description change:");
+        writer.println("editCalendarDescription");
+        writer.flush();
+        writer.println("storeOne,calendarTwo,Check for edit");
+        writer.flush();
+        String descriptionEdit = reader.readLine();
+        if (descriptionEdit.equals("1")) {
+            System.out.println("Description of calendarTwo changed");
+        } else {
+            System.out.println("Description change failed");
+        }
+
         //        7. create window * 2 for calendar1
+        System.out.println();
         //        8. delete calendar1 for store1
         //        9. import calendar for store2;
         //        10. create client1
