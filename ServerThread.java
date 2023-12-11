@@ -881,16 +881,30 @@ public class ServerThread extends Thread {
         String importDescription = fileReader.readLine();
         String insertCalendarStatement = String.format("INSERT INTO calendars (storeName, calendarName, " +
             "calendarDescription) VALUES ('%s', '%s', '%s')", storeName, importCalendar, importDescription);
-        statement.executeUpdate(insertCalendarStatement);
+        int calendarUpdate = statement.executeUpdate(insertCalendarStatement);
 
         String window = fileReader.readLine();
         String[] windowList = window.split(",");
+        boolean windowUpdateError = false;
         while (fileReader.readLine() != null) {
             String insertWindowStatement = String.format("INSERT INTO windows (storeName, calendarName, " +
                 "appointmentTitle, startTime, endTime, maxAttendees, currentBookings) VALUES ('%s', '%s', '%s', '%s'," +
                 " '%s', '%s', 0)", storeName, importCalendar, windowList[0], windowList[1], windowList[2],
                 windowList[3], windowList[4]);
-            statement.executeUpdate(insertWindowStatement);
+            int windowUpdate = statement.executeUpdate(insertWindowStatement);
+            if (windowUpdate == 0) {
+                windowUpdateError = true;
+            }
+        }
+
+        if ((calendarUpdate != 0) && (!windowUpdateError)) {
+            writer.write("1");
+            writer.println();
+            writer.flush();
+        } else {
+            writer.write("0");
+            writer.println();
+            writer.flush();
         }
         fileReader.close();
     }
