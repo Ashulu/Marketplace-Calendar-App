@@ -305,13 +305,17 @@ variablesNeeded:
 storeName, fileName
 
 output:
-list of stores
+list of stores  
+1 or 0
 
 -------------------------------------------------------------------------------------------------------------
 **exportApprovedRequests**
 
 variablesNeeded:
 fileName
+
+return:  
+1 or 0
 
 
 
