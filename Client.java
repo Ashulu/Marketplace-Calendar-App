@@ -251,18 +251,43 @@ public class Client extends JComponent implements Runnable {
                     customerSub.setLayout(new BoxLayout(customerSub, BoxLayout.Y_AXIS));
                     switch (customerOptions.getSelectedIndex()){
                         case 0 -> {
+                            frame.remove(customerMain);
+                            frame.add(customerSub);
+//                    frame.repaint();
+                            frame.pack();
+                            frame.setVisible(true);
                             c0(br, pw);
                         }
                         case 1 -> {
+                            frame.remove(customerMain);
+                            frame.add(customerSub);
+//                    frame.repaint();
+                            frame.pack();
+                            frame.setVisible(true);
                             c1(br, pw);
                         }
                         case 2 -> {
+                            frame.remove(customerMain);
+                            frame.add(customerSub);
+//                    frame.repaint();
+                            frame.pack();
+                            frame.setVisible(true);
                             c2(br, pw);
                         }
                         case 3 -> {
+                            frame.remove(customerMain);
+                            frame.add(customerSub);
+//                    frame.repaint();
+                            frame.pack();
+                            frame.setVisible(true);
                             c3(br, pw);
                         }
                         case 4 -> {
+                            frame.remove(customerMain);
+                            frame.add(customerSub);
+//                    frame.repaint();
+                            frame.pack();
+                            frame.setVisible(true);
                             c4(br, pw);
                         }
                         case 5 -> {
@@ -277,11 +302,6 @@ public class Client extends JComponent implements Runnable {
                             exit();
                         }
                     }
-                    frame.remove(customerMain);
-                    frame.add(customerSub);
-//                    frame.repaint();
-                    frame.pack();
-                    frame.setVisible(true);
                 } catch (Exception a) {
                     a.printStackTrace();
                 }
