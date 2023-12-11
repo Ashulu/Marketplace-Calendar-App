@@ -151,7 +151,24 @@ public class TestClient {
         } else {
             System.out.println("WindowTwo addition failed");
         }
-        //        8. delete calendar1 for store1
+        //        8. remove window1 for calendar1
+        System.out.println("Testing deleting calendar");
+        writer.println("editCalendar");
+        writer.flush();
+        writer.println("editCalendarRemoveWindow");
+        writer.flush();
+        writer.println("storeOne,newCalendarOne");
+        writer.flush();
+        reader.readLine();
+        writer.println("1400");
+        String deletingWindow = reader.readLine();
+        if (deletingWindow.equals("1")) {
+            System.out.println("Removing window Successful");
+        } else {
+            System.out.println("Removing window failed");
+        }
+        //        8.5 remove calendar2;
+
         //        9. import calendar for store2;
         //        10. create client1
         //        11. login client1
