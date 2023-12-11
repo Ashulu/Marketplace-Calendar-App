@@ -97,6 +97,8 @@ public class TestClient {
 
         //        5. edit calendar1 - name
         System.out.println("Testing calendar name change:");
+        writer.println("editCalendar");
+        writer.flush();
         writer.println("editCalendarName");
         writer.flush();
         writer.println("storeOne,calendarOne,newCalendarOne");
@@ -110,6 +112,8 @@ public class TestClient {
 
         //        6. edit calendar2 - description
         System.out.println("Testing calendar description change:");
+        writer.println("editCalendar");
+        writer.flush();
         writer.println("editCalendarDescription");
         writer.flush();
         writer.println("storeOne,calendarTwo,Check for edit");
@@ -122,7 +126,31 @@ public class TestClient {
         }
 
         //        7. create window * 2 for calendar1
-        System.out.println();
+        System.out.println("Testing adding windows for newCalendarOne");
+        writer.println("editCalendar");
+        writer.flush();
+        writer.println("editCalendarAddWindow");
+        writer.flush();
+        writer.println("storeOne,newCalendarOne,windowOne,1100,1200,10");
+        writer.flush();
+        String addingWindowOne = reader.readLine();
+        if (addingWindowOne.equals("1")) {
+            System.out.println("WindowOne addition successful");
+        } else {
+            System.out.println("WindowOne addition failed");
+        }
+        writer.println("editCalendar");
+        writer.flush();
+        writer.println("editCalendarAddWindow");
+        writer.flush();
+        writer.println("storeOne,newCalendarOne,windowTwo,1300,1400,20");
+        writer.flush();
+        String addingWindowTwo = reader.readLine();
+        if (addingWindowTwo.equals("1")) {
+            System.out.println("WindowTwo addition successful");
+        } else {
+            System.out.println("WindowTwo addition failed");
+        }
         //        8. delete calendar1 for store1
         //        9. import calendar for store2;
         //        10. create client1
